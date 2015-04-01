@@ -32,45 +32,11 @@ public class create_spectrum_jru_v1 implements PlugIn {
 		String stat=stats[index];
 		//get the image and its info
 		ImagePlus imp = WindowManager.getCurrentImage();
-		int height = imp.getHeight();
-		int width = imp.getWidth();
-		ImageProcessor ip = imp.getProcessor();
-		Rectangle r=null;
+		int slices=imp.getStack().getSize();
 		Roi roi = imp.getRoi();
-		boolean rect=false;
-		if(roi!=null){
-			r=roi.getBounds();
-			if(roi.getType()==0) rect=true;
-		}
-		ImageStack stack = imp.getStack();
-		int slices = stack.getSize();
-		float[] spectral_data = new float[slices];
-		float[] slice_array = new float[slices];
-		jstatistics js=new jstatistics();
 		float[] histoptions=jutils.getStatsOptions(stat);
-		boolean lambdastack=is_lambda_stack(stack);
-		if(roi==null || rect){
-			for(int i=0;i<slices;i++){
-				Object pixels=stack.getPixels(i+1);
-				if(lambdastack){
-					slice_array[i]=get_label_lambda(stack.getSliceLabel(i+1));
-				} else {
-					slice_array[i]=(float)(i+1);
-				}
-				spectral_data[i]=js.getstatistic(stat,pixels,width,height,r,histoptions);
-			}
-		} else {
-			boolean[] mask=jutils.roi2mask(roi,width,height);
-			for(int i=0;i<slices;i++){
-				Object pixels=stack.getPixels(i+1);
-				if(lambdastack){
-					slice_array[i]=get_label_lambda(stack.getSliceLabel(i+1));
-				} else {
-					slice_array[i]=(float)(i+1);
-				}
-				spectral_data[i]=js.getstatistic(stat,pixels,width,height,mask,histoptions);
-			}
-		}
+		float[] spectral_data=get_spectrum(imp,roi,stat,histoptions);
+		float[] slice_array=get_xvals(imp);
 		set_options();
 		//plot the spectrum
 		if(slices==1){IJ.log(stat+" = "+spectral_data[0]);}
@@ -80,7 +46,46 @@ public class create_spectrum_jru_v1 implements PlugIn {
 		}
 	}
 
-	private boolean is_lambda_stack(ImageStack stack){
+	public static float[] get_xvals(ImagePlus imp){
+		ImageStack stack = imp.getStack();
+		int slices = stack.getSize();
+		boolean lambdastack=is_lambda_stack(stack);
+		float[] xvals=new float[slices];
+		for(int i=0;i<slices;i++){
+			if(lambdastack) xvals[i]=(float)get_label_lambda(stack.getSliceLabel(i+1));
+			else xvals[i]=(float)(i+1);
+		}
+		return xvals;
+	}
+
+	public static float[] get_spectrum(ImagePlus imp,Roi roi,String stat,float[] extras){
+		boolean rect=false;
+		Rectangle r=null;
+		int width=imp.getWidth();
+		int height=imp.getHeight();
+		if(roi!=null){
+			r=roi.getBounds();
+			if(roi.getType()==0) rect=true;
+		}
+		ImageStack stack = imp.getStack();
+		int slices = stack.getSize();
+		float[] spectral_data=new float[slices];
+		if(roi==null || rect){
+			for(int i=0;i<slices;i++){
+				Object pixels=stack.getPixels(i+1);
+				spectral_data[i]=jstatistics.getstatistic(stat,pixels,width,height,r,extras);
+			}
+		} else {
+			boolean[] mask=jutils.roi2mask(roi,width,height);
+			for(int i=0;i<slices;i++){
+				Object pixels=stack.getPixels(i+1);
+				spectral_data[i]=jstatistics.getstatistic(stat,pixels,width,height,mask,extras);
+			}
+		}
+		return spectral_data;
+	}
+
+	public static boolean is_lambda_stack(ImageStack stack){
 		if(stack.getSliceLabel(1)==null){return false;}
 		for(int i=0;i<stack.getSize();i++){
 			String label=stack.getSliceLabel(1);
@@ -95,7 +100,7 @@ public class create_spectrum_jru_v1 implements PlugIn {
 		return true;
 	}
 
-	private int get_label_lambda(String label){
+	public static int get_label_lambda(String label){
 		return Integer.parseInt(label);
 	}
 

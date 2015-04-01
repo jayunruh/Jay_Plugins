@@ -8,11 +8,25 @@
 
 package jalgs;
 
-import java.io.*;
-import javax.swing.*;
-import java.awt.*;
-import java.util.*;
+import java.awt.Component;
+import java.io.BufferedInputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.EOFException;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
+
+import javax.swing.JFileChooser;
 
 public class jdataio{
 	// here are my utility methods for io including gui interfaces
@@ -81,94 +95,16 @@ public class jdataio{
 	}
 
 	public String[] get_sorted_string_list(String directory,String mask){
-		String[] names=(new File(directory)).list();
-		ArrayList<String> namelist=new ArrayList<String>();
-		int nmask=0;
-		for(int i=0;i<names.length;i++){
-			if(mask!=null){
-				if(names[i].contains(mask)){
-					nmask++;
-					namelist.add(names[i]);
-				}
-			}else{
-				nmask++;
-				namelist.add(names[i]);
-			}
-		}
-		Collections.sort(namelist);
-		String[] temp=new String[nmask];
-		for(int i=0;i<nmask;i++){
-			temp[i]=namelist.get(i);
-		}
-		return temp;
+		return get_sorted_string_list(directory,new String[]{mask},null);
 	}
 
 	public String[] get_datemod_sorted_string_list(String directory,String mask){
-		File[] files=(new File(directory)).listFiles();
-		boolean[] good=new boolean[files.length];
-		int nmask=0;
-		for(int i=0;i<files.length;i++){
-			if(mask!=null){
-				if(files[i].getName().contains(mask)){
-					good[i]=true;
-					nmask++;
-				}
-			}else{
-				good[i]=true;
-				nmask++;
-			}
-		}
-		String[] names=new String[nmask];
-		long[] created=new long[nmask];
-		int counter=0;
-		for(int i=0;i<nmask;i++){
-			if(good[i]){
-				names[counter]=files[i].getName();
-				created[counter]=files[i].lastModified();
-				counter++;
-			}
-		}
-		int[] order=jsort.get_javasort_order(created);
-		String[] temp=new String[nmask];
-		for(int i=0;i<nmask;i++){
-			temp[i]=names[order[i]];
-		}
-		return temp;
+		return get_datemod_sorted_string_list(directory,new String[]{mask},null);
 	}
 
 	public String[] get_datemod_sorted_string_list(String directory,String[] masks,String[] notmasks){
-		File[] files=(new File(directory)).listFiles();
-		ArrayList<File> filelist=new ArrayList<File>();
-		int nmask=0;
-		for(int i=0;i<files.length;i++){
-			boolean invalidated=false;
-			if(notmasks!=null){
-				for(int j=0;j<notmasks.length;j++){
-					if(files[i].getName().contains(notmasks[j])){
-						invalidated=true;
-						break;
-					}
-				}
-			}
-			if(!invalidated){
-				if(masks!=null){
-					boolean found=true;
-					for(int j=0;j<masks.length;j++){
-						if(!files[i].getName().contains(masks[j])){
-							found=false;
-							break;
-						}
-					}
-					if(found){
-						nmask++;
-						filelist.add(files[i]);
-					}
-				}else{
-					nmask++;
-					filelist.add(files[i]);
-				}
-			}
-		}
+		ArrayList<File> filelist=get_masked_file_list(directory,masks,notmasks);
+		int nmask=filelist.size();
 		long[] created=new long[nmask];
 		for(int i=0;i<nmask;i++)
 			created[i]=filelist.get(i).lastModified();
@@ -181,6 +117,18 @@ public class jdataio{
 	}
 
 	public String[] get_sorted_string_list(String directory,String[] masks,String[] notmasks){
+		ArrayList<String> namelist=get_masked_string_list(directory,masks,notmasks);
+		int nmask=namelist.size();
+		Collections.sort(namelist);
+		String[] temp=new String[nmask];
+		for(int i=0;i<nmask;i++){
+			temp[i]=namelist.get(i);
+		}
+		return temp;
+	}
+	
+	public ArrayList<String> get_masked_string_list(String directory,String[] masks,String[] notmasks){
+		//this is the master masking method
 		String[] names=(new File(directory)).list();
 		ArrayList<String> namelist=new ArrayList<String>();
 		int nmask=0;
@@ -196,12 +144,16 @@ public class jdataio{
 			}
 			if(!invalidated){
 				if(masks!=null){
+					//the file name needs to contain all of the masks
 					for(int j=0;j<masks.length;j++){
-						if(names[i].contains(masks[j])){
-							nmask++;
-							namelist.add(names[i]);
+						if(!names[i].contains(masks[j])){
+							invalidated=true;
 							break;
 						}
+					}
+					if(!invalidated){
+						nmask++;
+						namelist.add(names[i]);
 					}
 				}else{
 					nmask++;
@@ -209,82 +161,26 @@ public class jdataio{
 				}
 			}
 		}
-		Collections.sort(namelist);
-		String[] temp=new String[nmask];
-		for(int i=0;i<nmask;i++){
-			temp[i]=namelist.get(i);
+		return namelist;
+	}
+	
+	public ArrayList<File> get_masked_file_list(String directory,String[] masks,String[] notmasks){
+		ArrayList<String> namelist=get_masked_string_list(directory,masks,notmasks);
+		ArrayList<File> flist=new ArrayList<File>();
+		for(int i=0;i<namelist.size();i++){
+			flist.add(new File(directory+File.separator+namelist.get(i)));
 		}
-		return temp;
+		return flist;
 	}
 
 	public String[] get_numeric_sorted_string_list(String directory,String mask){
-		String[] names=(new File(directory)).list();
-		boolean[] masked=new boolean[names.length];
-		int nmask=0;
-		if(mask==null){
-			nmask=names.length;
-		}else{
-			for(int i=0;i<names.length;i++){
-				if(names[i].contains(mask)){
-					nmask++;
-				}else{
-					masked[i]=true;
-				}
-			}
-		}
-		String[] temp=new String[nmask];
-		int counter=0;
-		for(int i=0;i<names.length;i++){
-			if(!masked[i]){
-				temp[counter]=names[i].substring(0);
-				counter++;
-			}
-		}
-		return sort_strings_numeric(temp);
+		String[] names=get_sorted_string_list(directory,mask);
+		return sort_strings_numeric(names);
 	}
 
 	public String[] get_numeric_sorted_string_list(String directory,String[] masks,String[] notmasks){
-		String[] names=(new File(directory)).list();
-		boolean[] masked=new boolean[names.length];
-		int nmask=0;
-		for(int i=0;i<names.length;i++){
-			boolean invalidated=false;
-			if(notmasks!=null){
-				for(int j=0;j<notmasks.length;j++){
-					if(names[i].contains(notmasks[j])){
-						invalidated=true;
-						masked[i]=true;
-						break;
-					}
-				}
-			}
-			if(!invalidated){
-				if(masks!=null){
-					boolean validated=false;
-					for(int j=0;j<masks.length;j++){
-						if(names[i].contains(masks[j])){
-							nmask++;
-							validated=true;
-							break;
-						}
-						if(!validated){
-							masked[i]=true;
-						}
-					}
-				}else{
-					nmask++;
-				}
-			}
-		}
-		String[] temp=new String[nmask];
-		int counter=0;
-		for(int i=0;i<names.length;i++){
-			if(!masked[i]){
-				temp[counter]=names[i].substring(0);
-				counter++;
-			}
-		}
-		return sort_strings_numeric(temp);
+		String[] names=get_sorted_string_list(directory,masks,notmasks);
+		return sort_strings_numeric(names);
 	}
 
 	public String[] sort_strings_numeric(String[] data){
@@ -309,7 +205,7 @@ public class jdataio{
 		});
 		String[] newlist=new String[data.length];
 		for(int i=0;i<data.length;i++){
-			newlist[i]=(String)list.get(i).get(0);
+			newlist[i]=list.get(i).get(0);
 		}
 		return newlist;
 	}
@@ -567,7 +463,7 @@ public class jdataio{
 		if(dumint<0){
 			return -1;
 		}else{
-			return (int)(((temp[3]&0xff)<<24)|((temp[2]&0xff)<<16)|((temp[1]&0xff)<<8)|(temp[0]&0xff));
+			return ((temp[3]&0xff)<<24)|((temp[2]&0xff)<<16)|((temp[1]&0xff)<<8)|(temp[0]&0xff);
 		}
 	}
 
@@ -583,7 +479,7 @@ public class jdataio{
 			return false;
 		}
 		for(int i=0;i<length;i++){
-			data[i]=(int)(((framebytes[4*i+3]&0xff)<<24)|((framebytes[4*i+2]&0xff)<<16)|((framebytes[4*i+1]&0xff)<<8)|(framebytes[4*i]&0xff));
+			data[i]=((framebytes[4*i+3]&0xff)<<24)|((framebytes[4*i+2]&0xff)<<16)|((framebytes[4*i+1]&0xff)<<8)|(framebytes[4*i]&0xff);
 		}
 		return true;
 	}
@@ -613,8 +509,8 @@ public class jdataio{
 			return false;
 		}
 		for(int i=0;i<length;i++){
-			int tempint=(int)(((framebytes[4*i+3]&0xff)<<24)|((framebytes[4*i+2]&0xff)<<16)|((framebytes[4*i+1]&0xff)<<8)|(framebytes[4*i]&0xff));
-			data[i]=(float)tempint;
+			int tempint=((framebytes[4*i+3]&0xff)<<24)|((framebytes[4*i+2]&0xff)<<16)|((framebytes[4*i+1]&0xff)<<8)|(framebytes[4*i]&0xff);
+			data[i]=tempint;
 		}
 		return true;
 	}
@@ -630,7 +526,7 @@ public class jdataio{
 		if(dumint<0){
 			return -1;
 		}else{
-			return (int)(((temp[1]&0xff)<<8)|(temp[0]&0xff));
+			return ((temp[1]&0xff)<<8)|(temp[0]&0xff);
 		}
 	}
 
@@ -645,8 +541,44 @@ public class jdataio{
 		if(dumint<0){
 			return -1;
 		}else{
-			return (int)(((temp[0]&0xff)<<8)|(temp[1]&0xff));
+			return ((temp[0]&0xff)<<8)|(temp[1]&0xff);
 		}
+	}
+	
+	public boolean readmotorolashortfile(InputStream instream,int length,float[] data){
+		for(int i=0;i<length;i++){
+			int temp=readmotorolashort(instream);
+			if(temp==-1) return false;
+			data[i]=temp;
+		}
+		return true;
+	}
+	
+	public boolean readmotorolaintfile(InputStream instream,int length,float[] data){
+		for(int i=0;i<length;i++){
+			int temp=readmotorolaint(instream);
+			//if(temp==-1) return false;
+			data[i]=temp;
+		}
+		return true;
+	}
+	
+	public boolean readmotorolafloatfile(InputStream instream,int length,float[] data){
+		for(int i=0;i<length;i++){
+			float temp=readmotorolafloat(instream);
+			//if(Float.isNaN(temp)) return false;
+			data[i]=temp;
+		}
+		return true;
+	}
+	
+	public boolean readmotoroladoublefile(InputStream instream,int length,float[] data){
+		for(int i=0;i<length;i++){
+			double temp=readmotoroladouble(instream);
+			//if(Double.isNaN(temp)) return false;
+			data[i]=(float)temp;
+		}
+		return true;
 	}
 	
 	public int readmotorolaint(InputStream instream){
@@ -660,7 +592,7 @@ public class jdataio{
 		if(dumint<0){
 			return -1;
 		}else{
-			return (int)(((temp[0]&0xff)<<24)|((temp[1]&0xff)<<16)|((temp[2]&0xff)<<8)|(temp[3]&0xff));
+			return ((temp[0]&0xff)<<24)|((temp[1]&0xff)<<16)|((temp[2]&0xff)<<8)|(temp[3]&0xff);
 		}
 	}
 	
@@ -668,6 +600,23 @@ public class jdataio{
 		int temp=readmotorolaint(instream);
 		if(temp==-1) return Float.NaN;
 		return Float.intBitsToFloat(temp);
+	}
+	
+	public double readmotoroladouble(InputStream instream){
+		byte[] temp=new byte[8];
+		int dumint;
+		try{
+			dumint=instream.read(temp);
+		}catch(IOException e){
+			return Double.NaN;
+		}
+		if(dumint<0) return Double.NaN;
+		long[] b=new long[8];
+		for(int i=0;i<8;i++){
+			b[i]=temp[i]&0xff;
+		}
+		long tempint=(b[0]<<56)|(b[1]<<48)|(b[2]<<40)|(b[3]<<32)|(b[4]<<24)|(b[5]<<16)|(b[6]<<8)|b[7];
+		return Double.longBitsToDouble(tempint);
 	}
 
 	public int readintelbyte(InputStream instream){
@@ -677,7 +626,28 @@ public class jdataio{
 		}catch(IOException e){
 			return -1;
 		}
-		return (int)(data[0]&0xff);
+		return data[0]&0xff;
+	}
+	
+	public byte[] readentirebytefile(File f){
+		int length=(int)f.length();
+		try{
+			InputStream is=new BufferedInputStream(new FileInputStream(f));
+			int n=0;
+			byte[] data=new byte[length];
+			while(n<length){
+				int count=is.read(data,n,length-n);
+				if(count<0){
+					is.close();
+					return null;
+				}
+				n+=count;
+			}
+			is.close();
+			return data;
+		}catch(IOException e){
+			return null;
+		}
 	}
 
 	public boolean readintelbytefile(InputStream instream,int length,byte[] data){
@@ -709,7 +679,7 @@ public class jdataio{
 			return false;
 		}
 		for(int i=0;i<length;i++){
-			data[i]=(float)(framebytes[i]&0xff);
+			data[i]=framebytes[i]&0xff;
 		}
 		return true;
 	}
@@ -744,7 +714,7 @@ public class jdataio{
 		}
 		for(int i=0;i<length;i++){
 			short temp=(short)(((framebytes[2*i+1]&0xff)<<8)|(framebytes[2*i]&0xff));
-			data[i]=(float)(temp&0xffff);
+			data[i]=temp&0xffff;
 		}
 		return true;
 	}
@@ -775,7 +745,7 @@ public class jdataio{
 			return -1.0f;
 		}
 		int tmp;
-		tmp=(int)(((dumbyte[3]&0xff)<<24)|((dumbyte[2]&0xff)<<16)|((dumbyte[1]&0xff)<<8)|(dumbyte[0]&0xff));
+		tmp=((dumbyte[3]&0xff)<<24)|((dumbyte[2]&0xff)<<16)|((dumbyte[1]&0xff)<<8)|(dumbyte[0]&0xff);
 		return Float.intBitsToFloat(tmp);
 	}
 
@@ -791,7 +761,7 @@ public class jdataio{
 			return false;
 		}
 		for(int i=0;i<length;i++){
-			int tempint=(int)(((framebytes[4*i+3]&0xff)<<24)|((framebytes[4*i+2]&0xff)<<16)|((framebytes[4*i+1]&0xff)<<8)|(framebytes[4*i]&0xff));
+			int tempint=((framebytes[4*i+3]&0xff)<<24)|((framebytes[4*i+2]&0xff)<<16)|((framebytes[4*i+1]&0xff)<<8)|(framebytes[4*i]&0xff);
 			data[i]=Float.intBitsToFloat(tempint);
 		}
 		return true;
@@ -831,8 +801,8 @@ public class jdataio{
 			return false;
 		}
 		for(int i=0;i<length;i++){
-			int tempint=(int)(((framebytes[4*i+3]&0xff)<<24)|((framebytes[4*i+2]&0xff)<<16)|((framebytes[4*i+1]&0xff)<<8)|(framebytes[4*i]&0xff));
-			data[i]=(double)Float.intBitsToFloat(tempint);
+			int tempint=((framebytes[4*i+3]&0xff)<<24)|((framebytes[4*i+2]&0xff)<<16)|((framebytes[4*i+1]&0xff)<<8)|(framebytes[4*i]&0xff);
+			data[i]=Float.intBitsToFloat(tempint);
 		}
 		return true;
 	}
@@ -842,18 +812,18 @@ public class jdataio{
 		try{
 			instream.read(b1);
 		}catch(IOException e){
-			return -1.0f;
+			return Double.MAX_VALUE;
 		}
 		long[] b=new long[8];
 		for(int i=0;i<8;i++){
 			b[i]=b1[i]&0xff;
 		}
-		long tempint=(long)((b[7]<<56)|(b[6]<<48)|(b[5]<<40)|(b[4]<<32)|(b[3]<<24)|(b[2]<<16)|(b[1]<<8)|b[0]);
+		long tempint=(b[7]<<56)|(b[6]<<48)|(b[5]<<40)|(b[4]<<32)|(b[3]<<24)|(b[2]<<16)|(b[1]<<8)|b[0];
 		return Double.longBitsToDouble(tempint);
 	}
 
 	public boolean readinteldoublefile(InputStream instream,int length,float[] data){
-		int dumint;
+		/*int dumint;
 		byte[] framebytes=new byte[length*8];
 		try{
 			dumint=instream.read(framebytes);
@@ -866,10 +836,16 @@ public class jdataio{
 		long[] b=new long[8];
 		for(int i=0;i<length;i++){
 			for(int j=0;j<8;j++){
-				b[j]=(long)(framebytes[8*i+j]&0xff);
+				b[j]=framebytes[8*i+j]&0xff;
 			}
-			long tempint=(long)((b[7]>>56)|(b[6]>>48)|(b[5]>>40)|(b[4]>>32)|(b[3]>>24)|(b[2]>>16)|(b[1]>>8)|b[0]);
+			long tempint=(b[7]>>56)|(b[6]>>48)|(b[5]>>40)|(b[4]>>32)|(b[3]>>24)|(b[2]>>16)|(b[1]>>8)|b[0];
 			data[i]=(float)Double.longBitsToDouble(tempint);
+		}
+		return true;*/
+		for(int i=0;i<length;i++){
+			double temp=readinteldouble(instream);
+			if(temp==Double.MAX_VALUE) return false;
+			data[i]=(float)temp;
 		}
 		return true;
 	}
@@ -888,9 +864,9 @@ public class jdataio{
 		long[] b=new long[8];
 		for(int i=0;i<length;i++){
 			for(int j=0;j<8;j++){
-				b[j]=(long)(framebytes[8*i+j]&0xff);
+				b[j]=framebytes[8*i+j]&0xff;
 			}
-			long tempint=(long)((b[7]>>56)|(b[6]>>48)|(b[5]>>40)|(b[4]>>32)|(b[3]>>24)|(b[2]>>16)|(b[1]>>8)|b[0]);
+			long tempint=(b[7]>>56)|(b[6]>>48)|(b[5]>>40)|(b[4]>>32)|(b[3]>>24)|(b[2]>>16)|(b[1]>>8)|b[0];
 			data[i]=Double.longBitsToDouble(tempint);
 		}
 		return true;
@@ -962,13 +938,70 @@ public class jdataio{
 		try{
 			left=skip;
 			do{
-				long temp=(long)instream.skip(left);
+				long temp=instream.skip(left);
 				left-=temp;
 			}while(left>0);
 		}catch(IOException e){
 			return false;
 		}
 		return true;
+	}
+	
+	public String getExceptionTrace(Exception e){
+		ByteArrayOutputStream baos=new ByteArrayOutputStream();
+		PrintStream ps=new PrintStream(baos);
+		e.printStackTrace(ps);
+		String temp=baos.toString();
+		ps.close();
+		return temp;
+	}
+	
+	public static String printHexFile(InputStream is){
+		//copied from http://www.gubatron.com/blog/2009/04/20/how-to-make-a-quick-dirty-hexviewer-updated/
+		StringBuffer sb=new StringBuffer();
+        try {
+            byte[] chunk = null;
+            int readStatus = 0;
+            while (true) {
+                chunk = new byte[16];
+                readStatus = is.read(chunk, 0, 16);
+                char[] line = new char[16];
+                if (readStatus == -1)
+                    break;
+
+                for (byte i=0; i < readStatus; i++) {
+                    int readByte = (chunk[i] < 0) ? (-1 * (int) chunk[i]) : chunk[i];
+                    String paddingZero = (readByte < 16) ? "0" : "";
+                    sb.append(paddingZero + Integer.toHexString(readByte).toUpperCase() + " ");
+                    line[i] = (readByte >= 33 && readByte <= 126) ? (char) readByte : '.';
+                }
+                sb.append("\t");
+                //We add some padding to print the text line right below the one above.                      
+                /*String padding = new String();
+                if (readStatus < 16) {
+                    for (byte i=0; i < 16-readStatus; i++) {
+                        padding += "   ";
+                    }
+                }*/
+ 
+                sb.append(new String(line)+"\n");
+            }
+        } catch (Exception e1) { e1.printStackTrace(); return null; }
+        return sb.toString();
+	}
+	
+	public static String printHexFile(String filePath) {
+		try{
+			InputStream is=new BufferedInputStream(new FileInputStream(filePath));
+			return printHexFile(is);
+		}catch(IOException e){
+			e.printStackTrace(); return null; 
+		}
+    }
+	
+	public static String printHexString(String contents){
+		InputStream is = new ByteArrayInputStream(contents.getBytes());
+		return printHexFile(is);
 	}
 
 }

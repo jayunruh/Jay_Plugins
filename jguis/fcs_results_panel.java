@@ -8,15 +8,41 @@
 
 package jguis;
 
-import jalgs.*;
+import ij.IJ;
+import jalgs.jdataio;
+import jalgs.jstatistics;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.event.*;
-import ij.*;
-import java.io.*;
+import java.awt.Button;
+import java.awt.Choice;
+import java.awt.Dimension;
+import java.awt.FileDialog;
+import java.awt.Frame;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import jhcsfcs.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+
+import jhcsfcs.hcs_fcs_cell;
+import jhcsfcs.hcs_fcs_plate;
+import jhcsfcs.hcs_fcs_run;
+import jhcsfcs.hcs_fcs_well;
 
 public class fcs_results_panel extends Panel implements ActionListener,ItemListener,ListSelectionListener,TableModelListener{
 	private TablePanel platetable;
@@ -311,7 +337,7 @@ public class fcs_results_panel extends Panel implements ActionListener,ItemListe
 		}
 		for(int j=0;j<ncorrs;j++){
 			for(int k=0;k<corrsize;k++){
-				cellavg[j][k]/=(float)nvalid;
+				cellavg[j][k]/=nvalid;
 			}
 		}
 		Object[] corrs={cellavgxvals,cellavg,new Integer(nvalid)};
@@ -333,7 +359,7 @@ public class fcs_results_panel extends Panel implements ActionListener,ItemListe
 				float[][] yvals=(float[][])temp2[1];
 				for(int j=0;j<ncorrs;j++){
 					for(int k=0;k<corrsize;k++){
-						cellavg[j][k]+=(float)nvalid*yvals[j][k];
+						cellavg[j][k]+=nvalid*yvals[j][k];
 					}
 				}
 				wellnvalid+=nvalid;
@@ -341,7 +367,7 @@ public class fcs_results_panel extends Panel implements ActionListener,ItemListe
 		}
 		for(int j=0;j<ncorrs;j++){
 			for(int k=0;k<corrsize;k++){
-				cellavg[j][k]/=(float)wellnvalid;
+				cellavg[j][k]/=wellnvalid;
 			}
 		}
 		Object[] corrs={cellavgxvals,cellavg,new Integer(wellnvalid)};

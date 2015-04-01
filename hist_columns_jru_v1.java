@@ -13,6 +13,7 @@ import ij.plugin.*;
 import ij.util.*;
 import ij.text.*;
 import jguis.*;
+import jalgs.*;
 
 public class hist_columns_jru_v1 implements PlugIn {
 
@@ -52,20 +53,40 @@ public class hist_columns_jru_v1 implements PlugIn {
 			float[] xvals=new float[nlines];
 			float[] yvals=new float[nlines];
 			if(hasxvals){
+				int linect=0;
 				for(int i=0;i<nlines;i++){
-					String[] data=split_string_tab(tp.getLine(i));
-					try{
-						xvals[i]=Float.parseFloat(data[xindex]);
-						yvals[i]=Float.parseFloat(data[yindex]);
-					}catch(NumberFormatException e){}
+					String temp=tp.getLine(i);
+					if(temp.length()>0){
+						String[] data=split_string_tab(temp);
+						try{
+							if(xindex<data.length) xvals[linect]=Float.parseFloat(data[xindex]);
+							else xvals[linect]=Float.NaN;
+							if(yindex<data.length) yvals[linect]=Float.parseFloat(data[yindex]);
+							else yvals[linect]=Float.NaN;
+							linect++;
+						}catch(NumberFormatException e){}
+					}
+				}
+				if(linect!=nlines){
+					xvals=(float[])algutils.get_subarray(xvals,0,linect);
+					yvals=(float[])algutils.get_subarray(yvals,0,linect);
 				}
 				new PlotWindow2DHist(titles[index]+" Histogram",col_labels[xindex],col_labels[yindex],xvals,yvals,null).draw();
 			} else {
+				int linect=0;
 				for(int i=0;i<nlines;i++){
-					String[] data=split_string_tab(tp.getLine(i));
-					try{
-						yvals[i]=Float.parseFloat(data[yindex]);
-					}catch(NumberFormatException e){}
+					String temp=tp.getLine(i);
+					if(temp.length()>0){
+						String[] data=split_string_tab(temp);
+						try{
+							if(yindex<data.length) yvals[linect]=Float.parseFloat(data[yindex]);
+							else yvals[linect]=Float.NaN;
+							linect++;
+						}catch(NumberFormatException e){}
+					}
+				}
+				if(linect!=nlines){
+					yvals=(float[])algutils.get_subarray(yvals,0,linect);
 				}
 				new PlotWindowHist(titles[index]+" Histogram",col_labels[yindex],"Occurrences",yvals,3).draw();
 			}

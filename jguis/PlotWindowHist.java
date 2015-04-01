@@ -8,24 +8,47 @@
 
 package jguis;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.awt.datatransfer.*;
-import ij.*;
-import ij.gui.*;
-import ij.process.*;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.GenericDialog;
+import ij.gui.ImageWindow;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.process.ColorProcessor;
 import ij.text.TextWindow;
+
+import java.awt.Button;
+import java.awt.FileDialog;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.Rectangle;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 /**
  * This class is an extended ImageWindow that displays line graphs. This class
  * was adapted from the PlotWindow class original to ImageJ Adaptations were
  * done by Jay Unruh (jru@stowers.org)
  */
-public class PlotWindowHist extends ImageWindow implements ActionListener,ClipboardOwner{
+public class PlotWindowHist extends ImageWindow implements ActionListener,ClipboardOwner,MouseMotionListener,MouseListener{
 
 	private Button list,save,copy,editbutton;
-	// private Label coordinates;
+	private Label coordinates;
 	public boolean savehist,showerrors;
 	protected static String defaultDirectory=null;
 	public PlotHist p3;
@@ -35,18 +58,21 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 		super(createImage(title1));
 		p3=new PlotHist(xLabel1,yLabel1,xValues1,color);
 		savehist=true;
+		imp.getCanvas().addMouseMotionListener(this);
 	}
 
 	public PlotWindowHist(String title1,String xLabel1,String yLabel1,float[] hist,float startx,float endx,int color){
 		super(createImage(title1));
 		p3=new PlotHist(xLabel1,yLabel1,hist,startx,endx,color);
 		savehist=true;
+		imp.getCanvas().addMouseMotionListener(this);
 	}
 
 	public PlotWindowHist(String title1,PlotHist plot1){
 		super(createImage(title1));
 		p3=plot1;
 		savehist=true;
+		imp.getCanvas().addMouseMotionListener(this);
 	}
 
 	public PlotWindowHist(ImagePlus imp,PlotHist p3){
@@ -63,6 +89,7 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 		imp.setProcessor(cp);
 		// cp=(ColorProcessor)this.imp.getProcessor();
 		this.p3=p3;
+		imp.getCanvas().addMouseMotionListener(this);
 	}
 
 	public void setmagnification(float newmag){
@@ -137,7 +164,8 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 		if(rect!=null){
 			p3.scalerect(rect);
 			imp.killRoi();
-			updatePlot();
+			//updatePlot();
+			//IJ.log("plot updated");
 		}
 	}
 
@@ -173,14 +201,59 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 		editbutton=new Button("Edit...");
 		editbutton.addActionListener(this);
 		buttons.add(editbutton);
-		// coordinates = new Label("X=12345678, Y=12345678");
-		// coordinates.setFont(new Font("Monospaced", Font.PLAIN, 12));
-		// buttons.add(coordinates);
+		coordinates = new Label("Density = intialized size large");
+		coordinates.setFont(new Font("Monospaced", Font.PLAIN, 12));
+		buttons.add(coordinates);
 		add(buttons);
 		pack();
 		// coordinates.setText("");
 		updatePlot();
 		IJ.register(this.getClass());
+	}
+	
+	/**
+	 * Updates the graph X and Y values when the mouse is moved. Overrides
+	 * mouseMoved() in ImageWindow.
+	 * 
+	 * @see ij.gui.ImageWindow#mouseMoved
+	 */
+	public void mouseMoved(int x,int y){
+		// super.mouseMoved(x, y);
+		float temp=p3.getPlotCoords(x);
+		IJ.showStatus("X="+temp);
+	}
+
+	public void mouseMoved(MouseEvent e){
+		update_density();
+	}
+
+	public void mouseDragged(MouseEvent e){
+		update_density();
+	}
+
+	public void mouseClicked(MouseEvent e){
+	}
+
+	public void mouseEntered(MouseEvent e){
+	}
+
+	public void mouseExited(MouseEvent e){
+	}
+
+	public void mousePressed(MouseEvent e){
+	}
+
+	public void mouseReleased(MouseEvent e){
+		update_density();
+	}
+	
+	public void update_density(){
+		Roi roi=imp.getRoi();
+		if(roi!=null){
+			coordinates.setText("Density = "+jutils.formatted_string(p3.get_score(roi)));
+		}else{
+			coordinates.setText("Density = "+jutils.formatted_string(0.0f));
+		}
 	}
 
 	void showList(){
@@ -306,6 +379,10 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 		fd.dispose();
 		if(name==null||name==""||directory==null||directory=="")
 			return;
+		if(!name.endsWith(".pw2")){
+			if(name.endsWith(".pw")) name+="2";
+			else name+=".pw2";
+		}
 		imp.setTitle(name);
 		saveAsObject(directory+File.separator+name);
 	}
@@ -314,7 +391,7 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 		p3.saveplot2file(filename);
 	}
 
-	void copyToClipboard(){
+	public void copyToClipboard(){
 		Clipboard systemClipboard=null;
 		try{
 			systemClipboard=getToolkit().getSystemClipboard();
@@ -459,7 +536,7 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 	public float[] getXValues(int series){
 		return p3.getXValues(series);
 	}
-
+	
 	public float[] getYValues(int series){
 		return p3.getYValues(series);
 	}

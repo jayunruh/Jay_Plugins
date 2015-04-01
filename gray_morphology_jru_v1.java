@@ -11,7 +11,9 @@ import ij.gui.*;
 import java.awt.*;
 import ij.plugin.*;
 import ij.plugin.frame.*;
+import jalgs.*;
 import jalgs.jseg.*;
+import jguis.*;
 
 public class gray_morphology_jru_v1 implements PlugIn {
 
@@ -24,11 +26,27 @@ public class gray_morphology_jru_v1 implements PlugIn {
 		int index=gd.getNextChoiceIndex();
 		int iterations=(int)gd.getNextNumber();
 		ImagePlus imp=WindowManager.getCurrentImage();
-		float[] pixels=(float[])imp.getProcessor().convertToFloat().getPixels();
+		ImageStack stack=imp.getStack();
 		int width=imp.getWidth();
 		int height=imp.getHeight();
-		float[] result=pixels.clone();
-		switch(index){
+		Object[] newstack=filterStack(jutils.stack2array(stack),width,height,iterations,index);
+		ImageStack result=jutils.array2stack(newstack,width,height);
+		//new ImagePlus(imp.getTitle()+" "+ops[index],new FloatProcessor(width,height,result,null)).show();
+		new ImagePlus(imp.getTitle()+" "+ops[index],result).show();
+	}
+
+	public static Object[] filterStack(Object[] pix,int width,int height,int iterations,int op){
+		Object[] result=new Object[pix.length];
+		for(int i=0;i<pix.length;i++){
+			result[i]=filterSlice(algutils.convert_arr_float2(pix[i]),width,height,iterations,op);
+			IJ.showProgress(i,pix.length);
+		}
+		return result;
+	}
+
+	public static float[] filterSlice(float[] pix,int width,int height,int iterations,int op){
+		float[] result=pix.clone();
+		switch(op){
 			case 0:
 				for(int i=0;i<iterations;i++){
 					result=gray_processing.erode(result,width,height);
@@ -52,7 +70,7 @@ public class gray_morphology_jru_v1 implements PlugIn {
 				result=gray_processing.tophat_white(result,iterations,width,height);
 				break;
 		}
-		new ImagePlus(imp.getTitle()+" "+ops[index],new FloatProcessor(width,height,result,null)).show();
+		return result;
 	}
 
 }

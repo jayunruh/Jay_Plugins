@@ -7,29 +7,51 @@
  ******************************************************************************/
 package jguis;
 
+import ij.CompositeImage;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.LookUpTable;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.ImageWindow;
+import ij.gui.Plot;
+import ij.gui.PlotWindow;
+import ij.gui.Roi;
+import ij.measure.Calibration;
+import ij.plugin.filter.BackgroundSubtracter;
+import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+import ij.process.LUT;
+import ij.process.ShortProcessor;
+import ij.text.TextWindow;
 import jalgs.algutils;
-import jalgs.jdataio;
+import jalgs.interpolation;
 import jalgs.jstatistics;
-import jalgs.jseg.measure_object;
 import jalgs.jseg.findblobs3;
+import jalgs.jseg.measure_object;
 
-import java.awt.*;
-import java.text.DecimalFormat;
-import java.util.ArrayList;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.FontMetrics;
+import java.awt.Frame;
 import java.awt.Polygon;
 import java.awt.Rectangle;
 import java.awt.image.IndexColorModel;
-import java.lang.reflect.*;
-import ij.gui.*;
-import ij.*;
-import ij.measure.Calibration;
-import ij.process.*;
-import ij.text.*;
-
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 
 public class jutils{
 
@@ -55,7 +77,11 @@ public class jutils{
 	}
 
 	public static boolean isPlotFamily(ImageWindow iw){
-		return(isPlot(iw)||iw.getClass().getName().equals("jguis.PlotWindowHist")||iw.getClass().getName().equals("jguis.PlotWindow3D"));
+		return(isPlot(iw)||isPlotHist(iw)||iw.getClass().getName().equals("jguis.PlotWindow3D") || iw.getClass().getName().equals("jguis.PlotWindowColumn"));
+	}
+	
+	public static boolean isPlotHist(ImageWindow iw){
+		return (iw.getClass().getName().equals("jguis.PlotWindowHist") || iw.getClass().getName().equals("jguis.PlotWindow2DHist"));
 	}
 
 	public static boolean isPlot(ImageWindow iw){
@@ -336,7 +362,7 @@ public class jutils{
 
 	public static void savePW4(ImageWindow iw,String filename){
 		Class<?> temp=iw.getClass();
-		if(temp.getName().equals("jguis.PlotWindow4")||temp.getName().equals("jguis.PlotWindowHist")){
+		if(isPlotFamily(iw)){
 			runReflectionMethod(iw,"saveAsObject",new Object[]{filename});
 		}else{
 			if(temp.getName().equals("ij.gui.PlotWindow")){
@@ -356,28 +382,62 @@ public class jutils{
 		Plot4 p4=plot2Plot4(getPWPlot(pw));
 		p4.saveplot2file(filename);
 	}
+	
+	public static Object constructReflectionObject(Object tclass,Object[] args){
+		// here we automatically assume that number types are primitive
+		if(args==null)
+			return constructReflectionObject(tclass,null,null);
+		Class[] argcs=new Class[args.length];
+		for(int i=0;i<args.length;i++) argcs[i]=args[i].getClass();
+		transformClasses(argcs);
+		return constructReflectionObject(tclass,args,argcs);
+	}
+	
+	public static Object constructReflectionObject(Object tclass,Object[] args,Class[] argcs){
+		try{
+			Class<?> temp=tclass.getClass();
+			Constructor cons=temp.getDeclaredConstructor(argcs);
+			cons.setAccessible(true);
+			try{
+				return cons.newInstance(args);
+			}catch(IllegalArgumentException e){
+				IJ.log("illegal argument exception");
+			}catch(InstantiationException e){
+				IJ.log("instantiation exception");
+			}catch(IllegalAccessException e){
+				IJ.log("illegal access exception");
+			}catch(InvocationTargetException e){
+				IJ.log("invocation target exception");
+			}
+		}catch(SecurityException e){
+			IJ.log("security exception");
+		}catch(NoSuchMethodException e){
+			IJ.log("no such method exception");
+		}
+		return null;
+	}
+	
+	public static void transformClasses(Class[] argcs){
+		for(int i=0;i<argcs.length;i++){
+			try{
+				if(argcs[i]==Class.forName("ij.CompositeImage")) argcs[i]=Class.forName("ij.ImagePlus");
+			}catch(ClassNotFoundException e){}
+			if(argcs[i]==Integer.class) argcs[i]=Integer.TYPE;
+			if(argcs[i]==Float.class) argcs[i]=Float.TYPE;
+			if(argcs[i]==Double.class) argcs[i]=Double.TYPE;
+			if(argcs[i]==Short.class) argcs[i]=Short.TYPE;
+			if(argcs[i]==Byte.class) argcs[i]=Byte.TYPE;
+			if(argcs[i]==Boolean.class) argcs[i]=Boolean.TYPE;
+		}
+	}
 
 	public static Object runReflectionMethod(Object obj,String method,Object[] args){
 		// here we automatically assume that number types are primitive
 		if(args==null)
 			return runReflectionMethod(obj,method,null,null);
 		Class[] argcs=new Class[args.length];
-		for(int i=0;i<args.length;i++)
-			argcs[i]=args[i].getClass();
-		for(int i=0;i<argcs.length;i++){
-			if(argcs[i]==Integer.class)
-				argcs[i]=Integer.TYPE;
-			if(argcs[i]==Float.class)
-				argcs[i]=Float.TYPE;
-			if(argcs[i]==Double.class)
-				argcs[i]=Double.TYPE;
-			if(argcs[i]==Short.class)
-				argcs[i]=Short.TYPE;
-			if(argcs[i]==Byte.class)
-				argcs[i]=Byte.TYPE;
-			if(argcs[i]==Boolean.class)
-				argcs[i]=Boolean.TYPE;
-		}
+		for(int i=0;i<args.length;i++) argcs[i]=args[i].getClass();
+		transformClasses(argcs);
 		return runReflectionMethod(obj,method,args,argcs);
 	}
 
@@ -393,6 +453,7 @@ public class jutils{
 				IJ.log("illegal access exception");
 			}catch(InvocationTargetException e){
 				IJ.log("invocation target exception");
+				e.printStackTrace();
 			}catch(ClassCastException e){
 				IJ.log(e.getMessage());
 			}
@@ -400,6 +461,14 @@ public class jutils{
 			IJ.log("no such method exception");
 		}
 		return null;
+	}
+	
+	public static Object[] getReflectionMethods(Object obj){
+		Class<?> temp=obj.getClass();
+		Method[] meth=temp.getDeclaredMethods();
+		Class[][] argcs=new Class[meth.length][];
+		for(int i=0;i<meth.length;i++) argcs[i]=meth[i].getParameterTypes();
+		return new Object[]{meth,argcs};
 	}
 
 	public static Object getReflectionField(Object obj,String fieldname){
@@ -436,15 +505,15 @@ public class jutils{
 		int halfunits=(int)((float)length/(float)dash_length);
 		float xinc=(float)(x2-x1)/(float)length;
 		float yinc=(float)(x2-x1)/(float)length;
-		float x=(float)x1;
-		float y=(float)y1;
+		float x=x1;
+		float y=y1;
 		ip.moveTo((int)x,(int)y);
 		for(int i=0;i<nunits;i++){
-			x+=xinc*(float)dash_length;
-			y+=yinc*(float)dash_length;
+			x+=xinc*dash_length;
+			y+=yinc*dash_length;
 			ip.lineTo((int)x,(int)y);
-			x+=xinc*(float)dash_length;
-			y+=yinc*(float)dash_length;
+			x+=xinc*dash_length;
+			y+=yinc*dash_length;
 			ip.moveTo((int)x,(int)y);
 		}
 		if(halfunits>2*nunits){
@@ -457,10 +526,10 @@ public class jutils{
 		if(length==0.0f){
 			return;
 		}
-		float xinc=(float)(x2-x1)/length;
-		float yinc=(float)(y2-y1)/length;
-		float crossx=(float)x2-xinc*5.0f;
-		float crossy=(float)y2-yinc*5.0f;
+		float xinc=(x2-x1)/length;
+		float yinc=(y2-y1)/length;
+		float crossx=x2-xinc*5.0f; //go back 5 pixels from the second point
+		float crossy=y2-yinc*5.0f;
 		float x3=crossx-yinc*3.5f;
 		float x4=crossx+yinc*3.5f;
 		float y3=crossy+xinc*3.5f;
@@ -471,6 +540,7 @@ public class jutils{
 	}
 
 	public static void draw_arrow2(ImageProcessor ip,int x1,int y1,int x2,int y2){
+		//this isn't really an arrow but rather a line with a dot at the end
 		float length=(float)Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
 		if(length==0.0f){
 			return;
@@ -492,7 +562,7 @@ public class jutils{
 		int[] xpts=new int[nangles];
 		int[] ypts=new int[nangles];
 		for(int i=0;i<nangles;i++){
-			float phi=dphi*(float)i;
+			float phi=dphi*i;
 			xpts[i]=(int)(radius*(float)Math.cos(phi)+x);
 			ypts[i]=(int)(radius*(float)Math.sin(phi)+y);
 		}
@@ -579,6 +649,11 @@ public class jutils{
 
 	public static int rgb2intval(int r,int g,int b){
 		int temp=0xff000000|(r<<16)|(g<<8)|b;
+		return temp;
+	}
+	
+	public static int argb2intval(int a,int r,int g,int b){
+		int temp= (a<<24)|(r<<16)|(g<<8)|b;
 		return temp;
 	}
 
@@ -707,7 +782,7 @@ public class jutils{
 		if(max[2]>max[1]){
 			max2=max[2];
 		}
-		float multiplier=255.0f/(float)max2;
+		float multiplier=255.0f/max2;
 		int[] maxnorm={(int)(max[0]*multiplier),(int)(max[1]*multiplier),(int)(max[2]*multiplier)};
 		return get_closest_color_index(rgb2intval(maxnorm[0],maxnorm[1],maxnorm[2]));
 	}
@@ -728,7 +803,7 @@ public class jutils{
 		if(max[2]>max[1]){
 			max2=max[2];
 		}
-		float multiplier=255.0f/(float)max2;
+		float multiplier=255.0f/max2;
 		int[] maxnorm={(int)(max[0]*multiplier),(int)(max[1]*multiplier),(int)(max[2]*multiplier)};
 		return get_closest_color_index(rgb2intval(maxnorm[0],maxnorm[1],maxnorm[2]));
 	}
@@ -744,6 +819,15 @@ public class jutils{
 
 	public static Object get3DSlice(ImageStack is,int frame,int slice,int channel,int frames,int slices,int channels){
 		return is.getPixels(1+channel+slice*channels+frame*channels*slices);
+	}
+	
+	public static Object get3DSliceInterp(ImageStack is,int frame,float slice,int channel,int frames,int slices,int channels){
+		int prev=(int)slice;
+		Object sl1=is.getPixels(1+channel+prev*channels+frame*channels*slices);
+		if(prev==slice) return sl1;
+		int next=prev+1;
+		Object sl2=is.getPixels(1+channel+next*channels+frame*channels*slices);
+		return interpolation.interpz(sl1,sl2,is.getWidth(),is.getHeight(),slice-prev);
 	}
 
 	public static void set3DSlice(ImageStack is,Object pixels,int frame,int slice,int channel,int frames,int slices,int channels){
@@ -1057,6 +1141,18 @@ public class jutils{
 		}
 		return temp;
 	}
+	
+	public static ImageStack array2stack(Object[] arr,int width,int height){
+		ImageStack stack=new ImageStack(width,height);
+		for(int i=0;i<arr.length;i++) stack.addSlice("",arr[i]);
+		return stack;
+	}
+	
+	public static ImageStack array2stack(float[][] arr,int width,int height){
+		ImageStack stack=new ImageStack(width,height);
+		for(int i=0;i<arr.length;i++) stack.addSlice("",arr[i]);
+		return stack;
+	}
 
 	public static boolean[] roi2mask(Roi roi,int width,int height){
 		if(roi==null)
@@ -1087,8 +1183,8 @@ public class jutils{
 		// here j will index over red and i will index over green
 		for(int i=0;i<15;i++){
 			for(int j=0;j<15;j++){
-				LUT[0][j+i*15+17]=(byte)((int)(((double)j)*18.215));
-				LUT[1][j+i*15+17]=(byte)((int)(((double)i)*18.215));
+				LUT[0][j+i*15+17]=(byte)((int)((j)*18.215));
+				LUT[1][j+i*15+17]=(byte)((int)((i)*18.215));
 			}
 		}
 		IndexColorModel cm=new IndexColorModel(8,256,LUT[0],LUT[1],LUT[2]);
@@ -1102,11 +1198,11 @@ public class jutils{
 				}else{
 					int[] rgb=intval2rgb(pixels[i]);
 					if(isgray(pixels[i],15)){
-						int graylevel=(int)(((double)(rgb[0]+rgb[1]+rgb[2]))/(3.0*16.0));
+						int graylevel=(int)((rgb[0]+rgb[1]+rgb[2])/(3.0*16.0));
 						pixels8[i]=(byte)graylevel;
 					}else{
-						int redlevel=(int)(((double)rgb[0])/18.214);
-						int greenlevel=(int)(((double)rgb[1])/18.214);
+						int redlevel=(int)((rgb[0])/18.214);
+						int greenlevel=(int)((rgb[1])/18.214);
 						pixels8[i]=(byte)(redlevel+greenlevel*15+17);
 					}
 				}
@@ -1168,7 +1264,7 @@ public class jutils{
 		byte[] g=new byte[256];
 		byte[] b=new byte[256];
 		for(int i=0;i<256;i++){
-			float fraction=((float)i)/255.0f;
+			float fraction=(i)/255.0f;
 			r[i]=(byte)((int)(maxred*fraction));
 			g[i]=(byte)((int)(maxgreen*fraction));
 			b[i]=(byte)((int)(maxblue*fraction));
@@ -1253,7 +1349,7 @@ public class jutils{
 			float[] newarr=new float[temparr.length];
 			for(int i=0;i<temparr.length;i++){
 				int temp=temparr[i]&0xffff;
-				newarr[i]=(float)temp;
+				newarr[i]=temp;
 			}
 			return newarr;
 		}
@@ -1262,7 +1358,7 @@ public class jutils{
 			float[] newarr=new float[temparr.length];
 			for(int i=0;i<temparr.length;i++){
 				int temp=temparr[i]&0xff;
-				newarr[i]=(float)temp;
+				newarr[i]=temp;
 			}
 			return newarr;
 		}
@@ -1462,6 +1558,11 @@ public class jutils{
 		return selectTables(addnull,ntables,labels);
 	}
 
+	/************************************
+	 * selects a currently open table in ImageJ
+	 * @param title: the title of the table
+	 * @return
+	 */
 	public static TextWindow selectTable(String title){
 		Object[] windowlist=jutils.getTableWindowList(false);
 		String[] titles=(String[])windowlist[1];
@@ -1549,6 +1650,46 @@ public class jutils{
 		}
 		return selectPlots(addnull,nimages,labels);
 	}
+	
+	public static Object[] selectMixedWindows(boolean addnull,int nwindows,String[] labels,int[] types){
+		//here we select multiple windows with different types: 0=image, 1=plot family, 2=table
+		Object[] plotlist=jutils.getPlotFamilyWindowList(addnull);
+		Object[] imagelist=jutils.getImageWindowList(addnull);
+		Object[] tablelist=getTableWindowList(addnull);
+		String[] plottitles=(String[])plotlist[1];
+		int[] plotids=(int[])plotlist[0];
+		String[] imagetitles=(String[])imagelist[1];
+		int[] imageids=(int[])imagelist[0];
+		String[] tabletitles=(String[])tablelist[1];
+		Frame[] tableids=(Frame[])tablelist[0];
+		GenericDialog gd=new GenericDialog("Select Windows");
+		for(int i=0;i<nwindows;i++){
+			if(types[i]==0) gd.addChoice(labels[i],imagetitles,imagetitles[0]);
+			if(types[i]==1) gd.addChoice(labels[i],plottitles,plottitles[0]);
+			if(types[i]==2) gd.addChoice(labels[i],tabletitles,tabletitles[0]);
+		}
+		gd.showDialog();
+		if(gd.wasCanceled()){
+			return null;
+		}
+		Object[] windows=new Object[nwindows];
+		for(int i=0;i<nwindows;i++){
+			int index=gd.getNextChoiceIndex();
+			if(types[i]==0){
+    			if(index==imageids.length) windows[i]=null;
+    			else windows[i]=WindowManager.getImage(imageids[index]);
+			}
+			if(types[i]==1){
+    			if(index==plotids.length) windows[i]=null;
+    			else windows[i]=WindowManager.getImage(imageids[index]).getWindow();
+			}
+			if(types[i]==2){
+    			if(index==tableids.length) windows[i]=null;
+    			else windows[i]=tableids[index];
+			}
+		}
+		return windows;
+	}
 
 	public static void copyColorRoi(Polygon roi,ImagePlus source,ImagePlus destination,int x,int y,Rectangle clip){
 		int[] srcpix=(int[])source.getProcessor().getPixels();
@@ -1564,21 +1705,17 @@ public class jutils{
 			clip2=new Rectangle(destination.getWidth()-1,destination.getHeight()-1);
 		}else{
 			clip2=new Rectangle(clip.x,clip.y,clip.width,clip.height);
-			if(clip2.x<0)
-				clip2.x=0;
-			if(clip2.y<0)
-				clip2.y=0;
-			if((clip2.x+clip2.width)>=destination.getWidth())
-				clip2.width=(destination.getWidth()-clip2.x-1);
-			if((clip2.y+clip2.height)>=destination.getHeight())
-				clip2.width=(destination.getHeight()-clip2.y-1);
+			if(clip2.x<0) clip2.x=0;
+			if(clip2.y<0) clip2.y=0;
+			if((clip2.x+clip2.width)>=destination.getWidth()) clip2.width=(destination.getWidth()-clip2.x-1);
+			if((clip2.y+clip2.height)>=destination.getHeight()) clip2.width=(destination.getHeight()-clip2.y-1);
 		}
 		int dstwidth=destination.getWidth();
 		for(int i=r.y;i<(r.y+r.height);i++){
 			for(int j=r.x;j<(r.x+r.width);j++){
 				if(clip2.contains(x+j-r.x,y+i-r.y)){
 					if(roi.contains(j,i)){
-						dstpix[x+j-r.x+(y+i-r.y)*dstwidth]=srcpix[j+i*srcwidth];
+						if(j>=0 && i>=0 && j<srcwidth && i<srcheight) dstpix[x+j-r.x+(y+i-r.y)*dstwidth]=srcpix[j+i*srcwidth];
 					}
 				}
 			}
@@ -1597,7 +1734,7 @@ public class jutils{
 		int height=ip.getHeight();
 		int newwidth=(int)((float)width/(float)binx);
 		int newheight=(int)((float)height/(float)biny);
-		float totbin=(float)(binx*biny);
+		float totbin=binx*biny;
 		Object pixels=ip.getPixels();
 		if(pixels instanceof float[]){
 			float[] pix2=new float[newwidth*newheight];
@@ -1610,7 +1747,7 @@ public class jutils{
 					}
 				}
 			}
-			return new FloatProcessor(newwidth,newheight,(float[])pix2,ip.getColorModel());
+			return new FloatProcessor(newwidth,newheight,pix2,ip.getColorModel());
 		}else{
 			if(pixels instanceof short[]){
 				short[] pix2=new short[newwidth*newheight];
@@ -1625,7 +1762,7 @@ public class jutils{
 						pix2[j+i*newwidth]=(short)avg;
 					}
 				}
-				return new ShortProcessor(newwidth,newheight,(short[])pix2,ip.getColorModel());
+				return new ShortProcessor(newwidth,newheight,pix2,ip.getColorModel());
 			}else{
 				if(pixels instanceof byte[]){
 					byte[] pix2=new byte[newwidth*newheight];
@@ -1640,7 +1777,7 @@ public class jutils{
 							pix2[j+i*newwidth]=(byte)avg;
 						}
 					}
-					return new ByteProcessor(newwidth,newheight,(byte[])pix2,ip.getColorModel());
+					return new ByteProcessor(newwidth,newheight,pix2,ip.getColorModel());
 				}else{
 					int[] pix2=new int[newwidth*newheight];
 					for(int i=0;i<newheight;i++){
@@ -1659,7 +1796,7 @@ public class jutils{
 							pix2[j+i*newwidth]=rgb2intval(avgr,avgg,avgb);
 						}
 					}
-					return new ColorProcessor(newwidth,newheight,(int[])pix2);
+					return new ColorProcessor(newwidth,newheight,pix2);
 				}
 			}
 		}
@@ -1678,27 +1815,27 @@ public class jutils{
 		if(pixels instanceof float[]){
 			float[] pix2=new float[r.width*r.height];
 			for(int i=0;i<r.height;i++){
-				System.arraycopy((float[])pixels,r.x+(r.y+i)*width,pix2,i*r.width,r.width);
+				System.arraycopy(pixels,r.x+(r.y+i)*width,pix2,i*r.width,r.width);
 			}
-			return new FloatProcessor(r.width,r.height,(float[])pix2,ip.getColorModel());
+			return new FloatProcessor(r.width,r.height,pix2,ip.getColorModel());
 		}else{
 			if(pixels instanceof short[]){
 				short[] pix2=new short[r.width*r.height];
 				for(int i=0;i<r.height;i++){
-					System.arraycopy((short[])pixels,r.x+(r.y+i)*width,pix2,i*r.width,r.width);
+					System.arraycopy(pixels,r.x+(r.y+i)*width,pix2,i*r.width,r.width);
 				}
 				return new ShortProcessor(r.width,r.height,pix2,ip.getColorModel());
 			}else{
 				if(pixels instanceof byte[]){
 					byte[] pix2=new byte[r.width*r.height];
 					for(int i=0;i<r.height;i++){
-						System.arraycopy((byte[])pixels,r.x+(r.y+i)*width,pix2,i*r.width,r.width);
+						System.arraycopy(pixels,r.x+(r.y+i)*width,pix2,i*r.width,r.width);
 					}
 					return new ByteProcessor(r.width,r.height,pix2,ip.getColorModel());
 				}else{
 					int[] pix2=new int[r.width*r.height];
 					for(int i=0;i<r.height;i++){
-						System.arraycopy((int[])pixels,r.x+(r.y+i)*width,pix2,i*r.width,r.width);
+						System.arraycopy(pixels,r.x+(r.y+i)*width,pix2,i*r.width,r.width);
 					}
 					return new ColorProcessor(r.width,r.height,pix2);
 				}
@@ -1728,6 +1865,10 @@ public class jutils{
 	public static double get_pdepth(ImagePlus imp){
 		return imp.getCalibration().pixelDepth;
 	}
+	
+	public static double get_zratio(ImagePlus imp){
+		return get_pdepth(imp)/get_psize(imp);
+	}
 
 	public static void set_pinterval(ImagePlus imp,double interval){
 		imp.getCalibration().frameInterval=interval;
@@ -1737,6 +1878,17 @@ public class jutils{
 		return imp.getCalibration().frameInterval;
 	}
 
+	/*****************************
+	 * here we provide the luts as well
+	 * @param title
+	 * @param stack
+	 * @param frames
+	 * @param slices
+	 * @param channels
+	 * @param composite
+	 * @param luts
+	 * @return
+	 */
 	public static ImagePlus create_hyperstack(String title,ImageStack stack,int frames,int slices,int channels,boolean composite,LUT[] luts){
 		ImagePlus imp=new ImagePlus(title,stack);
 		imp.setOpenAsHyperStack(true);
@@ -1755,6 +1907,13 @@ public class jutils{
 		}
 	}
 
+	/**********************************
+	 * here the hyperstack has the exact same dimensions as the template
+	 * @param title
+	 * @param stack
+	 * @param template
+	 * @return
+	 */
 	public static ImagePlus create_hyperstack(String title,ImageStack stack,ImagePlus template){
 		ImagePlus imp=new ImagePlus(title,stack);
 		imp.copyScale(template);
@@ -1771,6 +1930,16 @@ public class jutils{
 		}
 	}
 
+	/************************
+	 * this creates a hyperstack with different number of frames, slices, and channels than the template
+	 * @param title
+	 * @param stack
+	 * @param template
+	 * @param frames
+	 * @param slices
+	 * @param channels
+	 * @return
+	 */
 	public static ImagePlus create_hyperstack(String title,ImageStack stack,ImagePlus template,int frames,int slices,int channels){
 		ImagePlus imp=new ImagePlus(title,stack);
 		imp.copyScale(template);
@@ -1798,8 +1967,8 @@ public class jutils{
 		display.setDimensions(2,1,1);
 		display=new CompositeImage(display,CompositeImage.COMPOSITE);
 		LUT graylut=jutils.get_lut_for_color(Color.white);
-		double dispmin=(double)jstatistics.getstatistic("Min",image,null);
-		double dispmax=(double)jstatistics.getstatistic("Max",image,null);
+		double dispmin=jstatistics.getstatistic("Min",image,null);
+		double dispmax=jstatistics.getstatistic("Max",image,null);
 		graylut.min=dispmin;
 		graylut.max=dispmax;
 		((CompositeImage)display).setChannelLut(graylut,1);
@@ -1822,8 +1991,8 @@ public class jutils{
 		display.setDimensions(2,1,1);
 		display=new CompositeImage(display,CompositeImage.COMPOSITE);
 		LUT graylut=jutils.get_lut_for_color(Color.white);
-		double dispmin=(double)jstatistics.getstatistic("Min",image,null);
-		double dispmax=(double)jstatistics.getstatistic("Max",image,null);
+		double dispmin=jstatistics.getstatistic("Min",image,null);
+		double dispmax=jstatistics.getstatistic("Max",image,null);
 		graylut.min=dispmin;
 		graylut.max=dispmax;
 		((CompositeImage)display).setChannelLut(graylut,1);
@@ -1862,7 +2031,7 @@ public class jutils{
 			ip.setFont(new Font("SansSerif",Font.PLAIN,10));
 			ip.setJustification(ImageProcessor.CENTER_JUSTIFY);
 			FontMetrics fm=ip.getFontMetrics();
-			int stringheight=(int)((float)fm.getHeight()/2.0f);
+			int stringheight=(int)(fm.getHeight()/2.0f);
 			if(showmask)
 				ip.setValue(0);
 			float[][] coords=measure_object.centroids(objects,fb.width,fb.height);
@@ -1898,7 +2067,7 @@ public class jutils{
 			ip.setFont(new Font("SansSerif",Font.PLAIN,10));
 			ip.setJustification(ImageProcessor.CENTER_JUSTIFY);
 			FontMetrics fm=ip.getFontMetrics();
-			int stringheight=(int)((float)fm.getHeight()/2.0f);
+			int stringheight=(int)(fm.getHeight()/2.0f);
 			if(showmask)
 				ip.setValue(0);
 			for(int i=0;i<ids.length;i++){
@@ -1906,6 +2075,22 @@ public class jutils{
 			}
 		}
 		imp.updateAndDraw();
+	}
+	
+	public static float[] sub_roll_ball_back(float[] image,float ballrad,int width,int height){
+		FloatProcessor fp2=new FloatProcessor(width,height,image,null);
+		fp2.snapshot();
+		BackgroundSubtracter bs=new BackgroundSubtracter();
+		bs.rollingBallBackground(fp2,ballrad,false,false,false,true,true);
+		return (float[])fp2.getPixels();
+	}
+	
+	public static float[][] sub_roll_ball_back(Object[] stack,float ballrad,int width,int height){
+		float[][] retstack=new float[stack.length][];
+		for(int i=0;i<stack.length;i++){
+			retstack[i]=sub_roll_ball_back(algutils.convert_arr_float(stack[i]),ballrad,width,height);
+		}
+		return retstack;
 	}
 
 	public static void run_command_in_IJ_thread(String command,String args){

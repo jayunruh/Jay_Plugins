@@ -54,7 +54,7 @@ public class binning_function{
 			return 0.0;
 		}
 		int xprev=(int)x;
-		double rem=x-(double)xprev;
+		double rem=x-xprev;
 		double interp=rem*(b3func[xprev+1]-b3func[xprev])+b3func[xprev];
 		return taud*taud*taud*interp;
 	}

@@ -8,17 +8,27 @@
 
 package jguis;
 
-import jalgs.*;
-
-import java.awt.*;
-
-import ij.IJ;
 import ij.measure.Calibration;
-import ij.process.*;
-import java.text.*;
+import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
+import ij.process.ImageProcessor;
+import jalgs.jdataio;
 
-import java.io.*;
-import java.awt.image.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.image.IndexColorModel;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.text.DecimalFormat;
 
 public class Plot4{
 	// this is a class that draws a plot usually associated with a PlotWindow4
@@ -36,7 +46,7 @@ public class Plot4{
 	protected String xLabel,yLabel;
 	protected boolean logx,logy;
 	protected String[] annotations;
-	public static final int WIDTH=512;
+	public static final int WIDTH=400;
 	public static final int HEIGHT=200;
 	public static final int TICK_LENGTH=3; // length of ticks
 	public Color gridColor=new Color(0xc0c0c0); // light gray
@@ -45,7 +55,7 @@ public class Plot4{
 	public static final int TOP_MARGIN=20;
 	public static final int BOTTOM_MARGIN=50;
 	public int shapesize=8;
-	public int fontsize=12;
+	public int fontsize=14;
 	protected float magnification,magratio;
 	public static final String[] color_names={"black","blue","green","red","magenta","cyan","yellow","orange"};
 	public static final Color[] java_colors={Color.black,Color.blue,Color.green,Color.red,Color.magenta,Color.cyan,Color.yellow,Color.orange};
@@ -178,7 +188,7 @@ public class Plot4{
 		xLabel=xLabel1;
 		yLabel=yLabel1;
 		maxpts=yValues[0].length;
-		npts=new int[2];
+		npts=new int[1];
 		npts[0]=maxpts;
 		nseries=yValues.length;
 		float[] temp=findminmax(xValues,npts);
@@ -206,7 +216,7 @@ public class Plot4{
 	public Plot4(String xLabel1,String yLabel1,float[] yValues1){
 		xValues=new float[1][yValues1.length];
 		for(int i=0;i<yValues1.length;i++){
-			xValues[0][i]=(float)(i+1);
+			xValues[0][i]=i+1;
 		}
 		yValues=new float[1][yValues1.length];
 		for(int i=0;i<yValues1.length;i++){
@@ -215,7 +225,7 @@ public class Plot4{
 		xLabel=xLabel1;
 		yLabel=yLabel1;
 		maxpts=yValues[0].length;
-		npts=new int[2];
+		npts=new int[1];
 		npts[0]=maxpts;
 		nseries=yValues.length;
 		float[] temp=findminmax(xValues,npts);
@@ -322,6 +332,17 @@ public class Plot4{
 			return true;
 		else
 			return false;
+	}
+	
+	public static boolean is_this(InputStream is) throws IOException{
+		//here we assume that this is some sort of plot family
+		jdataio jdio=new jdataio();
+		String label=jdio.readstring(is); // read the label
+		if(label.equals("pw2_file_type")){
+			int temp=jdio.readintelint(is); // now the identifier
+			if(temp==0) return true;
+		}
+		return false;
 	}
 
 	public void setmagnification(float newmag){
@@ -470,20 +491,20 @@ public class Plot4{
 	public void scalerect(Rectangle rect){
 		float ymag=magnification*magratio/((float)HEIGHT/(float)WIDTH);
 		if(rect!=null){
-			float tempxmin=((float)(rect.x-LEFT_MARGIN*magnification)/(float)(WIDTH*magnification))*(xMax-xMin)+xMin;
-			float tempymax=((float)(HEIGHT*ymag+TOP_MARGIN*ymag-rect.y)/(float)(HEIGHT*ymag))*(yMax-yMin)+yMin;
-			float tempxmax=((float)(rect.x+rect.width-LEFT_MARGIN*magnification)/(float)(WIDTH*magnification))*(xMax-xMin)+xMin;
-			float tempymin=((float)(HEIGHT*ymag+TOP_MARGIN*ymag-rect.y-rect.height)/(float)(HEIGHT*ymag))*(yMax-yMin)+yMin;
+			float tempxmin=((rect.x-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(xMax-xMin)+xMin;
+			float tempymax=((HEIGHT*ymag+TOP_MARGIN*ymag-rect.y)/(HEIGHT*ymag))*(yMax-yMin)+yMin;
+			float tempxmax=((rect.x+rect.width-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(xMax-xMin)+xMin;
+			float tempymin=((HEIGHT*ymag+TOP_MARGIN*ymag-rect.y-rect.height)/(HEIGHT*ymag))*(yMax-yMin)+yMin;
 			if(logx){
-				float templogxmin=((float)(rect.x-LEFT_MARGIN*magnification)/(float)(WIDTH*magnification))*(logxmax-logxmin)+logxmin;
+				float templogxmin=((rect.x-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(logxmax-logxmin)+logxmin;
 				tempxmin=(float)Math.exp(templogxmin);
-				float templogxmax=((float)(rect.x+rect.width-LEFT_MARGIN*magnification)/(float)(WIDTH*magnification))*(logxmax-logxmin)+logxmin;
+				float templogxmax=((rect.x+rect.width-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(logxmax-logxmin)+logxmin;
 				tempxmax=(float)Math.exp(templogxmax);
 			}
 			if(logy){
-				float templogymax=((float)(HEIGHT*ymag+TOP_MARGIN*ymag-rect.y)/(float)(HEIGHT*ymag))*(logymax-logymin)+logymin;
+				float templogymax=((HEIGHT*ymag+TOP_MARGIN*ymag-rect.y)/(HEIGHT*ymag))*(logymax-logymin)+logymin;
 				tempymax=(float)Math.exp(templogymax);
-				float templogymin=((float)(HEIGHT*ymag+TOP_MARGIN*ymag-rect.y-rect.height)/(float)(HEIGHT*ymag))*(logymax-logymin)+logymin;
+				float templogymin=((HEIGHT*ymag+TOP_MARGIN*ymag-rect.y-rect.height)/(HEIGHT*ymag))*(logymax-logymin)+logymin;
 				tempymin=(float)Math.exp(templogymin);
 			}
 			xMin=tempxmin;
@@ -495,14 +516,14 @@ public class Plot4{
 
 	public float[] getPlotCoords(int x,int y){
 		float ymag=magnification*magratio/((float)HEIGHT/(float)WIDTH);
-		float tempxmin=((float)(x-LEFT_MARGIN*magnification)/(float)(WIDTH*magnification))*(xMax-xMin)+xMin;
-		float tempymax=((float)(HEIGHT*ymag+TOP_MARGIN*ymag-y)/(float)(HEIGHT*ymag))*(yMax-yMin)+yMin;
+		float tempxmin=((x-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(xMax-xMin)+xMin;
+		float tempymax=((HEIGHT*ymag+TOP_MARGIN*ymag-y)/(HEIGHT*ymag))*(yMax-yMin)+yMin;
 		if(logx){
-			float templogxmin=((float)(x-LEFT_MARGIN*magnification)/(float)(WIDTH*magnification))*(logxmax-logxmin)+logxmin;
+			float templogxmin=((x-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(logxmax-logxmin)+logxmin;
 			tempxmin=(float)Math.exp(templogxmin);
 		}
 		if(logy){
-			float templogymax=((float)(HEIGHT*ymag+TOP_MARGIN*ymag-y)/(float)(HEIGHT*ymag))*(logymax-logymin)+logymin;
+			float templogymax=((HEIGHT*ymag+TOP_MARGIN*ymag-y)/(HEIGHT*ymag))*(logymax-logymin)+logymin;
 			tempymax=(float)Math.exp(templogymax);
 		}
 		float[] temp={tempxmin,tempymax};
@@ -751,7 +772,7 @@ public class Plot4{
 	public void addPoints(float[] yValues1,boolean rescale){
 		float[] xValues1=new float[yValues1.length];
 		for(int i=0;i<yValues1.length;i++){
-			xValues1[i]=(float)(i+1);
+			xValues1[i]=i+1;
 		}
 		addPoints(xValues1,yValues1,rescale);
 	}
@@ -815,28 +836,28 @@ public class Plot4{
 		logymax=0;
 		if(logx){
 			if(xMin<=0.0f){
-				logxmin=(float)Math.log((double)findmingt0(xValues,npts,xMax));
+				logxmin=(float)Math.log(findmingt0(xValues,npts,xMax));
 			}else{
-				logxmin=(float)Math.log((double)xMin);
+				logxmin=(float)Math.log(xMin);
 			}
-			logxmax=(float)Math.log((double)xMax);
-			logxscale=(float)newwidth/(logxmax-logxmin);
+			logxmax=(float)Math.log(xMax);
+			logxscale=newwidth/(logxmax-logxmin);
 		}
 		if(logy){
 			if(yMin<=0.0f){
-				logymin=(float)Math.log((double)findmingt0(yValues,npts,yMax));
+				logymin=(float)Math.log(findmingt0(yValues,npts,yMax));
 			}else{
-				logymin=(float)Math.log((double)yMin);
+				logymin=(float)Math.log(yMin);
 			}
-			logymax=(float)Math.log((double)yMax);
-			logyscale=(float)newheight/(logymax-logymin);
+			logymax=(float)Math.log(yMax);
+			logyscale=newheight/(logymax-logymin);
 		}
 		// IJ.showMessage("testdraw1");
 
 		drawAxisLabels(pr);
 		pr.setClipRect(frame.x,frame.y,frame.width,frame.height);
-		xScale=(float)newwidth/(xMax-xMin);
-		yScale=(float)newheight/(yMax-yMin);
+		xScale=newwidth/(xMax-xMin);
+		yScale=newheight/(yMax-yMin);
 
 		// IJ.showMessage("testdraw2");
 		if(!logx&&!logy){
@@ -884,7 +905,7 @@ public class Plot4{
 					if(logx){
 						float xtemp;
 						if(xValues[j][i]>0.0f){
-							xtemp=(float)Math.log((double)xValues[j][i]);
+							xtemp=(float)Math.log(xValues[j][i]);
 						}else{
 							xtemp=logxmin;
 						}
@@ -897,7 +918,7 @@ public class Plot4{
 					if(logy){
 						float ytemp;
 						if(yValues[j][i]>0.0f){
-							ytemp=(float)Math.log((double)yValues[j][i]);
+							ytemp=(float)Math.log(yValues[j][i]);
 						}else{
 							ytemp=logymin;
 						}
@@ -928,14 +949,14 @@ public class Plot4{
 						for(int i=0;i<npts[j];i++){
 							float ytemp=yValues[j][i]+errors[1][j][i];
 							if(ytemp>0.0f){
-								ytemp=(float)Math.log((double)ytemp);
+								ytemp=(float)Math.log(ytemp);
 							}else{
 								ytemp=logymin;
 							}
 							yerrptsu[i]=newtopmargin+frame.height-(int)((ytemp-logymin)*logyscale);
 							ytemp=yValues[j][i]-errors[1][j][i];
 							if(ytemp>0.0f){
-								ytemp=(float)Math.log((double)ytemp);
+								ytemp=(float)Math.log(ytemp);
 							}else{
 								ytemp=logymin;
 							}
@@ -975,16 +996,16 @@ public class Plot4{
 		float[] yticklabels=new float[4];
 		for(int i=0;i<4;i++){
 			if(logx){
-				float tempx=logxmin+((float)i/3.0f)*(logxmax-logxmin);
-				xticklabels[i]=(float)Math.exp((double)tempx);
+				float tempx=logxmin+(i/3.0f)*(logxmax-logxmin);
+				xticklabels[i]=(float)Math.exp(tempx);
 			}else{
-				xticklabels[i]=xMin+((float)i/3.0f)*(xMax-xMin);
+				xticklabels[i]=xMin+(i/3.0f)*(xMax-xMin);
 			}
 			if(logy){
-				float tempy=logymin+((float)i/3.0f)*(logymax-logymin);
-				yticklabels[i]=(float)Math.exp((double)tempy);
+				float tempy=logymin+(i/3.0f)*(logymax-logymin);
+				yticklabels[i]=(float)Math.exp(tempy);
 			}else{
-				yticklabels[i]=yMin+((float)i/3.0f)*(yMax-yMin);
+				yticklabels[i]=yMin+(i/3.0f)*(yMax-yMin);
 			}
 		}
 
@@ -996,45 +1017,47 @@ public class Plot4{
 
 		// draw the y axis labels
 
-		String s=jutils.formatted_string((double)yticklabels[0]);
+		String s=jutils.formatted_string(yticklabels[0]);
 		pr.drawString(s,newleftmargin-pr.getStringWidth(s)-newticklength-2,newtopmargin+newheight+fm.getDescent());
-		s=jutils.formatted_string((double)yticklabels[1]);
-		pr.drawString(s,newleftmargin-pr.getStringWidth(s)-newticklength-2,newtopmargin+(int)((2*newheight)/3)+fontheight/2);
-		s=jutils.formatted_string((double)yticklabels[2]);
-		pr.drawString(s,newleftmargin-pr.getStringWidth(s)-newticklength-2,newtopmargin+(int)(newheight/3)+fontheight/2);
-		s=jutils.formatted_string((double)yticklabels[3]);
+		s=jutils.formatted_string(yticklabels[1]);
+		pr.drawString(s,newleftmargin-pr.getStringWidth(s)-newticklength-2,newtopmargin+(2*newheight)/3+fontheight/2);
+		s=jutils.formatted_string(yticklabels[2]);
+		pr.drawString(s,newleftmargin-pr.getStringWidth(s)-newticklength-2,newtopmargin+newheight/3+fontheight/2);
+		s=jutils.formatted_string(yticklabels[3]);
 		pr.drawString(s,newleftmargin-pr.getStringWidth(s)-newticklength-2,newtopmargin+fontheight/2);
 
 		// draw the x axis labels
 		int y=newtopmargin+newheight+fontheight+newticklength+4;
-		s=jutils.formatted_string((double)xticklabels[0]);
+		s=jutils.formatted_string(xticklabels[0]);
 		pr.drawString(s,newleftmargin-8,y);
-		s=jutils.formatted_string((double)xticklabels[1]);
-		pr.drawString(s,newleftmargin+(int)(newwidth/3-pr.getStringWidth(s)/2),y);
-		s=jutils.formatted_string((double)xticklabels[2]);
-		pr.drawString(s,newleftmargin+(int)((2*newwidth)/3-pr.getStringWidth(s)/2),y);
-		s=jutils.formatted_string((double)xticklabels[3]);
+		s=jutils.formatted_string(xticklabels[1]);
+		pr.drawString(s,newleftmargin+newwidth/3-pr.getStringWidth(s)/2,y);
+		s=jutils.formatted_string(xticklabels[2]);
+		pr.drawString(s,newleftmargin+(2*newwidth)/3-pr.getStringWidth(s)/2,y);
+		s=jutils.formatted_string(xticklabels[3]);
 		pr.drawString(s,newleftmargin+newwidth-pr.getStringWidth(s)+8,y);
 
 		// now draw the axis labels
 		pr.drawString(xLabel,newleftmargin+(newwidth-pr.getStringWidth(xLabel))/2,newtopmargin+newheight+fm.getAscent()+newbottommargin/2);
-		pr.drawVerticalString(yLabel,newleftmargin-(4*newleftmargin/5),newtopmargin+(int)(newheight/2));
+		pr.drawVerticalString(yLabel,newleftmargin-(4*newleftmargin/5),newtopmargin+newheight/2);
 		// now draw the tick marks and grid lines
 		pr.drawRect(newleftmargin,newtopmargin,newwidth,newheight);
-		pr.setColor(gridColor);
-		pr.drawLine(newleftmargin+(int)(newwidth/3),newtopmargin,newleftmargin+(int)(newwidth/3),newtopmargin+newheight);
-		pr.drawLine(newleftmargin+(int)((2*newwidth)/3),newtopmargin,newleftmargin+(int)((2*newwidth)/3),newtopmargin+newheight);
-		pr.drawLine(newleftmargin,newtopmargin+(int)(newheight/3),newleftmargin+newwidth,newtopmargin+(int)(newheight/3));
-		pr.drawLine(newleftmargin,newtopmargin+(int)((2*newheight)/3),newleftmargin+newwidth,newtopmargin+(int)((2*newheight)/3));
+		if(gridColor.getRed()<=254){
+			pr.setColor(gridColor);
+			pr.drawLine(newleftmargin+newwidth/3,newtopmargin,newleftmargin+newwidth/3,newtopmargin+newheight);
+			pr.drawLine(newleftmargin+(2*newwidth)/3,newtopmargin,newleftmargin+(2*newwidth)/3,newtopmargin+newheight);
+			pr.drawLine(newleftmargin,newtopmargin+newheight/3,newleftmargin+newwidth,newtopmargin+newheight/3);
+			pr.drawLine(newleftmargin,newtopmargin+(2*newheight)/3,newleftmargin+newwidth,newtopmargin+(2*newheight)/3);
+		}
 		pr.setColor(Color.black);
 		pr.drawLine(newleftmargin,newtopmargin,newleftmargin-newticklength,newtopmargin);
-		pr.drawLine(newleftmargin,newtopmargin+(int)(newheight/3),newleftmargin-newticklength,newtopmargin+(int)(newheight/3));
-		pr.drawLine(newleftmargin,newtopmargin+(int)((2*newheight)/3),newleftmargin-newticklength,newtopmargin+(int)((2*newheight)/3));
+		pr.drawLine(newleftmargin,newtopmargin+newheight/3,newleftmargin-newticklength,newtopmargin+newheight/3);
+		pr.drawLine(newleftmargin,newtopmargin+(2*newheight)/3,newleftmargin-newticklength,newtopmargin+(2*newheight)/3);
 		pr.drawLine(newleftmargin,newtopmargin+newheight,newleftmargin-newticklength,newtopmargin+newheight);
 
 		pr.drawLine(newleftmargin,newtopmargin+newheight,newleftmargin,newtopmargin+newheight+newticklength);
-		pr.drawLine(newleftmargin+(int)(newwidth/3),newtopmargin+newheight,newleftmargin+(int)(newwidth/3),newtopmargin+newheight+newticklength);
-		pr.drawLine(newleftmargin+(int)((2*newwidth)/3),newtopmargin+newheight,newleftmargin+(int)((2*newwidth)/3),newtopmargin+newheight+newticklength);
+		pr.drawLine(newleftmargin+newwidth/3,newtopmargin+newheight,newleftmargin+newwidth/3,newtopmargin+newheight+newticklength);
+		pr.drawLine(newleftmargin+(2*newwidth)/3,newtopmargin+newheight,newleftmargin+(2*newwidth)/3,newtopmargin+newheight+newticklength);
 		pr.drawLine(newleftmargin+newwidth,newtopmargin+newheight,newleftmargin+newwidth,newtopmargin+newheight+newticklength);
 	}
 
@@ -1158,10 +1181,36 @@ public class Plot4{
 		Plotter pr=new PSPlotter(getWidth(),getHeight(),path);
 		drawPlot(pr);
 	}
+	
+	public void saveAsPDF(String path){
+		Plotter pr=new PDFPlotter(getWidth(),getHeight(),path);
+		drawPlot(pr);
+	}
 
 	public byte[] getEMFBinary(){
 		ByteArrayOutputStream os=new ByteArrayOutputStream();
 		Plotter pr=new EMFPlotter(getWidth(),getHeight(),os);
+		drawPlot(pr);
+		return os.toByteArray();
+	}
+	
+	public byte[] getPSBinary(){
+		ByteArrayOutputStream os=new ByteArrayOutputStream();
+		Plotter pr=new PSPlotter(getWidth(),getHeight(),os);
+		drawPlot(pr);
+		return os.toByteArray();
+	}
+	
+	public byte[] getPDFBinary(){
+		ByteArrayOutputStream os=new ByteArrayOutputStream();
+		Plotter pr=new PDFPlotter(getWidth(),getHeight(),os);
+		drawPlot(pr);
+		return os.toByteArray();
+	}
+	
+	public byte[] getSVGBinary(){
+		ByteArrayOutputStream os=new ByteArrayOutputStream();
+		Plotter pr=new SVGPlotter(getWidth(),getHeight(),os);
 		drawPlot(pr);
 		return os.toByteArray();
 	}

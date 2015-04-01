@@ -24,7 +24,7 @@ public class cat_hyperstacks_jru_v1 implements PlugIn, FrameInterface {
 	double scale;
 	ImagePlus currimp;
 	boolean maxproj;
-	//Opener opener;
+	Opener opener;
 
 	public void run(String arg) {
 		OpenDialog od = new OpenDialog("Open Image Sequence...", arg);
@@ -71,9 +71,9 @@ public class cat_hyperstacks_jru_v1 implements PlugIn, FrameInterface {
 		if(flist==null){return;}
 		nfiles=flist.length;
 		//IJ.showMessage("test");
-		//opener=new Opener(); opener.setSilentMode(true);
+		//opener=new Opener(); //opener.setSilentMode(true);
 		if(!extension.equals("lsm")){
-			//opener.openImage(directory,flist[0]);
+			//currimp=opener.openImage(directory+flist[0]);
 			//currimp=WindowManager.getCurrentImage();
 			currimp=(new LOCI_file_reader()).get_loci_imp(directory,flist[0]);
 		} else {
@@ -126,7 +126,7 @@ public class cat_hyperstacks_jru_v1 implements PlugIn, FrameInterface {
 			fileiterator++;
 			IJ.showProgress(fileiterator,nfiles-1);
 			if(!extension.equals("lsm")){
-				//opener.openImage(directory,flist[fileiterator]);
+				//currimp=opener.openImage(directory+flist[fileiterator]);
 				//currimp=WindowManager.getCurrentImage();
 				currimp=(new LOCI_file_reader()).get_loci_imp(directory,flist[fileiterator]);
 			} else {

@@ -12,12 +12,15 @@ import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.LookUpTable;
+import ij.VirtualStack;
 import ij.io.FileInfo;
 import ij.io.ImageReader;
 import ij.io.RandomAccessStream;
 import ij.measure.Calibration;
-import ij.VirtualStack;
-import ij.process.*;
+import ij.process.ByteProcessor;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+import ij.process.ShortProcessor;
 
 import java.awt.Color;
 import java.awt.image.ColorModel;
@@ -25,7 +28,6 @@ import java.awt.image.IndexColorModel;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 
@@ -79,7 +81,7 @@ public class LSM_virtual_stack extends VirtualStack{
 				setupStack(stream);
 				ImagePlus imp=new ImagePlus(lsmFi.fileName,this);
 				imp.setDimensions(channels,slices,frames);
-				if((int)channels>1){
+				if(channels>1){
 					imp=new CompositeImage(imp,CompositeImage.COLOR);
 				}
 				imp.setFileInfo(lsmFi);
@@ -362,7 +364,7 @@ public class LSM_virtual_stack extends VirtualStack{
 				}
 				ch=(char)in;
 				if(addchar==true){
-					String achar=new Character((char)ch).toString();
+					String achar=new Character(ch).toString();
 					if(ch!=0x00){
 						tempstr+=achar;
 					}else{
@@ -530,7 +532,7 @@ public class LSM_virtual_stack extends VirtualStack{
 		try{
 			RandomAccessStream stream=new RandomAccessStream(new RandomAccessFile(file,"r"));
 			int channelCount=stackslice%channels;
-			int imageCounter=(int)(stackslice/channels);
+			int imageCounter=stackslice/channels;
 			// IJ.log("slice = "+stackslice+", channel = "+channelCount+", nimage = "+imageCounter);
 			imageCounter*=2;
 			ImageReader reader=null;
@@ -584,7 +586,7 @@ public class LSM_virtual_stack extends VirtualStack{
 					// IJ.log("seeking: "+lsmFi.stripOffsets[0]);
 					stream.seek(lsmFi.stripOffsets[0]);
 					// IJ.log("seeked");
-					pixels=reader.readPixels((InputStream)stream);
+					pixels=reader.readPixels(stream);
 					// IJ.log("read");
 				}
 			}
@@ -620,7 +622,7 @@ public class LSM_virtual_stack extends VirtualStack{
 		String height=IJ.d2s(lsm.height,0);
 		String channels=IJ.d2s(cz.DimensionChannels,0);
 		String scantype="";
-		switch((int)cz.ScanType){
+		switch(cz.ScanType){
 		case 0:
 			scantype="Normal X-Y-Z scan";
 			break;
@@ -677,11 +679,11 @@ public class LSM_virtual_stack extends VirtualStack{
 	}
 
 	private int swap(int x){
-		return (int)((swap((short)x)<<16)|(swap((short)(x>>16))&0xffff));
+		return (swap((short)x)<<16)|(swap((short)(x>>16))&0xffff);
 	}
 
 	private long swap(long x){
-		return (long)(((long)swap((int)(x))<<32)|((long)swap((int)(x>>32))&0xffffffffL));
+		return ((long)swap((int)(x))<<32)|(swap((int)(x>>32))&0xffffffffL);
 	}
 
 	private double swap(double x){

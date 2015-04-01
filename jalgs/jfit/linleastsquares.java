@@ -10,7 +10,7 @@ package jalgs.jfit;
 
 import jalgs.matrixsolve;
 
-import java.util.*;
+import java.util.Arrays;
 
 public class linleastsquares{
 	public float[][] indvars;
@@ -105,7 +105,7 @@ public class linleastsquares{
 				for(int j=0;j<=i;j++){
 					for(int k=startfit;k<=endfit;k++){
 						if(weights!=null){
-							jacobian[i][j]+=(double)indvars[i][k]*(double)indvars[j][k]*(double)weights[k];
+							jacobian[i][j]+=(double)indvars[i][k]*(double)indvars[j][k]*weights[k];
 						}else{
 							jacobian[i][j]+=(double)indvars[i][k]*(double)indvars[j][k];
 						}
@@ -116,7 +116,7 @@ public class linleastsquares{
 				}
 				for(int k=startfit;k<=endfit;k++){
 					if(weights!=null){
-						jvector[i]+=(double)weights[k]*(double)indvars[i][k]*(double)data[k];
+						jvector[i]+=(double)weights[k]*(double)indvars[i][k]*data[k];
 					}else{
 						jvector[i]+=(double)data[k]*(double)indvars[i][k];
 					}
@@ -127,7 +127,7 @@ public class linleastsquares{
 				for(int j=0;j<=i;j++){
 					for(int k=startfit;k<=endfit;k++){
 						if(weights!=null){
-							jacobian[i][j]+=dindvars[i][k]*dindvars[j][k]*(double)weights[k];
+							jacobian[i][j]+=dindvars[i][k]*dindvars[j][k]*weights[k];
 						}else{
 							jacobian[i][j]+=dindvars[i][k]*dindvars[j][k];
 						}
@@ -138,9 +138,9 @@ public class linleastsquares{
 				}
 				for(int k=startfit;k<=endfit;k++){
 					if(weights!=null){
-						jvector[i]+=(double)weights[k]*dindvars[i][k]*(double)data[k];
+						jvector[i]+=weights[k]*dindvars[i][k]*data[k];
 					}else{
-						jvector[i]+=(double)data[k]*dindvars[i][k];
+						jvector[i]+=data[k]*dindvars[i][k];
 					}
 				}
 			}
@@ -148,6 +148,70 @@ public class linleastsquares{
 		double[] outcoef=new double[nindvars];
 		(new matrixsolve()).gjsolve(jacobian,jvector,outcoef,nindvars);
 		return outcoef;
+	}
+	
+	/*************************
+	 * here we get the fit coefficients as well as their standard errors
+	 * @param data
+	 * @return
+	 */
+	public double[][] getfiterrors(float[] data,float[] weights){
+		double[][] jacobian=new double[nindvars][nindvars];
+		double[] jvector=new double[nindvars];
+		if(isfloat){
+			for(int i=0;i<nindvars;i++){
+				for(int j=0;j<=i;j++){
+					for(int k=startfit;k<=endfit;k++){
+						if(weights!=null){
+							jacobian[i][j]+=(double)indvars[i][k]*(double)indvars[j][k]*weights[k];
+						}else{
+							jacobian[i][j]+=(double)indvars[i][k]*(double)indvars[j][k];
+						}
+					}
+					if(j!=i){
+						jacobian[j][i]=jacobian[i][j];
+					}
+				}
+				for(int k=startfit;k<=endfit;k++){
+					if(weights!=null){
+						jvector[i]+=(double)weights[k]*(double)indvars[i][k]*data[k];
+					}else{
+						jvector[i]+=(double)data[k]*(double)indvars[i][k];
+					}
+				}
+			}
+		}else{
+			for(int i=0;i<nindvars;i++){
+				for(int j=0;j<=i;j++){
+					for(int k=startfit;k<=endfit;k++){
+						if(weights!=null){
+							jacobian[i][j]+=dindvars[i][k]*dindvars[j][k]*weights[k];
+						}else{
+							jacobian[i][j]+=dindvars[i][k]*dindvars[j][k];
+						}
+					}
+					if(j!=i){
+						jacobian[j][i]=jacobian[i][j];
+					}
+				}
+				for(int k=startfit;k<=endfit;k++){
+					if(weights!=null){
+						jvector[i]+=weights[k]*dindvars[i][k]*data[k];
+					}else{
+						jvector[i]+=data[k]*dindvars[i][k];
+					}
+				}
+			}
+		}
+		//the coefficient variances are long the diagonal of the inversion matrix
+		double[][] inv=(new matrixsolve()).gjinv2(jacobian,nindvars);
+		double[] outcoef=matrixsolve.vec_mult(inv,jvector);
+		double[] se=new double[nindvars];
+		double c2=get_c2(outcoef,data,weights);
+		//int length=endfit-startfit+1;
+		//c2*=(double)(length-nindvars)/(double)(length-1);
+		for(int i=0;i<nindvars;i++) se[i]=Math.sqrt(c2*inv[i][i]);
+		return new double[][]{outcoef,se};
 	}
 
 	public double[] fitintensitydata(float[] data){
@@ -159,7 +223,7 @@ public class linleastsquares{
 				for(int j=0;j<=i;j++){
 					for(int k=startfit;k<=endfit;k++){
 						if(data[k]>0.0f){
-							jacobian[i][j]+=((double)indvars[i][k]*(double)indvars[j][k])/(double)data[k];
+							jacobian[i][j]+=((double)indvars[i][k]*(double)indvars[j][k])/data[k];
 						}else{
 							jacobian[i][j]+=(double)indvars[i][k]*(double)indvars[j][k];
 						}
@@ -170,7 +234,7 @@ public class linleastsquares{
 				}
 				for(int k=startfit;k<=endfit;k++){
 					if(data[k]>0.0f){
-						jvector[i]+=(double)indvars[i][k];
+						jvector[i]+=indvars[i][k];
 					}else{
 						jvector[i]+=(double)data[k]*(double)indvars[i][k];
 					}
@@ -181,7 +245,7 @@ public class linleastsquares{
 				for(int j=0;j<=i;j++){
 					for(int k=startfit;k<=endfit;k++){
 						if(data[k]>0.0f){
-							jacobian[i][j]+=(dindvars[i][k]*dindvars[j][k])/(double)data[k];
+							jacobian[i][j]+=(dindvars[i][k]*dindvars[j][k])/data[k];
 						}else{
 							jacobian[i][j]+=dindvars[i][k]*dindvars[j][k];
 						}
@@ -194,7 +258,7 @@ public class linleastsquares{
 					if(data[k]>0.0f){
 						jvector[i]+=dindvars[i][k];
 					}else{
-						jvector[i]+=(double)data[k]*dindvars[i][k];
+						jvector[i]+=data[k]*dindvars[i][k];
 					}
 				}
 			}
@@ -204,6 +268,11 @@ public class linleastsquares{
 		return outcoef;
 	}
 
+	/*********
+	 * gets the slope for a linear fit with the first point being 0 and increasing by 1
+	 * @param data
+	 * @return
+	 */
 	public float get_slope(float[] data){
 		double sumx2=0.0;
 		double sumx=0.0;
@@ -215,13 +284,43 @@ public class linleastsquares{
 			sumy+=data[i];
 			sumxy+=data[i]*i;
 		}
-		double dlength=(double)data.length;
+		double dlength=data.length;
 		if(sumx2>0.0){
 			double divider=dlength*sumx2-sumx*sumx;
 			return (float)((dlength*sumxy-sumx*sumy)/divider);
 		}else{
 			return 0.0f;
 		}
+	}
+	
+	/**********************
+	 * gets the slope and offset for a linear fit as with get_slope
+	 * @param data
+	 * @return
+	 */
+	public float[] get_slope_offset(float[] data){
+		double sumx2=0.0;
+		double sumx=0.0;
+		double sumy=0.0;
+		double sumxy=0.0;
+		for(int i=0;i<data.length;i++){
+			sumx2+=(double)i*(double)i;
+			sumx+=i;
+			sumy+=data[i];
+			sumxy+=data[i]*(double)i;
+		}
+		double dlength=data.length;
+		double off,amp;
+		if(sumx2>0.0){
+			double divider=dlength*sumx2-sumx*sumx;
+			off=(sumx2*sumy-sumx*sumxy)/divider;
+			amp=(dlength*sumxy-sumx*sumy)/divider;
+		}else{
+			amp=0.0;
+			off=sumy/dlength;
+		}
+		float[] fitparams={(float)amp,(float)off};
+		return fitparams;
 	}
 
 	public float[] get_slope_se(float[] data){
@@ -236,7 +335,7 @@ public class linleastsquares{
 			sumy+=data[i];
 			sumxy+=data[i]*i;
 		}
-		double dlength=(double)data.length;
+		double dlength=data.length;
 		if(sumx2>0.0){
 			double divider=dlength*sumx2-sumx*sumx;
 			double slope=(dlength*sumxy-sumx*sumy)/divider;
@@ -245,7 +344,7 @@ public class linleastsquares{
 			double offset=avgy-slope*avgx;
 			double c2=0.0f;
 			for(int i=0;i<data.length;i++)
-				c2+=(data[i]-offset-slope*(double)i)*(data[i]-offset-slope*(double)i);
+				c2+=(data[i]-offset-slope*i)*(data[i]-offset-slope*i);
 			double se=Math.sqrt(c2/((dlength-2.0)*(sumx2-sumx*sumx/dlength)));
 			return new float[]{(float)slope,(float)se};
 		}else{
@@ -253,6 +352,13 @@ public class linleastsquares{
 		}
 	}
 
+	/*****************************************
+	 * this function gets the amplitude and offset for any function (fit[i]=amp*function[i]+offset)
+	 * @param function
+	 * @param data: the data to fit
+	 * @param offset: whether or not to fit the offset
+	 * @return
+	 */
 	public float[] get_amp_offset(float[] function,float[] data,boolean offset){
 		double sumx2=0.0;
 		double sumx=0.0;
@@ -265,7 +371,7 @@ public class linleastsquares{
 			sumxy+=data[i]*function[i];
 		}
 		if(offset){
-			double dlength=(double)data.length;
+			double dlength=data.length;
 			double off,amp;
 			if(sumx2>0.0){
 				double divider=dlength*sumx2-sumx*sumx;
@@ -301,7 +407,7 @@ public class linleastsquares{
 			sumxy+=data[i]*function[i];
 		}
 		if(offset){
-			double dlength=(double)data.length;
+			double dlength=data.length;
 			double off,amp;
 			if(sumx2>0.0){
 				double divider=dlength*sumx2-sumx*sumx;
@@ -324,19 +430,37 @@ public class linleastsquares{
 			return fitparams;
 		}
 	}
+	
+	public double get_amp_offset_c2(double[] function,float[] data,double[] coef){
+		double c2=0.0;
+		if(coef.length>1){
+			for(int i=0;i<function.length;i++){
+				float resid=((float)coef[0]*(float)function[i]+(float)coef[1])-data[i];
+				c2+=resid*resid;
+			}
+			c2/=(function.length-2);
+		}else{
+			for(int i=0;i<function.length;i++){
+				float resid=(float)coef[0]*(float)function[i]-data[i];
+				c2+=resid*resid;
+			}
+			c2/=(function.length-1);
+		}
+		return c2;
+	}
 
 	public double get_amp_offset_c2(float[] function,float[] data,float[] coef){
 		double c2=0.0;
 		if(coef.length>1){
 			for(int i=0;i<function.length;i++){
 				float resid=(coef[0]*function[i]+coef[1])-data[i];
-				c2+=(double)(resid*resid);
+				c2+=resid*resid;
 			}
 			c2/=(function.length-2);
 		}else{
 			for(int i=0;i<function.length;i++){
 				float resid=coef[0]*function[i]-data[i];
-				c2+=(double)(resid*resid);
+				c2+=resid*resid;
 			}
 			c2/=(function.length-1);
 		}
@@ -348,7 +472,7 @@ public class linleastsquares{
 		if(isfloat){
 			for(int i=0;i<npts;i++){
 				for(int j=0;j<nindvars;j++){
-					fit[i]+=coef[j]*(double)indvars[j][i];
+					fit[i]+=coef[j]*indvars[j][i];
 				}
 			}
 		}else{
@@ -366,7 +490,7 @@ public class linleastsquares{
 		if(isfloat){
 			for(int i=0;i<npts;i++){
 				for(int j=0;j<nindvars;j++){
-					fit[i]+=(float)(coef[j]*(double)indvars[j][i]);
+					fit[i]+=(float)(coef[j]*indvars[j][i]);
 				}
 			}
 		}else{
@@ -380,29 +504,29 @@ public class linleastsquares{
 	}
 
 	public double get_c2(double[] coef,float[] data,float[] weights){
-		int length=data.length;
+		int length=endfit-startfit+1;
 		double tempc2=0.0;
 		double[] fit=get_fit(coef);
 		if(weights!=null){
-			for(int i=0;i<length;i++){
-				tempc2+=(fit[i]-(double)data[i])*(fit[i]-(double)data[i])*weights[i];
+			for(int i=startfit;i<=endfit;i++){
+				tempc2+=(fit[i]-data[i])*(fit[i]-data[i])*weights[i];
 			}
 		}else{
-			for(int i=0;i<length;i++){
-				tempc2+=(fit[i]-(double)data[i])*(fit[i]-(double)data[i]);
+			for(int i=startfit;i<=endfit;i++){
+				tempc2+=(fit[i]-data[i])*(fit[i]-data[i]);
 			}
 		}
-		return tempc2/((double)(length-nindvars));
+		return tempc2/(length-nindvars);
 	}
 
 	public double get_int_c2(double[] coef,float[] data){
-		int length=data.length;
+		int length=endfit-startfit+1;
 		double tempc2=0.0;
 		double[] resid=get_int_resid(coef,data);
-		for(int i=0;i<length;i++){
+		for(int i=startfit;i<=endfit;i++){
 			tempc2+=resid[i];
 		}
-		return tempc2/((double)(length-nindvars));
+		return tempc2/(length-nindvars);
 	}
 
 	public double[] get_resid(double[] coef,float[] data,float[] weights){
@@ -410,12 +534,12 @@ public class linleastsquares{
 		double[] resid=get_fit(coef);
 		if(weights!=null){
 			for(int i=0;i<length;i++){
-				resid[i]-=(double)data[i];
+				resid[i]-=data[i];
 				resid[i]*=Math.sqrt(weights[i]);
 			}
 		}else{
 			for(int i=0;i<length;i++){
-				resid[i]-=(double)data[i];
+				resid[i]-=data[i];
 			}
 		}
 		return resid;
@@ -427,11 +551,11 @@ public class linleastsquares{
 		float[] resid=new float[length];
 		if(weights!=null){
 			for(int i=0;i<length;i++){
-				resid[i]=(float)((fit[i]-(double)data[i])*Math.sqrt(weights[i]));
+				resid[i]=(float)((fit[i]-data[i])*Math.sqrt(weights[i]));
 			}
 		}else{
 			for(int i=0;i<length;i++){
-				resid[i]=(float)(fit[i]-(double)data[i]);
+				resid[i]=(float)(fit[i]-data[i]);
 			}
 		}
 		return resid;
@@ -441,7 +565,7 @@ public class linleastsquares{
 		int length=data.length;
 		double[] resid=get_fit(coef);
 		for(int i=0;i<length;i++){
-			resid[i]-=(double)data[i];
+			resid[i]-=data[i];
 			if(data[i]>0.0f){
 				resid[i]*=Math.sqrt(1.0/data[i]);
 			}
@@ -455,9 +579,9 @@ public class linleastsquares{
 		float[] resid=new float[length];
 		for(int i=0;i<length;i++){
 			if(data[i]>0.0f){
-				resid[i]=(float)((fit[i]-(double)data[i])*Math.sqrt(1.0/data[i]));
+				resid[i]=(float)((fit[i]-data[i])*Math.sqrt(1.0/data[i]));
 			}else{
-				resid[i]=(float)(fit[i]-(double)data[i]);
+				resid[i]=(float)(fit[i]-data[i]);
 			}
 		}
 		return resid;

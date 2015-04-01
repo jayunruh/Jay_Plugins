@@ -47,7 +47,13 @@ public class outline_objects_jru_v1 implements PlugIn, DialogListener{
 			pixels=collapse_multichannel(cstack,currchan,width*height);
 			if(pixels==null) return;
 		}
-		//thresh=jthresh.getautothresh(pixels,width,height,0.5f);
+		GenericDialog gd1=new GenericDialog("Options");
+		gd1.addCheckbox("Smooth Image",false);
+		gd1.addNumericField("StDev",1.0,5,15,null);
+		gd1.showDialog(); if(gd1.wasCanceled()){return;}
+		boolean smooth=gd1.getNextBoolean();
+		float stdev=(float)gd1.getNextNumber();
+		if(smooth) jsmooth.blur2D(pixels,stdev,width,height);
 		thresh=0.5f;
 		minint=jstatistics.getstatistic("Min",pixels,null);
 		maxint=jstatistics.getstatistic("Max",pixels,null);
@@ -101,6 +107,7 @@ public class outline_objects_jru_v1 implements PlugIn, DialogListener{
 				for(int j=0;j<slices;j++){
 					Object[] cstack=jutils.get3DCSeries(imp.getStack(),j,i,frames,slices,nchannels);
 					float[] pix=combine_channels(cstack,currchan,width*height);
+					if(smooth) jsmooth.blur2D(pix,stdev,width,height);
 					minint=jstatistics.getstatistic("Min",pix,null);
 					maxint=jstatistics.getstatistic("Max",pix,null);
 					float[] temp=get_mask(pix,thresh,minarea,maxarea);

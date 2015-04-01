@@ -207,7 +207,7 @@ public class pch{
 		if(number>0){
 			factval=1.0;
 			for(i=1;i<=number;i++){
-				factval*=(double)i;
+				factval*=i;
 			}
 			return factval;
 		}else{
@@ -244,7 +244,7 @@ public class pch{
 		if(number>0){
 			factval[0]=1.0;
 			for(i=1;i<=number;i++){
-				factval[0]*=(double)i;
+				factval[0]*=i;
 				if(factval[0]>1000.0){
 					factval[1]+=3;
 					factval[0]/=1000.0;

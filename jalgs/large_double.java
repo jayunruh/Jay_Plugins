@@ -173,14 +173,15 @@ public class large_double implements Cloneable{
 	}
 
 	public static large_double factorial(int val){
-		large_double temp=new large_double((double)val);
+		large_double temp=new large_double(val);
 		for(int i=(val-1);i>1;i--){
-			temp.multiply((double)i);
+			temp.multiply(i);
 		}
 		return temp;
 	}
 
 	public int compare(large_double compval){
+		if(number==Double.NaN || compval.number==Double.NaN) return -2;
 		if(compval.number==0.0){
 			if(number==0.0){
 				return 0;

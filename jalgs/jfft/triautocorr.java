@@ -37,7 +37,7 @@ public class triautocorr{
 			real[j]=data[j];
 			real2[j]=data[j]*data[j];
 			avg+=(double)data[j]/(double)length;
-			avgsq+=((double)data[j]*(double)data[j])/(double)length;
+			avgsq+=((double)data[j]*(double)data[j])/length;
 		}
 		fft.realfft(real,im,false);
 		fft.realfft(real2,im2,false);
@@ -54,11 +54,11 @@ public class triautocorr{
 		fft.realfft(real,im,true);
 		fft.realfft(real2,im2,true);
 		for(int j=0;j<length;j++){
-			real[j]/=(float)(avg*avg*avg)*(float)length;
-			real[j]-=(2.0f*real2[j])/((float)(avg*avg)*(float)length);
+			real[j]/=(float)(avg*avg*avg)*length;
+			real[j]-=(2.0f*real2[j])/((float)(avg*avg)*length);
 			real[j]-=avgsq/(float)(avg*avg);
 			real[j]+=2.0f;
-			real[j]-=real2[j]/((float)(avg*avg*avg)*(float)length);
+			real[j]-=real2[j]/((float)(avg*avg*avg)*length);
 			real[j]+=1.0f/(float)(avg);
 		}
 		return real;
@@ -75,7 +75,7 @@ public class triautocorr{
 			real[j]=data[j];
 			real2[j]=data[j]*data[j];
 			avg+=(double)data[j]/(double)length;
-			avgsq+=((double)data[j]*(double)data[j])/(double)length;
+			avgsq+=((double)data[j]*(double)data[j])/length;
 		}
 		fft.realfft(real,im,false);
 		fft.realfft(real2,im2,false);
@@ -92,11 +92,11 @@ public class triautocorr{
 		fft.realfft(real,im,true);
 		fft.realfft(real2,im2,true);
 		for(int j=0;j<length;j++){
-			real[j]/=(float)(avg*avg*avg)*(float)length;
-			real[j]-=(2.0f*real2[j])/((float)(avg*avg)*(float)length);
+			real[j]/=(float)(avg*avg*avg)*length;
+			real[j]-=(2.0f*real2[j])/((float)(avg*avg)*length);
 			real[j]-=avgsq/(float)(avg*avg);
 			real[j]+=2.0f;
-			real[j]-=real2[j]/((float)(avg*avg*avg)*(float)length);
+			real[j]-=real2[j]/((float)(avg*avg*avg)*length);
 			real[j]+=1.0f/(float)(avg);
 			if(dobrightcorr){
 				real[j]*=(float)(avg*avg);
@@ -123,7 +123,7 @@ public class triautocorr{
 			real[j]=data[j];
 			real2[j]=data[j]*data[j];
 			avg+=(double)data[j]/(double)data.length;
-			avgsq+=((double)data[j]*(double)data[j])/(double)data.length;
+			avgsq+=((double)data[j]*(double)data[j])/data.length;
 		}
 		for(int j=data.length;j<length;j++){
 			real[j]=(float)avg;
@@ -144,11 +144,11 @@ public class triautocorr{
 		fft.realfft(real,im,true);
 		fft.realfft(real2,im2,true);
 		for(int j=0;j<length;j++){
-			real[j]/=(float)(avg*avg*avg)*(float)length;
-			real[j]-=(2.0f*real2[j])/((float)(avg*avg)*(float)length);
+			real[j]/=(float)(avg*avg*avg)*length;
+			real[j]-=(2.0f*real2[j])/((float)(avg*avg)*length);
 			real[j]-=avgsq/(float)(avg*avg);
 			real[j]+=2.0f;
-			real[j]-=real2[j]/((float)(avg*avg*avg)*(float)length);
+			real[j]-=real2[j]/((float)(avg*avg*avg)*length);
 			real[j]+=1.0f/(float)(avg);
 			real[j]*=(float)length/(float)data.length;
 			if(dobrightcorr){
@@ -186,7 +186,7 @@ public class triautocorr{
 		}
 		fft.realfft(real,im,true);
 		fft.realfft(real2,im2,true);
-		double n=(double)length;
+		double n=length;
 		kstats ksclass=new kstats();
 		double[] u1=ksclass.rawmomentsshort(data);
 		double[][] u=new double[5][5];

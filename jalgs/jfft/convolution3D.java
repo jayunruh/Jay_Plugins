@@ -40,8 +40,8 @@ public class convolution3D{
 			for(int i=0;i<slices;i++){
 				real1[i]=new float[width*height];
 				real2[i]=new float[width*height];
-				System.arraycopy((float[])stack1[i],0,(float[])real1[i],0,width*height);
-				System.arraycopy((float[])stack2[i],0,(float[])real2[i],0,width*height);
+				System.arraycopy(stack1[i],0,real1[i],0,width*height);
+				System.arraycopy(stack2[i],0,real2[i],0,width*height);
 				im1[i]=new float[width*height];
 				im2[i]=new float[width*height];
 			}
@@ -79,7 +79,7 @@ public class convolution3D{
 		if(stack1[0] instanceof float[]){
 			for(int i=0;i<slices;i++){
 				real1[i]=new float[width*height];
-				System.arraycopy((float[])stack1[i],0,(float[])real1[i],0,width*height);
+				System.arraycopy(stack1[i],0,real1[i],0,width*height);
 				im1[i]=new float[width*height];
 			}
 		}else{
@@ -114,7 +114,7 @@ public class convolution3D{
 		if(stack1[0] instanceof float[]){
 			for(int i=0;i<slices;i++){
 				real1[i]=new float[width*height];
-				System.arraycopy((float[])stack1[i],0,(float[])real1[i],0,width*height);
+				System.arraycopy(stack1[i],0,real1[i],0,width*height);
 				im1[i]=new float[width*height];
 			}
 		}else{

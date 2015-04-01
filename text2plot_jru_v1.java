@@ -92,6 +92,9 @@ public class text2plot_jru_v1 implements PlugIn {
 			}
 		}
 		if(textdata==null){IJ.showMessage("Error in Obtaining String"); return;}
+		if(textdata.indexOf("\r")>=0){
+			textdata=textdata.replace('\r','\n');
+		}
 		char[] delims={'\t',',',' '};
 		delimit_string ds=new delimit_string(delims[delimindex]);
 		String[] rows=ds.getrows(textdata);
@@ -144,15 +147,21 @@ public class text2plot_jru_v1 implements PlugIn {
 			int[] npts=new int[ycolumns];
 			npts[0]=lines;
 			if(skipendzeros){
-				int counter=lines-1;
-				while((tempxdata[counter]==0 || tempxdata[counter]==Float.NaN) && counter>0){
-					npts[0]--;
-					counter--;
-				}
-				ydata=new float[ycolumns][npts[0]];
-				xdata=new float[ycolumns][npts[0]];
+				int maxpts=0;
 				for(int i=0;i<ycolumns;i++){
-					npts[i]=npts[0];
+					int counter=lines-1;
+					npts[i]=lines;
+					while((tempydata[i][counter]==0.0f || Float.isNaN(tempydata[i][counter])) && counter>0){
+						npts[i]--;
+						counter--;
+					}
+					if(npts[i]>maxpts) maxpts=npts[i];
+					IJ.log(""+npts[i]);
+				}
+				ydata=new float[ycolumns][maxpts];
+				xdata=new float[ycolumns][maxpts];
+				for(int i=0;i<ycolumns;i++){
+					//npts[i]=npts[0];
 					System.arraycopy(tempxdata,0,xdata[i],0,npts[i]);
 					System.arraycopy(tempydata[i],0,ydata[i],0,npts[i]);
 				}

@@ -182,9 +182,9 @@ public class NLLSglobalfit implements NLLSfitinterface{
 			double[] tempweights=new double[fitlength];
 			double[] tempfit=new double[fitlength];
 			for(int j=0;j<fitlength;j++){
-				tempfit[j]=(double)fit[i][j];
+				tempfit[j]=fit[i][j];
 				if(weights!=null){
-					tempweights[j]=(double)weights[i][j];
+					tempweights[j]=weights[i][j];
 				}else{
 					tempweights[j]=1.0f;
 				}

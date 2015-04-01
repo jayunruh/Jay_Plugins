@@ -8,18 +8,16 @@
 
 package jguis;
 
-import java.io.IOException;
-
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
-import ij.ImageStack;
 import ij.VirtualStack;
 import ij.io.FileInfo;
 import ij.io.FileOpener;
 import ij.measure.Calibration;
 import ij.process.ImageProcessor;
-import ij.process.LUT;
+
+import java.io.IOException;
 
 public class DV_virtual_stack extends VirtualStack{
 	public DVFile file;
@@ -33,7 +31,7 @@ public class DV_virtual_stack extends VirtualStack{
 			return;
 		}
 		fi=new FileInfo();
-		fi.fileFormat=fi.RAW;
+		fi.fileFormat=FileInfo.RAW;
 		fi.fileName=fname;
 		fi.directory=dir;
 		fi.width=file.getImageWidth();

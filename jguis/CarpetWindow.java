@@ -8,14 +8,23 @@
 
 package jguis;
 
+import ij.CompositeImage;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.GenericDialog;
+import ij.gui.StackWindow;
+import ij.process.LUT;
 import jalgs.algutils;
 import jalgs.interpolation;
 
-import java.awt.*;
-import java.awt.event.*;
-import ij.*;
-import ij.gui.*;
-import ij.process.*;
+import java.awt.Button;
+import java.awt.FlowLayout;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.Rectangle;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 /**
  * This class is an extended StackWindow that displays carpets with different
@@ -55,7 +64,7 @@ public class CarpetWindow extends StackWindow implements ActionListener{
 			this.carpet=transposecarpet(carpet);
 		else
 			this.carpet=carpet;
-		limits=new float[]{0.0f,(float)WIDTH};
+		limits=new float[]{0.0f,WIDTH};
 		binsize=1.0f;
 		updateStack();
 		imp.resetDisplayRange();
@@ -92,13 +101,13 @@ public class CarpetWindow extends StackWindow implements ActionListener{
 	/** Sets the x-axis and y-axis range. */
 	public void setLimits(float[] limits){
 		this.limits=limits;
-		binsize=(limits[1]-limits[0])/(float)WIDTH;
+		binsize=(limits[1]-limits[0])/WIDTH;
 		scale.setText(""+1.0f/binsize);
 		updateStack();
 	}
 
 	public void setLimits(float xmin){
-		float[] newlimits={xmin,xmin+binsize*(float)WIDTH};
+		float[] newlimits={xmin,xmin+binsize*WIDTH};
 		setLimits(newlimits);
 	}
 
@@ -232,35 +241,35 @@ public class CarpetWindow extends StackWindow implements ActionListener{
 			limits[1]-=1.0f;
 		}else if(b==pr){
 			limits[0]=limits[1];
-			limits[1]=limits[0]+binsize*(float)WIDTH;
+			limits[1]=limits[0]+binsize*WIDTH;
 		}else if(b==pl){
 			limits[1]=limits[0];
-			limits[0]=limits[1]-binsize*(float)WIDTH;
+			limits[0]=limits[1]-binsize*WIDTH;
 		}else if(b==home){
 			limits[0]=0.0f;
-			limits[1]=limits[0]+binsize*(float)WIDTH;
+			limits[1]=limits[0]+binsize*WIDTH;
 		}else if(b==end){
-			limits[1]=(float)(height2-1);
-			limits[0]=limits[1]-binsize*(float)WIDTH;
+			limits[1]=height2-1;
+			limits[0]=limits[1]-binsize*WIDTH;
 		}else if(b==fit){
-			limits[1]=(float)(height2-1);
+			limits[1]=height2-1;
 			limits[0]=0.0f;
 			binsize=(float)height2/(float)WIDTH;
 		}else if(b==orig){
 			binsize=1.0f;
 			float center=0.5f*(limits[1]+limits[0]);
-			limits[1]=center+0.5f*binsize*(float)WIDTH;
-			limits[0]=limits[1]-binsize*(float)WIDTH;
+			limits[1]=center+0.5f*binsize*WIDTH;
+			limits[0]=limits[1]-binsize*WIDTH;
 		}else if(b==scup){
 			float center=0.5f*(limits[1]+limits[0]);
 			binsize*=0.5f;
-			limits[1]=center+0.5f*binsize*(float)WIDTH;
-			limits[0]=limits[1]-binsize*(float)WIDTH;
+			limits[1]=center+0.5f*binsize*WIDTH;
+			limits[0]=limits[1]-binsize*WIDTH;
 		}else if(b==scdn){
 			float center=0.5f*(limits[1]+limits[0]);
 			binsize*=1.5f;
-			limits[1]=center+0.5f*binsize*(float)WIDTH;
-			limits[0]=limits[1]-binsize*(float)WIDTH;
+			limits[1]=center+0.5f*binsize*WIDTH;
+			limits[0]=limits[1]-binsize*WIDTH;
 		}else if(b==edit){
 			editStack();
 			return;
@@ -269,8 +278,8 @@ public class CarpetWindow extends StackWindow implements ActionListener{
 			if(text!=binsize)
 				binsize=text;
 			float center=0.5f*(limits[1]+limits[0]);
-			limits[1]=center+0.5f*binsize*(float)WIDTH;
-			limits[0]=limits[1]-binsize*(float)WIDTH;
+			limits[1]=center+0.5f*binsize*WIDTH;
+			limits[0]=limits[1]-binsize*WIDTH;
 		}
 		// check to make sure we haven't gone past the bounds
 		if(limits[0]<0.0f){
@@ -278,8 +287,8 @@ public class CarpetWindow extends StackWindow implements ActionListener{
 			limits[0]=0.0f;
 			limits[1]+=diff;
 		}else{
-			if(limits[1]>(float)(height2-1)){
-				float diff=limits[1]-(float)(height2-1);
+			if(limits[1]>height2-1){
+				float diff=limits[1]-(height2-1);
 				limits[0]-=diff;
 				limits[1]-=diff;
 				// check again on the lower bound since it takes precedence

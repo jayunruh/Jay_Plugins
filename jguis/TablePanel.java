@@ -14,9 +14,10 @@ import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ListSelectionModel;
 import javax.swing.JTable;
-import javax.swing.table.*;
+import javax.swing.ListSelectionModel;
+import javax.swing.ScrollPaneConstants;
+import javax.swing.table.DefaultTableModel;
 
 public class TablePanel extends JPanel{
 	private int height,width;
@@ -50,7 +51,7 @@ public class TablePanel extends JPanel{
 		table=new JTable(dm);
 		table.setPreferredScrollableViewportSize(new Dimension(500,100));
 		table.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-		JScrollPane scrollpane=new JScrollPane(table,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+		JScrollPane scrollpane=new JScrollPane(table,ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS,ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 		custom_cell_editor2 tce=new custom_cell_editor2(tabledata1);
 		// note that columns must have unique names for the following to work
 		for(int i=0;i<width;i++){

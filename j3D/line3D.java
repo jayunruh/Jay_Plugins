@@ -8,7 +8,8 @@
 
 package j3D;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
 
 public class line3D extends element3D implements Cloneable{
 	public point3D pt1,pt2;

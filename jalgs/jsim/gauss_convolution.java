@@ -15,7 +15,7 @@ public class gauss_convolution{
 	// zero
 	public int width,height;
 	public int[][] Dmap;
-	public float[] D2;
+	public float[] D2,widths;
 	public int[] sizes;
 	public Object[] profiles;
 	public float pixsize,T,widthmult;
@@ -32,9 +32,8 @@ public class gauss_convolution{
 		this.height=height;
 		D2=new float[1];
 		D2[0]=D*T/(pixsize*pixsize);
-		Dmap=new int[width][height];
-		if(height==1)
-			oneD=true;
+		Dmap=new int[height][width];
+		if(height==1) oneD=true;
 		widthmult=3.0f;
 		init_profiles();
 	}
@@ -149,25 +148,21 @@ public class gauss_convolution{
 		gausfunc gf=new gausfunc();
 		profiles=new Object[D2.length];
 		sizes=new int[D2.length];
+		widths=new float[D2.length];
 		for(int i=0;i<D2.length;i++){
-			if(D2[i]==0.0f){
+			if(D2[i]<=0.0f){
 				sizes[i]=0;
 				profiles[i]=null;
-			}else{
-				float tempwidth=(float)Math.sqrt(2.0f*D2[i]);
-				if(D2[i]<=0.0f)
-					tempwidth=0.0f;
-				sizes[i]=(int)(widthmult*tempwidth);
-				if(sizes[i]<1)
-					sizes[i]=1;
-				if(sizes[i]>width)
-					sizes[i]=width;
-				if(sizes[i]>height)
-					sizes[i]=height;
+			} else {
+				widths[i]=(float)Math.sqrt(2.0f*D2[i]);
+				sizes[i]=(int)(widthmult*widths[i]);
+				if(sizes[i]<1) sizes[i]=1;
+				if(sizes[i]>width) sizes[i]=width;
+				if(!oneD && sizes[i]>height) sizes[i]=height;
 				if(oneD){
-					profiles[i]=gf.get_norm_func(-sizes[i],2*sizes[i]+1,1.0f,tempwidth);
-				}else{
-					profiles[i]=gf.get_2D_norm_func(-sizes[i],2*sizes[i]+1,1.0f,tempwidth);
+					profiles[i]=gf.get_norm_func(-sizes[i],2*sizes[i]+1,1.0f,widths[i]);
+				} else {
+					profiles[i]=gf.get_2D_norm_func(-sizes[i],2*sizes[i]+1,1.0f,widths[i]);
 				}
 			}
 		}

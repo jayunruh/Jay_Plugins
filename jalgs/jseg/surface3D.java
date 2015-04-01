@@ -31,7 +31,7 @@ public class surface3D{
 		float increment=(top-bottom)/(float)(polys.length-1);
 		xybounds=polys[0].getBounds();
 		for(int i=0;i<polys.length;i++){
-			zpositions[i]=Math.round((float)bottom+increment*(float)i);
+			zpositions[i]=Math.round(bottom+increment*i);
 			Rectangle temp=polys[i].getBounds();
 			if(temp.x<xybounds.x)
 				xybounds.x=temp.x;
@@ -78,9 +78,9 @@ public class surface3D{
 				for(int k=temp.x;k<(temp.x+temp.width);k++){
 					if(polys[i].contains(k,j)){
 						count+=1.0;
-						xsum+=(double)k;
-						ysum+=(double)j;
-						zsum+=(double)zval;
+						xsum+=k;
+						ysum+=j;
+						zsum+=zval;
 					}
 				}
 			}
@@ -117,7 +117,7 @@ public class surface3D{
 		float[][][] coords=new float[polys.length][][];
 		float[] zcoords=new float[polys.length];
 		for(int i=0;i<polys.length;i++){
-			float zdist=((float)zpositions[i]-centroid[2]);
+			float zdist=(zpositions[i]-centroid[2]);
 			float distance=Math.abs(zdist);
 			float multiplier=(distance-pixels)/distance;
 			zcoords[i]=zdist*multiplier+centroid[2];
@@ -125,13 +125,13 @@ public class surface3D{
 		float zmin=zcoords[0];
 		float zmax=zcoords[polys.length-1];
 		for(int i=0;i<polys.length;i++){
-			float zdist=(float)zpositions[i]-centroid[2];
+			float zdist=zpositions[i]-centroid[2];
 			int[] xcoords=polys[i].xpoints;
 			int[] ycoords=polys[i].ypoints;
 			coords[i]=new float[2][xcoords.length];
 			for(int j=0;j<xcoords.length;j++){
-				float xdist=(float)xcoords[j]-centroid[0];
-				float ydist=(float)ycoords[j]-centroid[1];
+				float xdist=xcoords[j]-centroid[0];
+				float ydist=ycoords[j]-centroid[1];
 				float distance=(float)Math.sqrt(zdist*zdist+ydist*ydist+xdist*xdist);
 				float multiplier=(distance-pixels)/distance;
 				coords[i][0][j]=xdist*multiplier+centroid[0];
@@ -152,7 +152,7 @@ public class surface3D{
 		for(int i=0;i<=(zend-zstart);i++){
 			float index=interpolation.get_float_index(zcoords,zpositions[i]);
 			int prev=(int)index;
-			float rem=index-(float)prev;
+			float rem=index-prev;
 			float[][] temp=coords[prev];
 			if(rem>0.0f)
 				temp=interpolate_polygon(coords[prev],coords[prev+1],rem);

@@ -8,6 +8,10 @@
 
 package jalgs;
 
+import java.awt.Rectangle;
+
+import jalgs.jsim.rngs;
+
 public class sf{
 
 	public static double gammaln(float x){
@@ -35,7 +39,7 @@ public class sf{
 	}
 
 	public static double lnpoisson(double xx,int k){
-		return (double)k*Math.log(xx)-xx-lnfact(k);
+		return k*Math.log(xx)-xx-lnfact(k);
 	}
 
 	public static double poisson(double xx,int k){
@@ -85,7 +89,7 @@ public class sf{
 									r=1.0;
 									hg=1.0;
 									for(k=1;k<=m;k++){
-										r=r*(a+(double)k-1.0)/((double)k)/(b+(double)k-1.0)*x;
+										r=r*(a+k-1.0)/(k)/(b+k-1.0)*x;
 										hg+=r;
 									}
 								}
@@ -245,6 +249,164 @@ public class sf{
 
 	public static double erf(double x){
 		return 1.0-erfc(x);
+	}
+	
+	public static double dixonqlim(int dof){
+		double[] lims={0.97,0.829,0.71,0.625,0.568,0.526,0.493,0.466,0.444,0.426,0.41,0.396,0.384,0.374,0.365,0.356,0.349};
+		if(dof<3) return 0.0;
+		if(dof>19) return 0.9592*Math.pow(dof,-0.344);
+		return lims[dof-3];
+	}
+	
+	public static int dixonqtest(float[] data,boolean max){
+		float[] temp=find2minmax(data);
+		float min1=temp[0]; float min2=temp[1]; float max1=temp[3]; float max2=temp[4];
+		int minind=(int)temp[2]; int maxind=(int)temp[5];
+		if(max){
+			float q=(max1-max2)/(max1-min1);
+			double qlim=dixonqlim(data.length);
+			if(q>qlim) return maxind;
+			else return -1;
+		} else {
+			float q=(min2-min1)/(max1-min1);
+			double qlim=dixonqlim(data.length);
+			if(q>qlim) return minind;
+			else return -1;
+		}
+	}
+	
+	public static float[] find2minmax(float[] data){
+		float max1=data[0]; float max2=data[1]; int maxind=0;
+		if(max2>max1){
+			max1=data[1]; max2=data[0]; maxind=1;
+		}
+		float min1=data[0]; float min2=data[1]; int minind=0;
+		if(min2<min1){
+			min1=data[1]; min2=data[0]; minind=1;
+		}
+		for(int i=0;i<data.length;i++){
+			if(data[i]>max1){
+				max2=max1; max1=data[i]; maxind=i;
+			}
+			if(data[i]<min1){
+				min2=min1; min1=data[i]; minind=i;
+			}
+		}
+		return new float[]{min1,min2,minind,max1,max2,maxind};
+	}
+	
+	public static float[] findminmax(float[] data){
+		float min=data[0]; int minind=0;
+		float max=data[0]; int maxind=0;
+		for(int i=1;i<data.length;i++){
+			if(data[i]<min){min=data[i]; minind=i;}
+			if(data[i]>max){max=data[i]; maxind=i;}
+		}
+		return new float[]{min,minind,max,maxind};
+	}
+	
+	public static float grubbsglim(int N,float alpha,boolean twotailed){
+		int dof=N-2;
+		float p=alpha/(2*N);
+		float tlim=(float)(new jdist()).tLim(dof, p, twotailed);
+		return (N-1)*(float)Math.sqrt(tlim*tlim/(N*(N-2)+tlim*tlim));
+	}
+	
+	public static int[] grubbstest(float[] data,float prob){
+		float avg=jstatistics.getstatistic("Avg",data,null);
+		float stdev=jstatistics.getstatistic("stdev",data,null);
+		float[] temp=findminmax(data);
+		float g=(temp[2]-avg)/stdev;
+		float glim=grubbsglim(data.length,1.0f-prob,true);
+		int[] indices={(int)temp[1],(int)temp[3]};
+		if(g<=glim) indices[1]=-1;
+		g=(avg-temp[0])/stdev;
+		if(g<=glim) indices[0]=-1;
+		return indices;
+	}
+	
+	public static int[] mcoutliers(float[] data,int ntrials,float prob){
+		//here we do a monte carlo test for outliers
+		float avg=jstatistics.getstatistic("Avg",data,null);
+		float stdev=jstatistics.getstatistic("stdev",data,null);
+		float[] temp=findminmax(data);
+		int countabove=0;
+		int countbelow=0;
+		rngs random=new rngs();
+		for(int i=0;i<ntrials;i++){
+			boolean above=false;
+			boolean below=false;
+			for(int j=0;j<data.length;j++){
+				float temp2=(float)random.gasdev(avg,stdev);
+				if(!above && temp2>temp[2]){
+					countabove++;
+					above=true;
+				}
+				if(!below && temp2<temp[0]){
+					countbelow++;
+					below=true;
+				}
+				if(above && below) break;
+			}
+		}
+		float fabove=(float)countabove/(float)ntrials;
+		float fbelow=(float)countbelow/(float)ntrials;
+		int[] indices={(int)temp[1],(int)temp[3],countbelow,countabove};
+		if(fabove>(1.0f-prob)) indices[1]=-1;
+		if(fbelow>(1.0f-prob)) indices[0]=-1;
+		return indices;
+	}
+	
+	public static Object[] match_x_avg_diff(float[] x1,float[] data1,float[] x2,float[] data2){
+		//this matches the average x value from two data sets by reducing the higher one and interpolating
+		float avgx1=jstatistics.getstatistic("Avg",x1,null);
+		float avgx2=jstatistics.getstatistic("Avg",x2,null);
+		float avg1=jstatistics.getstatistic("Avg",data1,null);
+		float avg2=jstatistics.getstatistic("Avg",data2,null);
+		float sem1=jstatistics.getstatistic("sterr",data1,null);
+		float sem2=jstatistics.getstatistic("sterr",data2,null);
+		if(avg2==avg1) return new Object[]{new float[]{avg1,avg2,data1.length,data2.length,sem1,sem2,0.5f},x1,data1,x2,data2};
+		//first sort the data sets in increasing order
+		float[] s1=x1.clone();
+		int[] ord1=jsort.javasort_order(s1);
+		float[] s2=x2.clone();
+		int[] ord2=jsort.javasort_order(s2);
+		float[] datas1=new float[data1.length];
+		for(int i=0;i<data1.length;i++) datas1[i]=data1[ord1[i]];
+		float[] datas2=new float[data2.length];
+		for(int i=0;i<data2.length;i++) datas2[i]=data2[ord2[i]];
+		if(avgx2>avgx1){
+			float prevavg2=avg2;
+			float prevavgx2=avgx2;
+			int n=data2.length;
+			while(avgx2>avgx1 && n>1){
+				prevavg2=avg2;
+				prevavgx2=avgx2;
+				avgx2=(avgx2*(float)n-s2[n-1])/(float)(n-1);
+				avg2=(avg2*(float)n-datas2[n-1])/(float)(n-1);
+				n--;
+			}
+			if(n==1) return null;
+			float[] news2=new float[n+1]; System.arraycopy(s2,0,news2,0,n+1);
+			float[] newdatas2=new float[n+1]; System.arraycopy(datas2,0,newdatas2,0,n+1);
+			//interpolate between the two avgs
+			float interpfrac=(avgx1-avgx2)/(prevavgx2-avgx2);
+			float interp=avg2+(prevavg2-avg2)*interpfrac;
+			float sterr1=jstatistics.getstatistic("sterr",data1,null);
+			float sterr2=jstatistics.getstatistic("sterr",newdatas2,datas2.length,1,new Rectangle(0,0,n,1),null);
+			float prevsterr2=jstatistics.getstatistic("sterr",datas2,datas2.length,1,new Rectangle(0,0,n+1,1),null);
+			float interpsterr=sterr2+(prevsterr2-sterr2)*interpfrac;
+			double prevp=(new jdist()).tCumProbTwoSampEqVar(data1.length,n+1,avg1,prevavg2,sterr1,prevsterr2,0.0,true);
+			double p=(new jdist()).tCumProbTwoSampEqVar(data1.length,n,avg1,avg2,sterr1,sterr2,0.0,true);
+			double interpp=p+(prevp-p)*interpfrac;
+			float[] retvals={avg1,interp,data1.length,n,sterr1,interpsterr,(float)interpp};
+			return new Object[]{retvals,s1,datas1,news2,newdatas2};
+		} else {
+			Object[] temp=match_x_avg_diff(x2,data2,x1,data1);
+			float[] retvals=(float[])temp[0];
+			float[] newretvals={retvals[1],retvals[0],retvals[3],retvals[2],retvals[5],retvals[4],retvals[6]};
+			return new Object[]{newretvals,temp[3],temp[4],temp[1],temp[2]};
+		}
 	}
 
 }

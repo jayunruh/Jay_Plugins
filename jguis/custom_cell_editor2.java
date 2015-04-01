@@ -8,11 +8,16 @@
 
 package jguis;
 
-import java.awt.*;
-import javax.swing.table.*;
-import javax.swing.*;
-import javax.swing.event.*;
-import java.util.*;
+import java.awt.Component;
+import java.util.EventObject;
+
+import javax.swing.DefaultCellEditor;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.event.CellEditorListener;
+import javax.swing.table.TableCellEditor;
 
 public class custom_cell_editor2 implements TableCellEditor{
 	protected Object[][] editors;

@@ -8,17 +8,30 @@
 
 package jguis;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.awt.datatransfer.*;
-
-import ij.*;
-import ij.gui.*;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.GenericDialog;
+import ij.gui.ImageWindow;
 import ij.measure.Calibration;
-import ij.process.*;
+import ij.process.ColorProcessor;
 import ij.text.TextWindow;
-import java.text.*;
+
+import java.awt.Button;
+import java.awt.FileDialog;
+import java.awt.FlowLayout;
+import java.awt.Panel;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
 
 public class PlotWindow3D extends ImageWindow implements ActionListener,ClipboardOwner{
 	private Button list,save,copy,editbutton,selbutton,seldbutton,toimagebutton;
@@ -331,6 +344,10 @@ public class PlotWindow3D extends ImageWindow implements ActionListener,Clipboar
 		fd.dispose();
 		if(name==null||name==""||directory==null||directory=="")
 			return;
+		if(!name.endsWith(".pw2")){
+			if(name.endsWith(".pw")) name+="2";
+			else name+=".pw2";
+		}
 		imp.setTitle(name);
 		saveAsObject(directory+File.separator+name);
 	}
@@ -499,10 +516,12 @@ public class PlotWindow3D extends ImageWindow implements ActionListener,Clipboar
 					}else{
 						if(b==selbutton){
 							p3.selectSeries(p3.getSelected()+1);
+							IJ.showStatus("Series "+(p3.getSelected()+1)+" of "+p3.getNSeries()+" Selected");
 							updatePlot();
 						}else{
 							if(b==seldbutton){
 								p3.selectSeries(p3.getSelected()-1);
+								IJ.showStatus("Series "+(p3.getSelected()+1)+" of "+p3.getNSeries()+" Selected");
 								updatePlot();
 							}else{
 								if(b==toimagebutton){
@@ -596,6 +615,10 @@ public class PlotWindow3D extends ImageWindow implements ActionListener,Clipboar
 		return p3.getzLabel();
 	}
 
+	public String[] getAnnotations(){
+		return p3.getAnnotations();
+	}
+	
 	public int[][] getNpts(){
 		return p3.getNpts();
 	}

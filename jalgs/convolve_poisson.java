@@ -15,7 +15,7 @@ public class convolve_poisson{
 		for(int i=0;i<data.length;i++){
 			if(data[i]>0.0){
 				for(int j=0;j<data.length;j++){
-					newdata[j]+=data[i]*sf.poisson((double)i,j);
+					newdata[j]+=data[i]*sf.poisson(i,j);
 				}
 			}
 		}
@@ -28,7 +28,7 @@ public class convolve_poisson{
 		for(int i=0;i<data.length;i++){
 			if(data[i]>0.0){
 				for(int j=0;j<data.length;j++){
-					newdata[j]+=data[i]*sf.poisson((double)i,j);
+					newdata[j]+=data[i]*sf.poisson(i,j);
 				}
 			}
 		}

@@ -13,7 +13,9 @@ import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Image;
 
-public abstract class Plotter{
+import javax.swing.JComponent;
+
+public abstract class Plotter extends JComponent{
 	// this is an abstract superclass for different plotters
 	public int shapesize;
 	public int currx,curry;
@@ -86,8 +88,8 @@ public abstract class Plotter{
 		// here the columns touch each other
 		for(int i=0;i<heights.length;i++){
 			int ystart2=ystart-heights[i];
-			int xstart2=(int)((float)i*binwidth+(float)xstart);
-			int xend2=(int)((float)i*binwidth+binwidth+(float)xstart);
+			int xstart2=(int)(i*binwidth+xstart);
+			int xend2=(int)(i*binwidth+binwidth+xstart);
 			fillBoundedRect(xstart2,ystart2,xend2-xstart2,heights[i],rectcolor);
 		}
 	}
@@ -134,6 +136,17 @@ public abstract class Plotter{
 			if(shape1==4){
 				drawTriangle(x[i],y[i]);
 			}
+		}
+	}
+	
+	public void drawErrors(int x,int yu,int yl){
+		if(yu!=yl){
+			moveTo(x-shapesize/2,yl);
+			lineTo(x+shapesize/2,yl);
+			moveTo(x,yl);
+			lineTo(x,yu);
+			moveTo(x-shapesize/2,yu);
+			lineTo(x+shapesize/2,yu);
 		}
 	}
 

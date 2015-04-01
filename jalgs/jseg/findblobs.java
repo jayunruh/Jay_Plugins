@@ -51,7 +51,7 @@ public class findblobs{
 			ptfound=false;
 			maxpt=maxnotmask(data,binmask);
 			maxval=data[maxpt];
-			maxy=(int)(maxpt/width);
+			maxy=maxpt/width;
 			maxx=maxpt-maxy*width;
 			if(maxval>=thresh){
 				ptfound=true;
@@ -79,13 +79,13 @@ public class findblobs{
 				if(maxx<edgebuf){
 					atedge=true;
 				}
-				if(maxx>((float)(width-1)-edgebuf)){
+				if(maxx>(width-1-edgebuf)){
 					atedge=true;
 				}
 				if(maxy<edgebuf){
 					atedge=true;
 				}
-				if(maxy>((float)(height-1)-edgebuf)){
+				if(maxy>(height-1-edgebuf)){
 					atedge=true;
 				}
 				if(!atedge){
@@ -94,14 +94,17 @@ public class findblobs{
 					tempstats[blobcounter-1][2]=maxval;
 					for(int i=lowery;i<=uppery;i++){
 						for(int j=lowerx;j<=upperx;j++){
-							if(Math.sqrt((double)((i-maxy)*(i-maxy)+(j-maxx)*(j-maxx)))<=(double)searchr){
-								binmask[j+i*width]=true;
-								if(data[j+i*width]>=thresh){
-									mask[j+i*width]=(float)blobcounter;
-									tempstats[blobcounter-1][0]+=data[j+i*width]*(float)j;
-									tempstats[blobcounter-1][1]+=data[j+i*width]*(float)i;
-									intval+=data[j+i*width];
-									tempstats[blobcounter-1][3]+=1.0f;
+							if(Math.sqrt((i-maxy)*(i-maxy)+(j-maxx)*(j-maxx))<=searchr){
+								int index=j+i*width;
+								binmask[index]=true;
+								if(!Float.isNaN(data[index])){
+    								if(data[index]>=thresh){
+    									mask[index]=blobcounter;
+    									tempstats[blobcounter-1][0]+=data[index]*j;
+    									tempstats[blobcounter-1][1]+=data[index]*i;
+    									intval+=data[index];
+    									tempstats[blobcounter-1][3]+=1.0f;
+    								}
 								}
 							}
 						}
@@ -109,8 +112,8 @@ public class findblobs{
 					tempstats[blobcounter-1][0]/=intval;
 					tempstats[blobcounter-1][1]/=intval;
 					if(usemaxpt){
-						tempstats[blobcounter-1][0]=(float)maxx;
-						tempstats[blobcounter-1][1]=(float)maxy;
+						tempstats[blobcounter-1][0]=maxx;
+						tempstats[blobcounter-1][1]=maxy;
 					}
 					if(tempstats[blobcounter-1][3]>=minarea&&tempstats[blobcounter-1][3]<=maxarea){
 						tempstats[blobcounter-1][4]=1.0f;
@@ -119,7 +122,7 @@ public class findblobs{
 				}else{
 					for(int i=lowery;i<=uppery;i++){
 						for(int j=lowerx;j<=upperx;j++){
-							if(Math.sqrt((double)((i-maxy)*(i-maxy)+(j-maxx)*(j-maxx)))<=(double)searchr){
+							if(Math.sqrt((i-maxy)*(i-maxy)+(j-maxx)*(j-maxx))<=searchr){
 								binmask[j+i*width]=true;
 							}
 						}
@@ -136,14 +139,14 @@ public class findblobs{
 				stats[counter][2]=tempstats[i][2];
 				stats[counter][3]=tempstats[i][3];
 				for(int j=0;j<width*height;j++){
-					if(mask[j]==(float)(i+1)){
-						mask[j]=(float)(counter+1);
+					if(mask[j]==i+1){
+						mask[j]=counter+1;
 					}
 				}
 				counter++;
 			}else{
 				for(int j=0;j<width*height;j++){
-					if(mask[j]==(float)(i+1)){
+					if(mask[j]==i+1){
 						mask[j]=0.0f;
 					}
 				}
@@ -160,7 +163,7 @@ public class findblobs{
 		float[] objects=new float[width*height];
 		for(int i=0;i<coords.length;i++){
 			int id=coords.length-i;
-			set_circle_val((float)id,objects,coords[coords.length-1-i][0],coords[coords.length-1-i][1],minsep,width,height);
+			set_circle_val(id,objects,coords[coords.length-1-i][0],coords[coords.length-1-i][1],minsep,width,height);
 		}
 		//now set any pixels which are neighbored by different values to zero
 		findblobs3 fb=new findblobs3(width,height);
@@ -179,7 +182,7 @@ public class findblobs{
 		int yend=1+(int)(y+rad); if(yend>=height) yend=height-1;
 		for(int i=ystart;i<=yend;i++){
 			for(int j=xstart;j<=xend;j++){
-				float d2=(float)(((float)j-x)*((float)j-x)+((float)i-y)*((float)i-y));
+				float d2=(j-x)*(j-x)+(i-y)*(i-y);
 				if(d2<=rad2) image[j+i*width]=val;
 			}
 		}
@@ -189,6 +192,7 @@ public class findblobs{
 		float max=-1000000.0f;
 		int imax=0;
 		for(int i=0;i<data.length;i++){
+			if(Float.isNaN(data[i])) continue;
 			if(data[i]>max&&!binmask[i]){
 				max=data[i];
 				imax=i;

@@ -34,7 +34,7 @@ public class sim_setup{
 		dfraction=0.0f;
 		jumpprob=0.0f;
 		frametime2=frametime*(float)(1.0e-6);
-		fboxpixels=(float)boxpixels;
+		fboxpixels=boxpixels;
 		pixelsize=boxsize/fboxpixels;
 		gridsizepixels=gridsize/pixelsize;
 		yflowrate2=yflowrate*(frametime2/pixelsize);
@@ -62,7 +62,7 @@ public class sim_setup{
 		dfraction=0.0f;
 		jumpprob=0.0f;
 		frametime2=frametime*(float)(1.0e-6);
-		fboxpixels=(float)boxpixels;
+		fboxpixels=boxpixels;
 		pixelsize=boxsize/fboxpixels;
 		gridsizepixels=gridsize/pixelsize;
 		yflowrate2=yflowrate*frametime2;
@@ -91,7 +91,7 @@ public class sim_setup{
 		dfraction=dfraction1;
 		jumpprob=jumpprob1;
 		frametime2=frametime*(float)(1.0e-6);
-		fboxpixels=(float)boxpixels;
+		fboxpixels=boxpixels;
 		pixelsize=boxsize/fboxpixels;
 		gridsizepixels=gridsize/pixelsize;
 		yflowrate2=yflowrate*frametime2;

@@ -59,10 +59,10 @@ public class circ_object_acf{
 		if(position==0.0f){
 			return function[0];
 		}
-		if(position==(float)(function.length-1)){
+		if(position==function.length-1){
 			return function[function.length-1];
 		}
-		if(position>(float)(function.length-1)){
+		if(position>function.length-1){
 			return 0.0f;
 		}
 		float temp=position;
@@ -70,7 +70,7 @@ public class circ_object_acf{
 			temp=-position;
 		}
 		int prev=(int)temp;
-		float rem=temp-(float)prev;
+		float rem=temp-prev;
 		return function[prev]+rem*(function[prev+1]-function[prev]);
 	}
 

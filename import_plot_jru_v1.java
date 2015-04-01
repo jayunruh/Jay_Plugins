@@ -48,7 +48,13 @@ public class import_plot_jru_v1 implements PlugIn {
 							Plot2DHist plot=new Plot2DHist(path);
 							new PlotWindow2DHist(name,plot).draw();
 						} else {
-							IJ.log("unsupported or corrupted pw2 file");
+							 if(PlotColumn.is_this(path)){
+								IJ.showStatus("Importing PlotColumn");
+								PlotColumn plot=new PlotColumn(path);
+								new PlotWindowColumn(name,plot).draw();
+							} else {
+								IJ.log("unsupported or corrupted pw2 file");
+							}
 						}
 					}
 				}

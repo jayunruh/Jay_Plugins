@@ -26,6 +26,12 @@ public class convolution2D{
 		height=height1;
 		fft=new po4realfft2D(width,height);
 	}
+	
+	public convolution2D(int width1,int height1,int fftindex1,int fftindex2){
+		width=width1;
+		height=height1;
+		fft=new po4realfft2D(width,height,fftindex1,fftindex2);
+	}
 
 	public float[] convolve2D(float[] data1,float[] data2){
 		float[] real1=new float[width*height];

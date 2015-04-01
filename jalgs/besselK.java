@@ -20,8 +20,8 @@ public class besselK{
 		bessel1vals=new double[10000];
 		bessel2vals=new double[10000];
 		for(int i=0;i<10000;i++){
-			bessel0vals[i]=bessk0(0.1*(double)i);
-			bessel1vals[i]=bessk1(0.1*(double)i);
+			bessel0vals[i]=bessk0(0.1*i);
+			bessel1vals[i]=bessk1(0.1*i);
 			// bessel2vals[i]=bessel2(0.1*(double)i);
 		}
 	}
@@ -48,7 +48,7 @@ public class besselK{
 				nextval=bessel2vals[index+1];
 			}
 		}
-		fraction=dindex-(double)index;
+		fraction=dindex-index;
 		return(prevval+fraction*(nextval-prevval));
 	}
 

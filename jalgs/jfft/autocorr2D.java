@@ -57,7 +57,7 @@ public class autocorr2D{
 		}
 		fft.dorealfft2D(real,im,true);
 		for(int j=0;j<width*height;j++){
-			real[j]/=(float)(avg*avg)*(float)(width*height);
+			real[j]/=(float)(avg*avg)*(width*height);
 			real[j]-=1.0f;
 			if(brightcorr){
 				real[j]*=(float)avg;
@@ -104,7 +104,7 @@ public class autocorr2D{
 		}
 		fft.dorealfft2D(real,im,true);
 		for(int j=0;j<width*height;j++){
-			real[j]/=(float)(avg*avg)*(float)(width*height);
+			real[j]/=(float)(avg*avg)*(width*height);
 			real[j]-=1.0f;
 			if(brightcorr){
 				real[j]*=(float)avg;

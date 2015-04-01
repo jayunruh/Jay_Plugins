@@ -8,21 +8,15 @@
 
 package jguis;
 
-import j3D.*;
-
+import j3D.renderer;
 import jalgs.jdataio;
 
-import java.awt.*;
+import java.awt.Color;
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import ij.process.*;
 
 public class Traj3D extends Plot3D{
 	// here we have a single zValue per xy value
@@ -31,6 +25,7 @@ public class Traj3D extends Plot3D{
 	private float[][] yValues;
 	private float[][] zValues;
 	private int[] npts;
+	public boolean thick=true;
 
 	public Traj3D(String xLabel1,String yLabel1,String zLabel1,float[][] xValues1,float[][] yValues1,float[][] zValues1,Object npts1){
 		super();
@@ -192,6 +187,13 @@ public class Traj3D extends Plot3D{
 			return true;
 		else
 			return false;
+	}
+	
+	public static boolean is_this(InputStream is) throws IOException{
+		jdataio jdio=new jdataio();
+		jdio.readstring(is); // read the label
+		int temp=jdio.readintelint(is); // now the identifier
+		return (temp==2);
 	}
 
 	public void autoscale(){
@@ -420,36 +422,36 @@ public class Traj3D extends Plot3D{
 		logzscale=0;
 		if(logx){
 			if(xMin<=0.0f){
-				logxmin=(float)Math.log((double)findmingt0(xValues,npts,xMax));
+				logxmin=(float)Math.log(findmingt0(xValues,npts,xMax));
 			}else{
-				logxmin=(float)Math.log((double)xMin);
+				logxmin=(float)Math.log(xMin);
 			}
-			logxmax=(float)Math.log((double)xMax);
-			logxscale=(float)WIDTH/(logxmax-logxmin);
+			logxmax=(float)Math.log(xMax);
+			logxscale=WIDTH/(logxmax-logxmin);
 		}
 		if(logy){
 			if(yMin<=0.0f){
-				logymin=(float)Math.log((double)findmingt0(yValues,npts,yMax));
+				logymin=(float)Math.log(findmingt0(yValues,npts,yMax));
 			}else{
-				logymin=(float)Math.log((double)yMin);
+				logymin=(float)Math.log(yMin);
 			}
-			logymax=(float)Math.log((double)yMax);
-			logyscale=(float)WIDTH/(logymax-logymin);
+			logymax=(float)Math.log(yMax);
+			logyscale=WIDTH/(logymax-logymin);
 		}
 		if(logz){
 			if(zMin<=0.0f){
-				logzmin=(float)Math.log((double)findmingt0(zValues,npts,zMax));
+				logzmin=(float)Math.log(findmingt0(zValues,npts,zMax));
 			}else{
-				logzmin=(float)Math.log((double)zMin);
+				logzmin=(float)Math.log(zMin);
 			}
-			logzmax=(float)Math.log((double)zMax);
-			logzscale=(float)HEIGHT/(logzmax-logzmin);
+			logzmax=(float)Math.log(zMax);
+			logzscale=HEIGHT/(logzmax-logzmin);
 		}
 		// IJ.showMessage("testdraw1");
 
-		xScale=(float)WIDTH/(xMax-xMin);
-		yScale=(float)WIDTH/(yMax-yMin);
-		zScale=(float)HEIGHT/(zMax-zMin);
+		xScale=WIDTH/(xMax-xMin);
+		yScale=WIDTH/(yMax-yMin);
+		zScale=HEIGHT/(zMax-zMin);
 
 		// jr.setBufferSize(width,height);
 		drawAxisLabels(jr);
@@ -510,7 +512,7 @@ public class Traj3D extends Plot3D{
 					if(logx){
 						float xtemp;
 						if(xValues[j][i]>0.0f){
-							xtemp=(float)Math.log((double)xValues[j][i]);
+							xtemp=(float)Math.log(xValues[j][i]);
 						}else{
 							xtemp=logxmin;
 						}
@@ -529,7 +531,7 @@ public class Traj3D extends Plot3D{
 					if(logy){
 						float ytemp;
 						if(yValues[j][i]>0.0f){
-							ytemp=(float)Math.log((double)yValues[j][i]);
+							ytemp=(float)Math.log(yValues[j][i]);
 						}else{
 							ytemp=logymin;
 						}
@@ -548,7 +550,7 @@ public class Traj3D extends Plot3D{
 					if(logz){
 						float ztemp;
 						if(zValues[j][i]>0.0f){
-							ztemp=(float)Math.log((double)zValues[j][i]);
+							ztemp=(float)Math.log(zValues[j][i]);
 						}else{
 							ztemp=logzmin;
 						}
@@ -590,57 +592,57 @@ public class Traj3D extends Plot3D{
 		float[] zticklabels=new float[4];
 		for(int i=0;i<4;i++){
 			if(logx){
-				float tempx=logxmin+((float)i/3.0f)*(logxmax-logxmin);
-				xticklabels[i]=(float)Math.exp((double)tempx);
+				float tempx=logxmin+(i/3.0f)*(logxmax-logxmin);
+				xticklabels[i]=(float)Math.exp(tempx);
 			}else{
-				xticklabels[i]=xMin+((float)i/3.0f)*(xMax-xMin);
+				xticklabels[i]=xMin+(i/3.0f)*(xMax-xMin);
 			}
 			if(logy){
-				float tempy=logymin+((float)i/3.0f)*(logymax-logymin);
-				yticklabels[i]=(float)Math.exp((double)tempy);
+				float tempy=logymin+(i/3.0f)*(logymax-logymin);
+				yticklabels[i]=(float)Math.exp(tempy);
 			}else{
-				yticklabels[i]=yMin+((float)i/3.0f)*(yMax-yMin);
+				yticklabels[i]=yMin+(i/3.0f)*(yMax-yMin);
 			}
 			if(logz){
-				float tempz=logzmin+((float)i/3.0f)*(logzmax-logzmin);
-				zticklabels[i]=(float)Math.exp((double)tempz);
+				float tempz=logzmin+(i/3.0f)*(logzmax-logzmin);
+				zticklabels[i]=(float)Math.exp(tempz);
 			}else{
-				zticklabels[i]=zMin+((float)i/3.0f)*(zMax-zMin);
+				zticklabels[i]=zMin+(i/3.0f)*(zMax-zMin);
 			}
 		}
 
 		// draw the z axis labels
-		String s=jutils.formatted_string((double)zticklabels[0]);
+		String s=jutils.formatted_string(zticklabels[0]);
 		jr.addText3D(s,LEFT_MARGIN+WIDTH+10,LEFT_MARGIN,TOP_MARGIN+HEIGHT-5,Color.BLACK);
-		s=jutils.formatted_string((double)zticklabels[1]);
-		jr.addText3D(s,LEFT_MARGIN+WIDTH+10,LEFT_MARGIN,TOP_MARGIN+(int)((2*HEIGHT)/3)-5,Color.BLACK);
-		s=jutils.formatted_string((double)zticklabels[2]);
-		jr.addText3D(s,LEFT_MARGIN+WIDTH+10,LEFT_MARGIN,TOP_MARGIN+(int)(HEIGHT/3)-5,Color.BLACK);
-		s=jutils.formatted_string((double)zticklabels[3]);
+		s=jutils.formatted_string(zticklabels[1]);
+		jr.addText3D(s,LEFT_MARGIN+WIDTH+10,LEFT_MARGIN,TOP_MARGIN+(2*HEIGHT)/3-5,Color.BLACK);
+		s=jutils.formatted_string(zticklabels[2]);
+		jr.addText3D(s,LEFT_MARGIN+WIDTH+10,LEFT_MARGIN,TOP_MARGIN+HEIGHT/3-5,Color.BLACK);
+		s=jutils.formatted_string(zticklabels[3]);
 		jr.addText3D(s,LEFT_MARGIN+WIDTH+10,LEFT_MARGIN,TOP_MARGIN-5,Color.BLACK);
 
 		jr.addText3D(zLabel,LEFT_MARGIN+WIDTH+25,LEFT_MARGIN,TOP_MARGIN+HEIGHT/2-15,Color.BLACK);
 
 		// now the x axis labels
-		s=jutils.formatted_string((double)xticklabels[0]);
+		s=jutils.formatted_string(xticklabels[0]);
 		jr.addText3D(s,LEFT_MARGIN-10,LEFT_MARGIN+WIDTH+40,TOP_MARGIN+HEIGHT,Color.BLACK);
-		s=jutils.formatted_string((double)xticklabels[1]);
-		jr.addText3D(s,LEFT_MARGIN+(int)(WIDTH/3)-10,LEFT_MARGIN+WIDTH+40,TOP_MARGIN+HEIGHT,Color.BLACK);
-		s=jutils.formatted_string((double)xticklabels[2]);
-		jr.addText3D(s,LEFT_MARGIN+(int)(2*WIDTH/3)-10,LEFT_MARGIN+WIDTH+40,TOP_MARGIN+HEIGHT,Color.BLACK);
-		s=jutils.formatted_string((double)xticklabels[3]);
+		s=jutils.formatted_string(xticklabels[1]);
+		jr.addText3D(s,LEFT_MARGIN+WIDTH/3-10,LEFT_MARGIN+WIDTH+40,TOP_MARGIN+HEIGHT,Color.BLACK);
+		s=jutils.formatted_string(xticklabels[2]);
+		jr.addText3D(s,LEFT_MARGIN+2*WIDTH/3-10,LEFT_MARGIN+WIDTH+40,TOP_MARGIN+HEIGHT,Color.BLACK);
+		s=jutils.formatted_string(xticklabels[3]);
 		jr.addText3D(s,LEFT_MARGIN+WIDTH-10,LEFT_MARGIN+WIDTH+40,TOP_MARGIN+HEIGHT,Color.BLACK);
 
 		jr.addText3D(xLabel,LEFT_MARGIN+WIDTH/2,LEFT_MARGIN+WIDTH+60,TOP_MARGIN+HEIGHT,Color.BLACK);
 
 		// and the y axis labels
-		s=jutils.formatted_string((double)yticklabels[0]);
+		s=jutils.formatted_string(yticklabels[0]);
 		jr.addText3D(s,LEFT_MARGIN+WIDTH+20,LEFT_MARGIN+10,TOP_MARGIN+HEIGHT,Color.BLACK);
-		s=jutils.formatted_string((double)yticklabels[1]);
-		jr.addText3D(s,LEFT_MARGIN+WIDTH+20,LEFT_MARGIN+(int)(WIDTH/3)+10,TOP_MARGIN+HEIGHT,Color.BLACK);
-		s=jutils.formatted_string((double)yticklabels[2]);
-		jr.addText3D(s,LEFT_MARGIN+WIDTH+20,LEFT_MARGIN+(int)(2*WIDTH/3)+10,TOP_MARGIN+HEIGHT,Color.BLACK);
-		s=jutils.formatted_string((double)yticklabels[3]);
+		s=jutils.formatted_string(yticklabels[1]);
+		jr.addText3D(s,LEFT_MARGIN+WIDTH+20,LEFT_MARGIN+WIDTH/3+10,TOP_MARGIN+HEIGHT,Color.BLACK);
+		s=jutils.formatted_string(yticklabels[2]);
+		jr.addText3D(s,LEFT_MARGIN+WIDTH+20,LEFT_MARGIN+2*WIDTH/3+10,TOP_MARGIN+HEIGHT,Color.BLACK);
+		s=jutils.formatted_string(yticklabels[3]);
 		jr.addText3D(s,LEFT_MARGIN+WIDTH+20,LEFT_MARGIN+WIDTH+10,TOP_MARGIN+HEIGHT,Color.BLACK);
 
 		jr.addText3D(yLabel,LEFT_MARGIN+WIDTH+60,LEFT_MARGIN+WIDTH/2,TOP_MARGIN+HEIGHT,Color.BLACK);
@@ -677,6 +679,7 @@ public class Traj3D extends Plot3D{
 	private void drawPolyline(renderer jr,int[] xpoints,int[] ypoints,int[] zpoints,int npts,Color color){
 		for(int i=1;i<npts;i++){
 			jr.addLine3D(xpoints[i-1],ypoints[i-1],zpoints[i-1],xpoints[i],ypoints[i],zpoints[i],color);
+			jr.elements[jr.elements.length-1].thick=thick;
 		}
 	}
 
@@ -713,6 +716,8 @@ public class Traj3D extends Plot3D{
 	public int[][] getNpts(){
 		return new int[][]{npts};
 	}
+	
+	public void setThick(boolean thick){this.thick=thick;}
 	
 	/*public ColorProcessor getProcessor(){
 		return new ColorProcessor(getImage());
@@ -751,7 +756,11 @@ public class Traj3D extends Plot3D{
 			jdio.writeintelfloatarray(os,yValues[l],npts[l]); // y values
 			jdio.writeintelfloatarray(os,zValues[l],npts[l]); // z values
 		}
-		// save the errors if they exist
+		// save the annotations if they exist
+		if(annotations!=null && annotations.length==nseries){
+			jdio.writeintelint(os,1);
+			for(int i=0;i<nseries;i++) jdio.writestring(os,annotations[i]);
+		}
 	}
 
 }

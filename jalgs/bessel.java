@@ -18,9 +18,9 @@ public class bessel{
 		bessel1vals=new double[10000];
 		bessel2vals=new double[10000];
 		for(int i=0;i<10000;i++){
-			bessel0vals[i]=bessel0(0.1*(double)i);
-			bessel1vals[i]=bessel1(0.1*(double)i);
-			bessel2vals[i]=bessel2(0.1*(double)i);
+			bessel0vals[i]=bessel0(0.1*i);
+			bessel1vals[i]=bessel1(0.1*i);
+			bessel2vals[i]=bessel2(0.1*i);
 		}
 	}
 
@@ -46,7 +46,7 @@ public class bessel{
 				nextval=bessel2vals[index+1];
 			}
 		}
-		fraction=dindex-(double)index;
+		fraction=dindex-index;
 		return(prevval+fraction*(nextval-prevval));
 	}
 
@@ -106,7 +106,7 @@ public class bessel{
 		funcval=0.0;
 		if(x<40.0){
 			for(k=0;k<91;k++){
-				funcval+=intpow(((-0.25)*x*x),k)/(factorial(k)*factorial(k)*((double)k+1.0)*((double)k+2.0));
+				funcval+=intpow(((-0.25)*x*x),k)/(factorial(k)*factorial(k)*(k+1.0)*(k+2.0));
 			}
 		}else{
 			funcval=Math.sqrt(2.0/(Math.PI*x))*Math.cos(x-1.25*Math.PI);
@@ -120,7 +120,7 @@ public class bessel{
 		if(x>0){
 			funcval=1;
 			for(i=1;i<=x;i++){
-				funcval*=(double)i;
+				funcval*=i;
 			}
 		}else{
 			funcval=1.0;

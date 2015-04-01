@@ -21,8 +21,10 @@ public class combine_all_tables_jru_v1 implements PlugIn {
 	public void run(String arg) {
 		GenericDialog gd=new GenericDialog("Options");
 		gd.addCheckbox("Add_Titles",true);
+		gd.addCheckbox("Close Original",false);
 		gd.showDialog(); if(gd.wasCanceled()){return;}
 		boolean addtitles=gd.getNextBoolean();
+		boolean closeorig=gd.getNextBoolean();
 		//first get the table window
 		Frame[] niframes=WindowManager.getNonImageWindows();
 		boolean first=true;
@@ -59,6 +61,7 @@ public class combine_all_tables_jru_v1 implements PlugIn {
 					}
 					tw2.append(table_tools.print_listtable(listtable));
 				}
+				if(closeorig) tw.close();
 			}
 		}
 	}

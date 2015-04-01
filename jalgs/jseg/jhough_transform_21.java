@@ -39,13 +39,13 @@ public class jhough_transform_21{
 		nangles=new int[maxrad-minrad+1];
 		for(int radius=minrad;radius<=maxrad;radius++){
 			int rindex=radius-minrad;
-			double dangle=1.0/(double)radius;
-			nangles[rindex]=(int)(2.0*Math.PI*(double)radius);
+			double dangle=1.0/radius;
+			nangles[rindex]=(int)(2.0*Math.PI*radius);
 			pixelshifts[rindex][0]=new int[nangles[rindex]];
 			pixelshifts[rindex][1]=new int[nangles[rindex]];
 			for(int i=0;i<nangles[rindex];i++){
-				double x=(double)radius*Math.cos(dangle*(double)i);
-				double y=(double)radius*Math.sin(dangle*(double)i);
+				double x=radius*Math.cos(dangle*i);
+				double y=radius*Math.sin(dangle*i);
 				pixelshifts[rindex][0][i]=(int)x;
 				pixelshifts[rindex][1][i]=(int)y;
 			}
@@ -217,7 +217,7 @@ public class jhough_transform_21{
 			int y=center[1]+pixelshifts[radindex][1][i];
 			if(x>=0&&x<width&&y>=0&&y<height){
 				if(image[x+y*width]==(byte)255){
-					integral+=1.0f/(float)nangles[radindex];
+					integral+=1.0f/nangles[radindex];
 				}
 			}
 		}

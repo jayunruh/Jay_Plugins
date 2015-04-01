@@ -13,23 +13,48 @@ import jalgs.sf;
 public class erffunc{
 	public float[] model_erf;
 
+	/************************
+	 * This is an error function scaled to start at 0 (x<<0) and end at 1 (x>>0)
+	 */
 	public erffunc(){
 		model_erf=new float[1000];
 		for(int i=0;i<1000;i++){
-			double r=0.01*(double)i;
+			double r=0.01*i;
 			model_erf[i]=(float)sf.erf(r);
 		}
 	}
 
+	/******************
+	 * this version goes from the standard -1 to 1
+	 * @param r: position
+	 * @param stdev: standard deviation of the error function
+	 * @return
+	 */
 	public double getinterperf2(double r,double stdev){
 		// here is an "unscaled" erf
 		return 2.0*getinterperf(r,stdev)-1.0;
+	}
+	
+	/***************
+	 * see getinterperf2
+	 * @param startr
+	 * @param nr
+	 * @param dr
+	 * @param stdev
+	 * @return
+	 */
+	public float[] get_func2(double startr,int nr,double dr,double stdev){
+		float[] temp=new float[nr];
+		for(int i=0;i<nr;i++){
+			temp[i]=(float)getinterperf(startr+i*dr,stdev);
+		}
+		return temp;
 	}
 
 	public double getinterperf(double r,double stdev){
 		double rrel=Math.abs(r)/stdev;
 		int rp=(int)(rrel*100.0);
-		double rem=rrel*100.0-(double)rp;
+		double rem=rrel*100.0-rp;
 		double interp=1.0;
 		if(rp<999){
 			interp=rem*(model_erf[rp+1]-model_erf[rp])+model_erf[rp];
@@ -52,7 +77,7 @@ public class erffunc{
 	public float[] get_func(float[] rvals,double stdev){
 		float[] temp=new float[rvals.length];
 		for(int i=0;i<rvals.length;i++){
-			temp[i]=(float)getinterperf((double)rvals[i],stdev);
+			temp[i]=(float)getinterperf(rvals[i],stdev);
 		}
 		return temp;
 	}

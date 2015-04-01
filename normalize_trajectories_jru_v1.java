@@ -37,10 +37,10 @@ public class normalize_trajectories_jru_v1 implements PlugIn {
 		if(normindex==0){
 			for(int i=0;i<nseries;i++){
 				float max=yvals[i][0];
-				for(int j=1;j<maxpts;j++){
+				for(int j=1;j<npts[i];j++){
 					if(yvals[i][j]>max){max=yvals[i][j];}
 				}
-				for(int j=0;j<maxpts;j++){
+				for(int j=0;j<npts[i];j++){
 					yvals[i][j]/=max;
 				}
 			}
@@ -48,10 +48,10 @@ public class normalize_trajectories_jru_v1 implements PlugIn {
 			if(normindex==1){
 				for(int i=0;i<nseries;i++){
 					float integral=0.0f;
-					for(int j=0;j<maxpts;j++){
+					for(int j=0;j<npts[i];j++){
 						integral+=yvals[i][j];
 					}
-					for(int j=0;j<maxpts;j++){
+					for(int j=0;j<npts[i];j++){
 						yvals[i][j]/=integral;
 					}
 				}

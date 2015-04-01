@@ -10,12 +10,13 @@ package j3D;
 
 import jalgs.jsort;
 
-import java.awt.*;
-import java.awt.image.*;
-import java.io.ByteArrayOutputStream;
-
-import org.freehep.graphicsio.emf.EMFGraphics2D;
-import org.freehep.graphicsio.ps.PSGraphics2D;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.image.BufferedImage;
+import java.awt.image.MemoryImageSource;
+import java.awt.image.PixelGrabber;
 
 public class renderer implements Cloneable{
 	// this class returns an awt image based on transformations of 3D spots and
@@ -132,9 +133,9 @@ public class renderer implements Cloneable{
 	}
 
 	public void setrotation(int degx1,int degy1,int degz1){
-		degx=(double)degx1;
-		degy=(double)degy1;
-		degz=(double)degz1;
+		degx=degx1;
+		degy=degy1;
+		degz=degz1;
 		double cosx=Math.cos(Math.toRadians(degx));
 		double cosy=Math.cos(Math.toRadians(degy));
 		double cosz=Math.cos(Math.toRadians(-degz));
@@ -147,9 +148,9 @@ public class renderer implements Cloneable{
 	}
 
 	public void setrotation(float degx1,float degy1,float degz1){
-		degx=(double)degx1;
-		degy=(double)degy1;
-		degz=(double)degz1;
+		degx=degx1;
+		degy=degy1;
+		degz=degz1;
 		double cosx=Math.cos(Math.toRadians(degx));
 		double cosy=Math.cos(Math.toRadians(degy));
 		double cosz=Math.cos(Math.toRadians(-degz));
@@ -184,8 +185,8 @@ public class renderer implements Cloneable{
 		v.set_rot_about_vector(costheta,-sintheta,cross[0],cross[1],cross[2],0,0,0);
 		//now rotate about the obervation axis so that the vertical direction is preserved
 		double newlength=Math.sqrt(v.rx*v.rx+v.ry*v.ry);
-		double costheta2=(double)v.ry/newlength;
-		double sintheta2=(double)v.rx/newlength;
+		double costheta2=v.ry/newlength;
+		double sintheta2=v.rx/newlength;
 		for(int i=0;i<elements.length;i++){
 			elements[i].addrotatecossin(0,0,costheta2,0,0,-sintheta2,centerx,centery,centerz);
 		}
@@ -206,9 +207,9 @@ public class renderer implements Cloneable{
 	}
 
 	public void rotate(int dx,int dy,int dz){
-		degx+=(double)dx;
-		degy+=(double)dy;
-		degz+=(double)dz;
+		degx+=dx;
+		degy+=dy;
+		degz+=dz;
 		for(int i=0;i<elements.length;i++){
 			elements[i].rotatedeg(degx,degy,degz,centerx,centery,centerz);
 		}
@@ -216,7 +217,7 @@ public class renderer implements Cloneable{
 
 	public void addrotation(int dx,int dy,int dz){
 		for(int i=0;i<elements.length;i++){
-			elements[i].addrotatedeg((double)dx,(double)dy,(double)dz,centerx,centery,centerz);
+			elements[i].addrotatedeg(dx,dy,dz,centerx,centery,centerz);
 		}
 	}
 	
@@ -232,7 +233,7 @@ public class renderer implements Cloneable{
 		// values
 		float[] zvals=new float[elements.length];
 		for(int i=0;i<elements.length;i++){
-			zvals[i]=(float)elements[i].getzpos();
+			zvals[i]=elements[i].getzpos();
 		}
 		int[] temporder=jsort.javasort_order(zvals);
 		order=new int[elements.length];
@@ -256,47 +257,33 @@ public class renderer implements Cloneable{
 	}
 
 	public byte[] renderEMF(){
-		try{
-			ByteArrayOutputStream os=new ByteArrayOutputStream();
-			EMFGraphics2D g=new EMFGraphics2D(os,new Dimension(width,height));
-			//g=new EMFGraphics2D(os,new Dimension(width,height));
-			g.setDeviceIndependent(true);
-			g.startExport();
-			Color tempcolor=g.getColor();
-			g.setColor(background);
-			g.fillRect(0,0,width,height);
-			g.setColor(tempcolor);
-			setyorder();
-			for(int i=0;i<elements.length;i++){
-				elements[order[i]].drawelement(g);
-			}
-			g.endExport();
-			return os.toByteArray();
-		}catch(Throwable e){
-			return null;
+		RenderVector rv=new RenderVector(width,height,background,0);
+		setyorder();
+		for(int i=0;i<elements.length;i++){
+			rv.drawElement(elements[order[i]]);
 		}
+		rv.endExport();
+		return rv.getByteArray();
 	}
 	
 	public byte[] renderPS(){
-		try{
-			ByteArrayOutputStream os=new ByteArrayOutputStream();
-			PSGraphics2D g=new PSGraphics2D(os,new Dimension(width,height));
-			//g=new PSGraphics2D(os,new Dimension(width,height));
-			g.setDeviceIndependent(true);
-			g.startExport();
-			Color tempcolor=g.getColor();
-			g.setColor(background);
-			g.fillRect(0,0,width,height);
-			g.setColor(tempcolor);
-			setyorder();
-			for(int i=0;i<elements.length;i++){
-				elements[order[i]].drawelement(g);
-			}
-			g.endExport();
-			return os.toByteArray();
-		}catch(Throwable e){
-			return null;
+		RenderVector rv=new RenderVector(width,height,background,1);
+		setyorder();
+		for(int i=0;i<elements.length;i++){
+			rv.drawElement(elements[order[i]]);
 		}
+		rv.endExport();
+		return rv.getByteArray();
+	}
+	
+	public byte[] renderPDF(){
+		RenderVector rv=new RenderVector(width,height,background,2);
+		setyorder();
+		for(int i=0;i<elements.length;i++){
+			rv.drawElement(elements[order[i]]);
+		}
+		rv.endExport();
+		return rv.getByteArray();
 	}
 	
 	public int[] renderrgb(){
@@ -536,7 +523,7 @@ public class renderer implements Cloneable{
 	}
 
 	public Color scalecolor(Color colorval,int scale){
-		float factor=(float)scale/255.0f;
+		float factor=scale/255.0f;
 		int r1=(int)(factor*colorval.getRed());
 		int g1=(int)(factor*colorval.getGreen());
 		int b1=(int)(factor*colorval.getBlue());

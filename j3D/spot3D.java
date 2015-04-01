@@ -8,7 +8,8 @@
 
 package j3D;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
 
 public class spot3D extends element3D implements Cloneable{
 	public point3D point;
@@ -71,7 +72,7 @@ public class spot3D extends element3D implements Cloneable{
 		if(horizon_dist<=0.0){
 			transshapesize=shapesize;
 		}else{
-			double tempz=(double)(point.z-centerz);
+			double tempz=point.z-centerz;
 			double temphordist=(tempz+horizon_dist)/horizon_dist;
 			if(temphordist<=0){
 				transshapesize=0;
@@ -86,7 +87,7 @@ public class spot3D extends element3D implements Cloneable{
 		if(horizon_dist<=0.0){
 			transshapesize=shapesize;
 		}else{
-			double tempz=(double)(centerz-point.z);
+			double tempz=centerz-point.z;
 			double temphordist=(horizon_dist-tempz)/horizon_dist;
 			if(temphordist<=0){
 				transshapesize=0;

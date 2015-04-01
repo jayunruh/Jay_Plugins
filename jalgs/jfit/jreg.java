@@ -1,6 +1,7 @@
 package jalgs.jfit;
 
 public class jreg{
+	//uses the kabsch algorithm
 
 	public Object[] rigid_body_fiducials(float[][] f1,float[][] f2){
 		// start by calculating the centroids
@@ -47,6 +48,10 @@ public class jreg{
 		float[] t=new float[ndims];
 		for(int i=0;i<ndims;i++)
 			t[i]=centroid2[i]-rcentroid1[i];
+		//r is the rotation matrix (ndims x ndims)
+		//t is the translation vector (ndims length)
+		//w is from svd
+		//centroids are simply the centroids of the two data sets
 		return new Object[]{r,t,w,centroid1,centroid2};
 	}
 
@@ -105,14 +110,17 @@ public class jreg{
 		float[] t=new float[ndims];
 		for(int i=0;i<ndims;i++)
 			t[i]=centroid2[i]-rcentroid1[i];
-		return new Object[]{r,t,new Float(s)};
+		//r is the rotation matrix (ndims x ndims)
+		//t is the translation vector (ndims length)
+		//s is the scaling factor
+		return new Object[]{r,t,new Float(s),centroid1,centroid2};
 	}
 
 	public float centroid1D(float[] data){
 		float sum=data[0];
 		for(int i=1;i<data.length;i++)
 			sum+=data[i];
-		return sum/(float)data.length;
+		return sum/data.length;
 	}
 
 	public float[] centroidND(float[][] data){

@@ -8,7 +8,10 @@
 
 package jalgs;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class jsort{
 	// here we have sorting routines. The ones based on the java collections
@@ -213,14 +216,14 @@ public class jsort{
 	public int[] get_order(int[] arr){
 		float[] newarr=new float[arr.length];
 		for(int i=0;i<arr.length;i++)
-			newarr[i]=(float)arr[i];
+			newarr[i]=arr[i];
 		return quicksort_order(newarr);
 	}
 
 	public static int[] get_javasort_order(int[] arr){
 		float[] newarr=new float[arr.length];
 		for(int i=0;i<arr.length;i++)
-			newarr[i]=(float)arr[i];
+			newarr[i]=arr[i];
 		return get_javasort_order(newarr);
 	}
 
@@ -240,6 +243,28 @@ public class jsort{
 		int[] order=new int[arr.length];
 		for(int i=0;i<arr.length;i++){
 			order[i]=list.get(i).get(1).intValue();
+		}
+		return order;
+	}
+	
+	public static int[] get_javasort_order(String[] arr){
+		List<List<Object>> list=new ArrayList<List<Object>>();
+		for(int i=0;i<arr.length;i++){
+			List<Object> temp=new ArrayList<Object>();
+			temp.add(arr[i]);
+			temp.add(new Float(i));
+			list.add(temp);
+		}
+		Collections.sort(list,new Comparator<List<Object>>(){
+			public int compare(List<Object> o1,List<Object> o2){
+				String s1=(String)o1.get(0);
+				String s2=(String)o2.get(0);
+				return s1.compareTo(s2);
+			}
+		});
+		int[] order=new int[arr.length];
+		for(int i=0;i<arr.length;i++){
+			order[i]=((Float)list.get(i).get(1)).intValue();
 		}
 		return order;
 	}
@@ -267,7 +292,7 @@ public class jsort{
 	public static int[] javasort_order(int[] arr){
 		float[] newarr=new float[arr.length];
 		for(int i=0;i<arr.length;i++)
-			newarr[i]=(float)arr[i];
+			newarr[i]=arr[i];
 		int[] order=javasort_order(newarr);
 		for(int i=0;i<arr.length;i++){
 			arr[i]=(int)newarr[i];
@@ -295,12 +320,35 @@ public class jsort{
 		}
 		return order;
 	}
+	
+	public static int[] javasort_order(String[] arr){
+		List<List<Object>> list=new ArrayList<List<Object>>();
+		for(int i=0;i<arr.length;i++){
+			List<Object> temp=new ArrayList<Object>();
+			temp.add(arr[i]);
+			temp.add(new Float(i));
+			list.add(temp);
+		}
+		Collections.sort(list,new Comparator<List<Object>>(){
+			public int compare(List<Object> o1,List<Object> o2){
+				String s1=(String)o1.get(0);
+				String s2=(String)o2.get(0);
+				return s1.compareTo(s2);
+			}
+		});
+		int[] order=new int[arr.length];
+		for(int i=0;i<arr.length;i++){
+			order[i]=((Float)list.get(i).get(1)).intValue();
+			arr[i]=(String)list.get(i).get(0);
+		}
+		return order;
+	}
 
 	public String[] stringsort(String[] list){
 		String startval=list[0];
 		float[] intlist=new float[list.length];
 		for(int i=1;i<list.length;i++){
-			intlist[i]=(float)startval.compareTo(list[i]);
+			intlist[i]=startval.compareTo(list[i]);
 		}
 		int[] neworder=quicksort_order(intlist);
 		String[] temp=new String[list.length];
@@ -345,7 +393,7 @@ public class jsort{
 		String startval=list[0];
 		float[] intlist=new float[list.length];
 		for(int i=1;i<list.length;i++){
-			intlist[i]=(float)startval.compareTo(list[i]);
+			intlist[i]=startval.compareTo(list[i]);
 		}
 		int[] neworder=quicksort_order(intlist);
 		if(update){

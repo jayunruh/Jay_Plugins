@@ -35,8 +35,8 @@ public class complexac{
 		}
 		fft.dopo4fft(real,im,true,true);
 		for(int j=0;j<length;j++){
-			real[j]/=(float)length;
-			im[j]/=(float)length;
+			real[j]/=length;
+			im[j]/=length;
 		}
 	}
 }

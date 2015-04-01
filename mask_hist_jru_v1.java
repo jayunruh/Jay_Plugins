@@ -11,6 +11,7 @@ import ij.gui.*;
 import java.awt.*;
 import ij.plugin.*;
 import jguis.*;
+import jalgs.*;
 
 public class mask_hist_jru_v1 implements PlugIn {
 
@@ -26,8 +27,12 @@ public class mask_hist_jru_v1 implements PlugIn {
 		if(imp2!=null){
 			mask=(float[])((imp2.getProcessor().convertToFloat()).getPixels());
 		} else {
-			mask=new float[width*height];
-			for(int i=0;i<width*height;i++){mask[i]=1.0f;}
+			if(imp1.getRoi()!=null){
+				mask=jstatistics.poly2fmask(imp1.getRoi().getPolygon(),width,height);
+			} else {
+				mask=new float[width*height];
+				for(int i=0;i<width*height;i++){mask[i]=1.0f;}
+			}
 		}
 
 		ImageStack datastack=imp1.getStack();

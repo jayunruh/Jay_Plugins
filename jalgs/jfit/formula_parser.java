@@ -130,7 +130,7 @@ public class formula_parser{
 			for(int j=0;j<nummult[0][i];j++){
 				for(int k=0;k<paramsnames.length;k++){
 					if(terms[i][j].equals(paramsnames[k])){
-						coefficients[i][j]=(double)k;
+						coefficients[i][j]=k;
 						isterm[i][j]=true;
 						break;
 					}
@@ -143,7 +143,7 @@ public class formula_parser{
 				for(int j=5;j<5+nummult[1][i];j++){
 					for(int k=0;k<paramsnames.length;k++){
 						if(terms[i][j].equals(paramsnames[k])){
-							coefficients[i][j]=(double)k;
+							coefficients[i][j]=k;
 							isterm[i][j]=true;
 							break;
 						}
@@ -158,7 +158,7 @@ public class formula_parser{
 			for(int j=0;j<nummult[0][i];j++){
 				for(int k=0;k<paramsnames.length;k++){
 					if(terms[i][j].equals(paramsnames[k])){
-						coefficients[i][j]=(double)k;
+						coefficients[i][j]=k;
 						isterm[i][j]=true;
 						break;
 					}
@@ -171,7 +171,7 @@ public class formula_parser{
 				for(int j=5;j<5+nummult[1][i];j++){
 					for(int k=0;k<paramsnames.length;k++){
 						if(terms[i][j].equals(paramsnames[k])){
-							coefficients[i][j]=(double)k;
+							coefficients[i][j]=k;
 							isterm[i][j]=true;
 							break;
 						}

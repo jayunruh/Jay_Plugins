@@ -45,7 +45,7 @@ public class tricrosscorr{
 			avg+=(double)data[j]/(double)length;
 			avg2+=(double)data2[j]/(double)length;
 			avg3+=(double)data3[j]/(double)length;
-			avggy+=((double)data[j]*(double)data2[j])/(double)length;
+			avggy+=((double)data[j]*(double)data2[j])/length;
 		}
 		fft.realfft(real,im,false);
 		fft.realfft(real2,im2,false);
@@ -71,9 +71,9 @@ public class tricrosscorr{
 		fft.realfft(real2,im2,true);
 		fft.realfft(real3,im3,true);
 		for(int j=0;j<length;j++){
-			real[j]/=(float)(avg*avg2*avg3)*(float)length;
-			real[j]-=real2[j]/((float)(avg*avg3)*(float)length);
-			real[j]-=real3[j]/((float)(avg2*avg3)*(float)length);
+			real[j]/=(float)(avg*avg2*avg3)*length;
+			real[j]-=real2[j]/((float)(avg*avg3)*length);
+			real[j]-=real3[j]/((float)(avg2*avg3)*length);
 			real[j]-=avggy/(float)(avg*avg2);
 			real[j]+=2.0f;
 		}
@@ -101,7 +101,7 @@ public class tricrosscorr{
 			avg+=(double)data[j]/(double)length;
 			avg2+=(double)data2[j]/(double)length;
 			avg3+=(double)data3[j]/(double)length;
-			avggy+=((double)data[j]*(double)data2[j])/(double)length;
+			avggy+=((double)data[j]*(double)data2[j])/length;
 		}
 		fft.realfft(real,im,false);
 		fft.realfft(real2,im2,false);
@@ -127,9 +127,9 @@ public class tricrosscorr{
 		fft.realfft(real2,im2,true);
 		fft.realfft(real3,im3,true);
 		for(int j=0;j<length;j++){
-			real[j]/=(float)(avg*avg2*avg3)*(float)length;
-			real[j]-=real2[j]/((float)(avg*avg3)*(float)length);
-			real[j]-=real3[j]/((float)(avg2*avg3)*(float)length);
+			real[j]/=(float)(avg*avg2*avg3)*length;
+			real[j]-=real2[j]/((float)(avg*avg3)*length);
+			real[j]-=real3[j]/((float)(avg2*avg3)*length);
 			real[j]-=avggy/(float)(avg*avg2);
 			real[j]+=2.0f;
 			if(brightcorrindex==1){

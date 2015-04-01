@@ -62,7 +62,7 @@ public class gridfit{
 			}
 		}else{
 			for(int i=0;i<npts;i++){
-				weights[i]=(double)weights1[i];
+				weights[i]=weights1[i];
 			}
 		}
 		stats[1]=search_param(0,fitparams,params,fixes,constraints,data,weights);
@@ -161,12 +161,12 @@ public class gridfit{
 		int length=data.length;
 		double tempc2=0.0;
 		for(int i=0;i<length;i++){
-			double tempval=(fit[i]-(double)data[i])*(fit[i]-(double)data[i])*weights[i];
+			double tempval=(fit[i]-data[i])*(fit[i]-data[i])*weights[i];
 			if(!Double.isNaN(tempval)){
-				tempc2+=(fit[i]-(double)data[i])*(fit[i]-(double)data[i])*weights[i];
+				tempc2+=(fit[i]-data[i])*(fit[i]-data[i])*weights[i];
 			}
 		}
-		return tempc2/((double)(length-numfit));
+		return tempc2/(length-numfit);
 	}
 
 	public double calculate_c2_params(double[] params,int numfit,float[] data,double[] weights,boolean[] fitmask){
@@ -182,12 +182,12 @@ public class gridfit{
 		int nonfit=0;
 		for(int i=0;i<length;i++){
 			if(!fitmask[i]){
-				tempc2+=(fit[i]-(double)data[i])*(fit[i]-(double)data[i])*weights[i];
+				tempc2+=(fit[i]-data[i])*(fit[i]-data[i])*weights[i];
 			}else{
 				nonfit++;
 			}
 		}
-		return tempc2/((double)(length-nonfit-numfit));
+		return tempc2/(length-nonfit-numfit);
 	}
 
 }

@@ -8,11 +8,12 @@
 
 package jalgs.jseg;
 
-import jalgs.*;
+import jalgs.jstatistics;
 
-import java.util.*;
 import java.awt.Polygon;
 import java.awt.Rectangle;
+import java.util.ArrayList;
+import java.util.List;
 
 public class findblobs3{
 	// this class finds contiguous blobs using a flood fill mechanism
@@ -66,17 +67,31 @@ public class findblobs3{
 		float[] objects=new float[width*height];
 		for(int i=0;i<coords.length;i++){
 			int id=coords.length-i;
-			findblobs.set_circle_val((float)id,objects,coords[coords.length-1-i][0],coords[coords.length-1-i][1],diameter,width,height);
+			findblobs.set_circle_val(id,objects,coords[coords.length-1-i][0],coords[coords.length-1-i][1],diameter,width,height);
 		}
 		nobjects=coords.length;
 		//now set any pixels which are neighbored by different values to zero
 		separateobjects(objects);
 		//and renumber in standard raster discovery order if asked for
-		//if(renumber) renumber_objects(objects);
-		if(renumber){
-			objects=dofindblobs(objects,0.5f);
-		}
+		if(renumber) renumber_objects2(objects);
 		return objects;
+	}
+	
+	public float[] outlines2objects(Polygon[] polys){
+		float[] objects=new float[width*height];
+		for(int i=0;i<polys.length;i++) fillPolygon(objects,polys[i],i+1);
+		nobjects=polys.length;
+		return objects;
+	}
+	
+	public void fillPolygon(float[] objects,Polygon poly,float val){
+		Rectangle r=poly.getBounds();
+		Rectangle r2=new Rectangle(0,0,width,height);
+		for(int j=r.y;j<(r.y+r.height);j++){
+			for(int k=r.x;k<(r.x+r.width);k++){
+				if(r2.contains(k,j) && poly.contains(k,j)) objects[k+j*width]=val;
+			}
+		}
 	}
 
 	public static byte[] threshimage(Object data,float thresh){
@@ -103,7 +118,7 @@ public class findblobs3{
 	public static byte[] threshimage(short[] data,float thresh){
 		byte[] data2=new byte[data.length];
 		for(int i=0;i<data.length;i++){
-			if((float)(data[i]&0xffff)>=thresh)
+			if((data[i]&0xffff)>=thresh)
 				data2[i]=(byte)255;
 			else
 				data2[i]=(byte)0;
@@ -114,7 +129,7 @@ public class findblobs3{
 	public static byte[] threshimage(byte[] data,float thresh){
 		byte[] data2=new byte[data.length];
 		for(int i=0;i<data.length;i++){
-			if((float)(data[i]&0xff)>=thresh)
+			if((data[i]&0xff)>=thresh)
 				data2[i]=(byte)255;
 			else
 				data2[i]=(byte)0;
@@ -210,8 +225,8 @@ public class findblobs3{
 		double length=Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
 		double xinc=(x2-x1)/length;
 		double yinc=(y2-y1)/length;
-		double x=(double)x1;
-		double y=(double)y1;
+		double x=x1;
+		double y=y1;
 		clear_dot(objects,(int)x,(int)y);
 		for(int i=1;i<=(int)length;i++){
 			x+=xinc;
@@ -224,8 +239,8 @@ public class findblobs3{
 		double length=Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
 		double xinc=(x2-x1)/length;
 		double yinc=(y2-y1)/length;
-		double x=(double)x1;
-		double y=(double)y1;
+		double x=x1;
+		double y=y1;
 		clear_dot(objects,(int)x,(int)y,id);
 		for(int i=1;i<=(int)length;i++){
 			x+=xinc;
@@ -248,13 +263,13 @@ public class findblobs3{
 		if(x<1||x>=(width-1)||y<1||y>=(height-1)){
 			return;
 		}
-		if(objects[x+y*width]==(float)id)
+		if(objects[x+y*width]==id)
 			objects[x+y*width]=0.0f;
-		if(objects[x+1+y*width]==(float)id)
+		if(objects[x+1+y*width]==id)
 			objects[x+1+y*width]=0.0f;
-		if(objects[x+(y+1)*width]==(float)id)
+		if(objects[x+(y+1)*width]==id)
 			objects[x+(y+1)*width]=0.0f;
-		if(objects[x+1+(y+1)*width]==(float)id)
+		if(objects[x+1+(y+1)*width]==id)
 			objects[x+1+(y+1)*width]=0.0f;
 	}
 
@@ -277,10 +292,19 @@ public class findblobs3{
 		return stats2;
 	}
 
+	/*********************
+	 * dialates objects without letting them merge
+	 * @param objects: float indexed objects image
+	 */
 	public void dilateobjects(float[] objects){
 		dilateobjects(objects,true);
 	}
 
+	/********************
+	 * dialates objects without letting them merge
+	 * @param objects: float indexed objects image
+	 * @param renumber: whether or not to renumber the objects
+	 */
 	public void dilateobjects(float[] objects,boolean renumber){
 		float[] dilated=new float[objects.length];
 		System.arraycopy(objects,0,dilated,0,objects.length);
@@ -314,13 +338,8 @@ public class findblobs3{
 		separateobjects(dilated);
 		// note we have to refind objects because they may have shifted relative
 		// position
-		if(renumber){
-			byte[] temp=tobinary(dilated,true);
-			float[] temp2=dofindblobs(temp);
-			System.arraycopy(temp2,0,objects,0,width*height);
-		}else{
-			System.arraycopy(dilated,0,objects,0,width*height);
-		}
+		System.arraycopy(dilated,0,objects,0,width*height);
+		if(renumber) renumber_objects(objects);
 	}
 
 	public void dilateobjects2(float[] objects){
@@ -408,6 +427,61 @@ public class findblobs3{
 		}
 		// here we don't refind the objects so that numbering is maintained
 		System.arraycopy(eroded,0,objects,0,width*height);
+	}
+	
+	public float[] binobjects(float[] objects,int binby,boolean renumber){
+		//here we downscale an objects image
+		//binned regions containing one object will be assigned to that object
+		//binned regions containing two or more objects will be set to zero
+		int newwidth=(int)((float)width/(float)binby);
+		int newheight=(int)((float)height/(float)binby);
+		float[] newobjects=new float[newwidth*newheight];
+		for(int i=0;i<newheight;i++){
+			for(int j=0;j<newwidth;j++){
+				float id=0.0f;
+				boolean found1=false;
+				boolean found2=false;
+				for(int k=0;k<binby;k++){
+					for(int l=0;l<binby;l++){
+						float val=objects[j*binby+l+(i*binby+k)*width];
+						if(val>0.0f){
+							if(!found1){
+								id=val;
+								found1=true;
+							} else {
+								if(val!=id) found2=true;
+							}
+						}
+					}
+				}
+				if(found1 && !found2) newobjects[j+i*newwidth]=id;
+			}
+		}
+		width=newwidth;
+		height=newheight;
+		if(renumber) renumber_objects2(newobjects);
+		return newobjects;
+	}
+	
+	/****************
+	 * enlarges the image maintaining object boundaries
+	 * @param objects: the objects images
+	 * @param enlargeby: the scaling factor
+	 */
+	public float[] enlarge(float[] objects,int enlargeby){
+		int newwidth=width*enlargeby;
+		int newheight=height*enlargeby;
+		float[] newobjects=new float[newwidth*newheight];
+		for(int i=0;i<newheight;i++){
+			int oldy=(int)((float)i/(float)enlargeby);
+			for(int j=0;j<newwidth;j++){
+				int oldx=(int)((float)j/(float)enlargeby);
+				newobjects[j+i*newwidth]=objects[oldx+width*oldy];
+			}
+		}
+		width=newwidth;
+		height=newheight;
+		return newobjects;
 	}
 
 	public void closeobjects(float[] objects){
@@ -506,6 +580,7 @@ public class findblobs3{
 		nobjects++;
 		float maxid=maxarray(objects);
 		fill_poly_id(objects,maxid+1.0f,poly);
+		renumber_objects2(objects);
 	}
 
 	public void fill_poly_id(float[] objects,float id,Polygon poly){
@@ -558,14 +633,19 @@ public class findblobs3{
 		}
 	}
 
+	/*************
+	 * adds the polygon region to the object
+	 * @param objects
+	 * @param poly
+	 */
 	public void expand_object(float[] objects,Polygon poly){
-		// first find out which two objects are in the polygon
+		// first find out which object is in the polygon
 		Rectangle bounds=poly.getBounds();
 		float obj1=0.0f;
 		findobj1: for(int i=bounds.y;i<=(bounds.y+bounds.height);i++){
 			for(int j=bounds.x;j<=(bounds.x+bounds.width);j++){
-				if(poly.contains(j,i)&&objects[i]>0.0f){
-					obj1=objects[i];
+				if(poly.contains(j,i)&&objects[j+i*width]>0.0f){
+					obj1=objects[j+i*width];
 					break findobj1;
 				}
 			}
@@ -576,14 +656,19 @@ public class findblobs3{
 		fill_poly_id(objects,obj1,poly);
 	}
 
+	/**********
+	 * here we replace the object partially contained in the polygon with the polygon itself
+	 * @param objects
+	 * @param poly
+	 */
 	public void edit_object(float[] objects,Polygon poly){
-		// first find out which two objects are in the polygon
+		// first find out which object is in the polygon
 		Rectangle bounds=poly.getBounds();
 		float obj1=0.0f;
 		findobj1: for(int i=bounds.y;i<=(bounds.y+bounds.height);i++){
 			for(int j=bounds.x;j<=(bounds.x+bounds.width);j++){
-				if(poly.contains(j,i)&&objects[i]>0.0f){
-					obj1=objects[i];
+				if(poly.contains(j,i)&&objects[j+i*width]>0.0f){
+					obj1=objects[j+i*width];
 					break findobj1;
 				}
 			}
@@ -595,28 +680,44 @@ public class findblobs3{
 		add_object(objects,poly);
 	}
 
+	/***********
+	 * this implementation doesn't necessarily preserve discovery order but is more efficient
+	 * @param objects
+	 */
 	public void renumber_objects(float[] objects){
+		//build a table with the new numbers
 		int maxid=(int)maxarray(objects);
-		boolean[] occupancy=new boolean[maxid+1];
-		for(int i=0;i<width*height;i++){
+		int[] hist=new int[maxid+1];
+		for(int i=0;i<objects.length;i++){
+			if(objects[i]>0.0f) hist[(int)objects[i]]++;
+		}
+		int[] newnumbers=new int[maxid+1];
+		int index=1;
+		for(int i=1;i<hist.length;i++){
+			if(hist[i]>0){
+				newnumbers[i]=index;
+				index++;
+			}
+		}
+		nobjects=index-1;
+		for(int i=0;i<objects.length;i++){
 			if(objects[i]>0.0f){
-				occupancy[(int)objects[i]]=true;
+				int temp=(int)objects[i];
+				objects[i]=newnumbers[temp];
 			}
 		}
-		int counter=0;
-		float[] newids=new float[maxid+1];
-		for(int i=1;i<=maxid;i++){
-			if(occupancy[i]){
-				counter++;
-				newids[i]=(float)counter;
-			}
-		}
-		nobjects=counter;
-		for(int i=0;i<width*height;i++){
-			if(objects[i]>0.0f){
-				objects[i]=newids[(int)objects[i]];
-			}
-		}
+	}
+	
+	/****************
+	 * this version recalculates discovery order but is less efficient
+	 * it also separates objects in the process
+	 * @param objects
+	 */
+	public void renumber_objects2(float[] objects){
+		//this is a less efficient implementation
+		byte[] temp=tobinary(objects,true);
+		float[] temp2=dofindblobs(temp);
+		System.arraycopy(temp2,0,objects,0,width*height);
 	}
 
 	private float maxarray(float[] input){
@@ -763,7 +864,7 @@ public class findblobs3{
 	}
 
 	public int[] getfilllimits(float[] objects,int id,int x,int y){
-		float fid=(float)id;
+		float fid=id;
 		float[] data=objects.clone();
 		stackSize=0;
 		push(x,y);
@@ -851,7 +952,7 @@ public class findblobs3{
 		}
 		for(int x=x1;x<=x2;x++){
 			data[x+y*width]=false;
-			counter[x+y*width]=(float)id;
+			counter[x+y*width]=id;
 		}
 	}
 
@@ -872,7 +973,7 @@ public class findblobs3{
 
 	public void fill_holes(float[] objects,Polygon[] outlines){
 		for(int i=0;i<outlines.length;i++){
-			float id=(float)(i+1);
+			float id=i+1;
 			Rectangle r=outlines[i].getBounds();
 			for(int j=r.y;j<(r.y+r.height);j++){
 				for(int k=r.x;k<(r.x+r.width);k++){
@@ -902,11 +1003,17 @@ public class findblobs3{
 		filter_area(objects,arealims,false);
 	}
 
+	/****************************
+	 * filers out objects that are outside the arealims
+	 * @param objects: the float indexed objects image
+	 * @param arealims: an int array with lower then upper area limits
+	 * @param renumber: whether or not to renumber after filtering
+	 */
 	public void filter_area(float[] objects,int[] arealims,boolean renumber){
 		int[] hist=get_areas(objects);
 		for(int i=0;i<hist.length;i++){
 			if(hist[i]<arealims[0]||hist[i]>arealims[1]){
-				delete_object(objects,(float)(i+1));
+				delete_object(objects,i+1);
 			}
 		}
 		if(renumber)
@@ -951,7 +1058,7 @@ public class findblobs3{
 		float mincirc=limits[2];
 		float maxcirc=limits[3];
 		for(int i=0;i<outlines.length;i++){
-			float id=(float)(i+1);
+			float id=i+1;
 			int area=0;
 			Rectangle r=outlines[i].getBounds();
 			for(int j=r.y;j<(r.y+r.height);j++){
@@ -962,7 +1069,7 @@ public class findblobs3{
 				}
 			}
 			float perimeter=(float)get_perimeter(outlines[i]);
-			float circ=4.0f*(float)Math.PI*((float)area/(perimeter*perimeter));
+			float circ=4.0f*(float)Math.PI*(area/(perimeter*perimeter));
 			if(area<minarea||area>maxarea||circ<mincirc||circ>maxcirc){
 				delete_object(objects,id,r);
 			}
@@ -1067,6 +1174,27 @@ public class findblobs3{
 			output[i]=list.get(i).intValue();
 		return output;
 	}
+	
+	public boolean[] find_clusters(float[] objects){
+		//here we find which objects are "clusters"
+		//these are non-contiguous objects
+		int nobj=(int)maxarray(objects);
+		int oldnblobs=nobjects;
+		boolean[] iscluster=new boolean[nobj];
+		float[] newid=new float[nobj+1];
+		float[] renumbered=dofindblobs(objects,0.5f);
+		for(int i=0;i<objects.length;i++){
+			if(objects[i]>0.0f){
+				int id=(int)objects[i];
+				if(newid[id]==0.0f) newid[id]=renumbered[i];
+				else{
+					if(newid[id]!=renumbered[i]) iscluster[id-1]=true;
+				}
+			}
+		}
+		nobjects=oldnblobs;
+		return iscluster;
+	}
 
 	public float[] get_cluster_stats(float[] clusters,float[] objects,int clusterid,Object measurement,String stat){
 		int[] clusterids=get_cluster_ids(clusters,objects,clusterid);
@@ -1094,7 +1222,7 @@ public class findblobs3{
 	public boolean[] get_object_mask(float[] objects,int id){
 		boolean[] mask=new boolean[width*height];
 		for(int i=0;i<width*height;i++){
-			if(objects[i]==(float)id){
+			if(objects[i]==id){
 				mask[i]=true;
 			}
 		}
@@ -1105,7 +1233,7 @@ public class findblobs3{
 		boolean[] mask=new boolean[width*height];
 		for(int i=lims[2];i<=lims[3];i++){
 			for(int j=lims[0];j<=lims[1];j++){
-				if(objects[j+i*width]==(float)id) mask[j+i*width]=true;
+				if(objects[j+i*width]==id) mask[j+i*width]=true;
 			}
 		}
 		return mask;
@@ -1114,7 +1242,7 @@ public class findblobs3{
 	public byte[] get_object_mask2(float[] objects,int id){
 		byte[] mask=new byte[width*height];
 		for(int i=0;i<width*height;i++){
-			if(objects[i]==(float)id){
+			if(objects[i]==id){
 				mask[i]=(byte)255;
 			}
 		}
@@ -1125,7 +1253,7 @@ public class findblobs3{
 		byte[] mask=new byte[width*height];
 		for(int i=lims[2];i<=lims[3];i++){
 			for(int j=lims[0];j<=lims[1];j++){
-				if(objects[j+i*width]==(float)id) mask[j+i*width]=(byte)255;
+				if(objects[j+i*width]==id) mask[j+i*width]=(byte)255;
 			}
 		}
 		return mask;
@@ -1152,12 +1280,109 @@ public class findblobs3{
 	public Polygon get_object_outline(float[] objects,int id){
 		for(int i=0;i<height;i++){
 			for(int j=0;j<width;j++){
-				if(objects[j+i*width]==(float)id){
+				if(objects[j+i*width]==id){
 					return get_object_outline(objects,j,i);
 				}
 			}
 		}
 		return null;
+	}
+	
+	public Polygon get_cluster_outline(float[] objects,float[] clusters,int clusterid){
+		//this combines fragmented clusters by adding an isthmus between them
+		int[] ids=get_cluster_ids(clusters,objects,clusterid);
+		Polygon[] polys=new Polygon[ids.length];
+		for(int i=0;i<ids.length;i++){
+			polys[i]=get_object_outline(objects,ids[i]);
+		}
+		//now we need to combine all of the polygons by adding an isthmus between them
+		return combine_polygons(polys);
+	}
+	
+	public float[] link_objects(float[] objects,int[] linkids){
+		//here we set all linkids objects equal to the lowest one's id
+		//then need to renumber everything carefully afterwards
+		int tempnobjects=(int)maxarray(objects);
+		int[] hist=new int[tempnobjects+1];
+		int minid=(int)jstatistics.getstatistic("Min",linkids,null);
+		for(int i=0;i<objects.length;i++){
+			if(objects[i]>0.0f){
+    			for(int j=0;j<linkids.length;j++){
+    				if((int)objects[i]==linkids[j]){
+    					objects[i]=(float)minid;
+    					break;
+    				}
+    			}
+    			hist[(int)objects[i]]++;
+			}
+		}
+		//now the renumbering
+		//build a table with the new numbers
+		int[] newnumbers=new int[tempnobjects+1];
+		int index=1;
+		for(int i=1;i<hist.length;i++){
+			if(hist[i]>0){
+				newnumbers[i]=index;
+				index++;
+			}
+		}
+		nobjects=index-1;
+		for(int i=0;i<objects.length;i++){
+			if(objects[i]>0.0f){
+				int temp=(int)objects[i];
+				objects[i]=newnumbers[temp];
+			}
+		}
+		return objects;
+	}
+	
+	public Polygon combine_polygons(Polygon[] polys){
+		Polygon poly=new Polygon(polys[0].xpoints.clone(),polys[0].ypoints.clone(),polys[0].npoints);
+		for(int i=1;i<polys.length;i++){
+			poly=combine_polygons(poly,polys[i]);
+		}
+		return poly;
+	}
+	
+	public Polygon combine_polygons(Polygon poly1,Polygon poly2){
+		//start by finding the closest pair of points
+		int index1=0;
+		int index2=0;
+		float closest2=(poly1.xpoints[0]-poly2.xpoints[0])*(poly1.xpoints[0]-poly2.xpoints[0])+(poly1.ypoints[0]-poly2.ypoints[0])*(poly1.ypoints[0]-poly2.ypoints[0]);
+		for(int i=0;i<poly1.npoints;i++){
+			for(int j=0;j<poly2.npoints;j++){
+				float temp=(poly1.xpoints[i]-poly2.xpoints[j])*(poly1.xpoints[i]-poly2.xpoints[j])+(poly1.ypoints[i]-poly2.ypoints[j])*(poly1.ypoints[i]-poly2.ypoints[j]);
+				if(temp<closest2){
+					closest2=temp;
+					index1=i;
+					index2=j;
+				}
+			}
+		}
+		int[] newxpts=new int[poly1.npoints+poly2.npoints+2];
+		int[] newypts=new int[poly1.npoints+poly2.npoints+2];
+		int counter=0;
+		for(int i=0;i<=index1;i++){
+			newxpts[counter]=poly1.xpoints[i];
+			newypts[counter]=poly1.ypoints[i];
+			counter++;
+		}
+		for(int i=index2;i<poly2.npoints;i++){
+			newxpts[counter]=poly2.xpoints[i];
+			newypts[counter]=poly2.ypoints[i];
+			counter++;
+		}
+		for(int i=0;i<=index2;i++){
+			newxpts[counter]=poly2.xpoints[i];
+			newypts[counter]=poly2.ypoints[i];
+			counter++;
+		}
+		for(int i=index1;i<poly1.npoints;i++){
+			newxpts[counter]=poly1.xpoints[i];
+			newypts[counter]=poly1.ypoints[i];
+			counter++;
+		}
+		return new Polygon(newxpts,newypts,newxpts.length);
 	}
 
 	public Polygon get_object_outline(float[] objects,int x,int y){
@@ -1189,7 +1414,7 @@ public class findblobs3{
 	public int[] get_object_coords(float[] objects,int id){
 		for(int i=0;i<height;i++){
 			for(int j=0;j<width;j++){
-				if(objects[j+i*width]==(float)id){
+				if(objects[j+i*width]==id){
 					int[] temp={j,i};
 					return temp;
 				}

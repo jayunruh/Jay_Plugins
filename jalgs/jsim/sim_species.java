@@ -140,12 +140,12 @@ public class sim_species implements Cloneable{
 			int[] bleach_state=bsteps.clone();
 			coords[0]=(float)random.unidev(set.fboxpixels,0.0);
 			if(set.confineindex<2){
-				coords[1]=(float)random.unidev((double)set.fboxpixels,0.0);
+				coords[1]=(float)random.unidev(set.fboxpixels,0.0);
 			}else{
 				coords[1]=0.5f*set.fboxpixels;
 			}
 			if(set.confineindex!=1&&set.confineindex!=3){
-				coords[2]=(float)random.unidev((double)set.fboxpixels,0.0);
+				coords[2]=(float)random.unidev(set.fboxpixels,0.0);
 			}else{
 				coords[2]=0.5f*set.fboxpixels;
 			}

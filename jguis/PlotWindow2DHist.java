@@ -8,20 +8,33 @@
 
 package jguis;
 
-import java.awt.*;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.GenericDialog;
+import ij.gui.ImageWindow;
+import ij.gui.Roi;
+import ij.process.ColorProcessor;
+import ij.text.TextWindow;
+import jalgs.jdist;
+import jalgs.jstatistics;
+import jalgs.jsim.rngs;
+
+import java.awt.Button;
+import java.awt.FileDialog;
+import java.awt.Font;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.Rectangle;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.ClipboardOwner;
 import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.io.File;
-
-import ij.*;
-import ij.gui.*;
-import ij.process.*;
-import ij.text.TextWindow;
-import jalgs.jstatistics;
-import jalgs.jdist;
 
 /**
  * This class is an extended ImageWindow that displays 2D histograms. This class
@@ -347,6 +360,10 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 		fd.dispose();
 		if(name==null||name==""||directory==null||directory=="")
 			return;
+		if(!name.endsWith(".pw2")){
+			if(name.endsWith(".pw")) name+="2";
+			else name+=".pw2";
+		}
 		imp.setTitle(name);
 		saveAsObject(directory+File.separator+name);
 	}
@@ -430,6 +447,9 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 			GenericDialog gd2=new GenericDialog("Options");
 			gd2.addNumericField("X_Min",mins[0],5,15,null);
 			gd2.addNumericField("Y_Min",mins[1],5,15,null);
+			gd2.addNumericField("N_Trials_For_Errors",10000,0);
+			gd2.addNumericField("Percentile_For_Errors",95.0,5,15,null);
+			gd2.addCheckbox("Show Histograms",true);
 			gd2.showDialog();
 			if(!gd2.wasCanceled()){
 				mins[0]=(float)gd2.getNextNumber();
@@ -439,6 +459,29 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 				IJ.log("Only X Over = "+scores[1]);
 				IJ.log("Only Y Over = "+scores[2]);
 				IJ.log("Both under = "+scores[0]);
+				float tot=scores[0]+scores[1]+scores[2]+scores[3];
+				IJ.log("F Both Over = "+scores[3]/tot);
+				IJ.log("F Only X Over = "+scores[1]/tot);
+				IJ.log("F Only Y Over = "+scores[2]/tot);
+				IJ.log("F Both under = "+scores[0]/tot);
+				int ntrials=(int)gd2.getNextNumber();
+				float percentile=(float)gd2.getNextNumber();
+				float[] fscores={scores[0]/tot,scores[1]/tot,scores[2]/tot,scores[3]/tot};
+				if(ntrials>1){
+					Object[] errs=getQuadsErrs(fscores,(int)tot,ntrials,percentile);
+					float[] errs2=(float[])errs[0];
+					IJ.log("F Both Over Err = "+(errs2[3]-fscores[3]));
+					IJ.log("F Only X Over Err = "+(errs2[1]-fscores[1]));
+					IJ.log("F Only Y Over Err = "+(errs2[2]-fscores[2]));
+					IJ.log("F Both under Err = "+(errs2[0]-fscores[0]));
+					if(gd2.getNextBoolean()){
+						float[][] simdata=(float[][])errs[1];
+						String[] labels={"Both Under Histogram","X Over Histogram","Y Over Histogram","Both Over Histogram"};
+						for(int i=0;i<4;i++){
+							new PlotWindowHist(labels[i],"Counts","Sim Frequency",simdata[i],3).draw();
+						}
+					}
+				}
 			}
 		}
 		if(ascalex){
@@ -458,6 +501,38 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 			scaleroi();
 		}
 		updatePlot();
+	}
+	
+	private Object[] getQuadsErrs(float[] probs,int ntrials,int nsims,float percentile){
+		float[][] simcounts=new float[4][nsims];
+		rngs random=new rngs();
+		for(int i=0;i<nsims;i++){
+			float[] temp=simQuads(probs,ntrials,random);
+			simcounts[0][i]=temp[0];
+			simcounts[1][i]=temp[1];
+			simcounts[2][i]=temp[2];
+			simcounts[3][i]=temp[3];
+		}
+		float[] stats=new float[4];
+		for(int i=0;i<4;i++){
+			float temp1=percentile;
+			stats[i]=jstatistics.getstatistic("Percentile",simcounts[i],new float[]{temp1});
+			stats[i]/=ntrials;
+		}
+		return new Object[]{stats,simcounts};
+	}
+	
+	private float[] simQuads(float[] probs,int ntrials,rngs random){
+		float[] cumprobs={probs[0],probs[0]+probs[1],probs[0]+probs[1]+probs[2]};
+		int[] counts=new int[4];
+		for(int i=0;i<ntrials;i++){
+			float rand=(float)random.unidev(1.0,0.0);
+			if(rand<cumprobs[0]) counts[0]++;
+			else if(rand<cumprobs[1]) counts[1]++;
+			else if(rand<cumprobs[2]) counts[2]++;
+			else counts[3]++;
+		}
+		return new float[]{counts[0],counts[1],counts[2],counts[3]};
 	}
 
 	public void lostOwnership(Clipboard clipboard,Transferable contents){

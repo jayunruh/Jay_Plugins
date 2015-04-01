@@ -38,8 +38,8 @@ public class complexcc{
 		}
 		fft.dopo4fft(real1,im1,true,true);
 		for(int j=0;j<length;j++){
-			real1[j]/=(float)length;
-			im1[j]/=(float)length;
+			real1[j]/=length;
+			im1[j]/=length;
 		}
 	}
 }

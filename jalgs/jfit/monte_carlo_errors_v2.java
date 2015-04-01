@@ -8,7 +8,7 @@
 
 package jalgs.jfit;
 
-import jalgs.jsim.*;
+import jalgs.jsim.rngs;
 
 public class monte_carlo_errors_v2 implements NLLSfitinterface_v2{
 	NLLSfitinterface_v2 fitclass;
@@ -95,7 +95,7 @@ public class monte_carlo_errors_v2 implements NLLSfitinterface_v2{
 			if(weights!=null){
 				for(int j=0;j<fit.length;j++){
 					if(weights[j]>0.0f){
-						float stdev=(float)Math.sqrt(minc2/(double)weights[j]);
+						float stdev=(float)Math.sqrt(minc2/weights[j]);
 						sim[j]+=random.gasdev(0.0,stdev);
 					}
 				}
@@ -146,7 +146,7 @@ public class monte_carlo_errors_v2 implements NLLSfitinterface_v2{
 			for(int j=0;j<fit.length;j++){
 				for(int k=0;k<fit[0].length;k++){
 					if(weights[j][j]>0.0f){
-						float stdev=(float)Math.sqrt(minc2/(double)weights[j][k]);
+						float stdev=(float)Math.sqrt(minc2/weights[j][k]);
 						sim[j][k]+=random.gasdev(0.0,stdev);
 					}
 				}

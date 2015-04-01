@@ -8,9 +8,10 @@
 
 package jguis;
 
-import javax.swing.table.*;
-import javax.swing.*;
-import java.awt.*;
+import java.awt.Component;
+
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableCellRenderer;
 
 public class custom_cell_renderer extends DefaultTableCellRenderer{
 

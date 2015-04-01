@@ -8,14 +8,15 @@
 
 package jalgs;
 
-import java.awt.*;
-import java.util.*;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.util.Arrays;
 
 public class jstatistics{
 	public static final String[] stats={"Avg","Sum","Max","Min","Variance","Median","Mode","StDev","StErr","RelErr","Count","Percentile","ConditionalAvg","Not0Avg","Not0StDev","Not0StErr","Not0Sum",
-			"Not0Count","Not0Min"};
+			"Not0Count","Not0Min","Identity","MaxPos"};
 	public static final String[] stats2={"avg","sum","max","min","variance","median","mode","stdev","sterr","relerr","count","percentile","conditionalavg","not0avg","not0stdev","not0sterr","not0sum",
-			"not0count","not0min"};
+			"not0count","not0min","identity","maxpos"};
 
 	public static float getstatistic(String stat,Object data,int width,int height,Rectangle r,float[] extras){
 		if(data instanceof float[]){
@@ -163,10 +164,10 @@ public class jstatistics{
 			return (float)Math.sqrt(fvar(tempdata));
 		}
 		if(stat.equalsIgnoreCase("sterr")){
-			return (float)Math.sqrt(fvar(tempdata)/(float)tempdata.length);
+			return (float)Math.sqrt(fvar(tempdata)/tempdata.length);
 		}
 		if(stat.equalsIgnoreCase("relerr")){
-			return (float)Math.sqrt(fvar(tempdata)/(float)tempdata.length)/favg(tempdata);
+			return (float)Math.sqrt(fvar(tempdata)/tempdata.length)/favg(tempdata);
 		}
 		if(stat.equalsIgnoreCase("count")){
 			return fcount(tempdata,extras);
@@ -181,13 +182,19 @@ public class jstatistics{
 			return (float)Math.sqrt(fn0var(tempdata)/fn0count(tempdata));
 		}
 		if(stat.equalsIgnoreCase("not0count")){
-			return (float)fn0count(tempdata);
+			return fn0count(tempdata);
 		}
 		if(stat.equalsIgnoreCase("not0sum")){
-			return (float)fn0sum(tempdata);
+			return fn0sum(tempdata);
 		}
 		if(stat.equalsIgnoreCase("not0min")){
-			return (float)fn0min(tempdata);
+			return fn0min(tempdata);
+		}
+		if(stat.equalsIgnoreCase("identity")){
+			return 1.0f;
+		}
+		if(stat.equalsIgnoreCase("maxpos")){
+			return fmaxpos(tempdata);
 		}
 		return 0.0f;
 	}
@@ -226,10 +233,10 @@ public class jstatistics{
 			return (float)Math.sqrt(svar(tempdata));
 		}
 		if(stat.equalsIgnoreCase("sterr")){
-			return (float)Math.sqrt(svar(tempdata)/(float)tempdata.length);
+			return (float)Math.sqrt(svar(tempdata)/tempdata.length);
 		}
 		if(stat.equalsIgnoreCase("relerr")){
-			return (float)Math.sqrt(svar(tempdata)/(float)tempdata.length)/savg(tempdata);
+			return (float)Math.sqrt(svar(tempdata)/tempdata.length)/savg(tempdata);
 		}
 		if(stat.equalsIgnoreCase("count")){
 			return scount(tempdata,extras);
@@ -244,13 +251,19 @@ public class jstatistics{
 			return (float)Math.sqrt(sn0var(tempdata)/sn0count(tempdata));
 		}
 		if(stat.equalsIgnoreCase("not0count")){
-			return (float)sn0count(tempdata);
+			return sn0count(tempdata);
 		}
 		if(stat.equalsIgnoreCase("not0sum")){
-			return (float)sn0sum(tempdata);
+			return sn0sum(tempdata);
 		}
 		if(stat.equalsIgnoreCase("not0min")){
-			return (float)sn0min(tempdata);
+			return sn0min(tempdata);
+		}
+		if(stat.equalsIgnoreCase("identity")){
+			return 1.0f;
+		}
+		if(stat.equalsIgnoreCase("maxpos")){
+			return smaxpos(tempdata);
 		}
 		return 0.0f;
 	}
@@ -289,10 +302,10 @@ public class jstatistics{
 			return (float)Math.sqrt(ivar(tempdata));
 		}
 		if(stat.equalsIgnoreCase("sterr")){
-			return (float)Math.sqrt(ivar(tempdata)/(float)tempdata.length);
+			return (float)Math.sqrt(ivar(tempdata)/tempdata.length);
 		}
 		if(stat.equalsIgnoreCase("relerr")){
-			return (float)Math.sqrt(ivar(tempdata)/(float)tempdata.length)/iavg(tempdata);
+			return (float)Math.sqrt(ivar(tempdata)/tempdata.length)/iavg(tempdata);
 		}
 		if(stat.equalsIgnoreCase("count")){
 			return icount(tempdata,extras);
@@ -307,13 +320,19 @@ public class jstatistics{
 			return (float)Math.sqrt(in0var(tempdata)/in0count(tempdata));
 		}
 		if(stat.equalsIgnoreCase("not0count")){
-			return (float)in0count(tempdata);
+			return in0count(tempdata);
 		}
 		if(stat.equalsIgnoreCase("not0sum")){
-			return (float)in0sum(tempdata);
+			return in0sum(tempdata);
 		}
 		if(stat.equalsIgnoreCase("not0min")){
-			return (float)in0min(tempdata);
+			return in0min(tempdata);
+		}
+		if(stat.equalsIgnoreCase("identity")){
+			return 1.0f;
+		}
+		if(stat.equalsIgnoreCase("maxpos")){
+			return imaxpos(tempdata);
 		}
 		return 0.0f;
 	}
@@ -352,10 +371,10 @@ public class jstatistics{
 			return (float)Math.sqrt(bvar(tempdata));
 		}
 		if(stat.equalsIgnoreCase("sterr")){
-			return (float)Math.sqrt(bvar(tempdata)/(float)tempdata.length);
+			return (float)Math.sqrt(bvar(tempdata)/tempdata.length);
 		}
 		if(stat.equalsIgnoreCase("relerr")){
-			return (float)Math.sqrt(bvar(tempdata)/(float)tempdata.length)/bavg(tempdata);
+			return (float)Math.sqrt(bvar(tempdata)/tempdata.length)/bavg(tempdata);
 		}
 		if(stat.equalsIgnoreCase("count")){
 			return bcount(tempdata,extras);
@@ -370,13 +389,19 @@ public class jstatistics{
 			return (float)Math.sqrt(bn0var(tempdata)/bn0count(tempdata));
 		}
 		if(stat.equalsIgnoreCase("not0count")){
-			return (float)bn0count(tempdata);
+			return bn0count(tempdata);
 		}
 		if(stat.equalsIgnoreCase("not0sum")){
-			return (float)bn0sum(tempdata);
+			return bn0sum(tempdata);
 		}
 		if(stat.equalsIgnoreCase("not0min")){
-			return (float)bn0min(tempdata);
+			return bn0min(tempdata);
+		}
+		if(stat.equalsIgnoreCase("identity")){
+			return 1.0f;
+		}
+		if(stat.equalsIgnoreCase("maxpos")){
+			return bmaxpos(tempdata);
 		}
 		return 0.0f;
 	}
@@ -427,64 +452,64 @@ public class jstatistics{
 		// sort the vector
 		float[] tempdata=values.clone();
 		Arrays.sort(tempdata);
-		if(((float)length%2.0f)==0.0f){
+		if((length%2.0f)==0.0f){
 			return 0.5f*(tempdata[length/2]+tempdata[length/2-1]);
 		}else{
-			return tempdata[(int)((float)length/2.0f)];
+			return tempdata[(int)(length/2.0f)];
 		}
 	}
 
 	public static float imedian(int[] values){
 		int length=values.length;
 		if(length==2){
-			return 0.5f*(float)(values[0]+values[1]);
+			return 0.5f*(values[0]+values[1]);
 		}
 		// sort the vector
 		float[] tempdata=new float[length];
 		for(int i=0;i<length;i++){
-			tempdata[i]=(float)(values[i]);
+			tempdata[i]=(values[i]);
 		}
 		Arrays.sort(tempdata);
-		if(((float)length%2.0f)==0.0f){
+		if((length%2.0f)==0.0f){
 			return 0.5f*(tempdata[length/2]+tempdata[length/2-1]);
 		}else{
-			return tempdata[(int)((float)length/2.0f)];
+			return tempdata[(int)(length/2.0f)];
 		}
 	}
 
 	public static float smedian(short[] values){
 		int length=values.length;
 		if(length==2){
-			return 0.5f*(float)(values[0]&0xffff+values[1]&0xffff);
+			return 0.5f*(values[0]&0xffff+values[1]&0xffff);
 		}
 		// sort the vector
 		float[] tempdata=new float[length];
 		for(int i=0;i<length;i++){
-			tempdata[i]=(float)(values[i]&0xffff);
+			tempdata[i]=values[i]&0xffff;
 		}
 		Arrays.sort(tempdata);
-		if(((float)length%2.0f)==0.0f){
+		if((length%2.0f)==0.0f){
 			return 0.5f*(tempdata[length/2]+tempdata[length/2-1]);
 		}else{
-			return tempdata[(int)((float)length/2.0f)];
+			return tempdata[(int)(length/2.0f)];
 		}
 	}
 
 	public static float bmedian(byte[] values){
 		int length=values.length;
 		if(length==2){
-			return 0.5f*(float)(values[0]&0xff+values[1]&0xff);
+			return 0.5f*(values[0]&0xff+values[1]&0xff);
 		}
 		// sort the vector
 		float[] tempdata=new float[length];
 		for(int i=0;i<length;i++){
-			tempdata[i]=(float)(values[i]&0xff);
+			tempdata[i]=values[i]&0xff;
 		}
 		Arrays.sort(tempdata);
-		if(((float)length%2.0f)==0.0f){
+		if((length%2.0f)==0.0f){
 			return 0.5f*(tempdata[length/2]+tempdata[length/2-1]);
 		}else{
-			return tempdata[(int)((float)length/2.0f)];
+			return tempdata[(int)(length/2.0f)];
 		}
 	}
 
@@ -493,11 +518,11 @@ public class jstatistics{
 		float[] temppercentile;
 		if(percentile==null){
 			temppercentile=new float[1];
-			temppercentile[0]=0.95f*(float)(length-1);
+			temppercentile[0]=0.95f*(length-1);
 		}else{
 			temppercentile=new float[percentile.length];
 			for(int i=0;i<percentile.length;i++){
-				temppercentile[i]=percentile[i]*0.01f*(float)(length-1);
+				temppercentile[i]=percentile[i]*0.01f*(length-1);
 			}
 		}
 		// sort the vector
@@ -507,12 +532,14 @@ public class jstatistics{
 		for(int i=0;i<temppercentile.length;i++){
 			if(temppercentile[i]<=0.0f){
 				percentile2[i]=tempdata[0];
+				continue;
 			}
-			if(temppercentile[i]>=(float)(length-1)){
+			if(temppercentile[i]>=length-1){
 				percentile2[i]=tempdata[length-1];
+				continue;
 			}
 			int prev=(int)temppercentile[i];
-			float rem=temppercentile[i]-(float)prev;
+			float rem=temppercentile[i]-prev;
 			percentile2[i]=tempdata[prev]+rem*(tempdata[prev+1]-tempdata[prev]);
 		}
 		if(percentile!=null)
@@ -526,28 +553,28 @@ public class jstatistics{
 		float[] temppercentile;
 		if(percentile==null){
 			temppercentile=new float[1];
-			temppercentile[0]=0.95f*(float)(length-1);
+			temppercentile[0]=0.95f*(length-1);
 		}else{
 			temppercentile=new float[percentile.length];
 			for(int i=0;i<percentile.length;i++){
-				temppercentile[i]=percentile[i]*0.01f*(float)(length-1);
+				temppercentile[i]=percentile[i]*0.01f*(length-1);
 			}
 		}
 		// sort the vector
 		float[] tempdata=new float[length];
 		for(int i=0;i<length;i++)
-			tempdata[i]=(float)(values[i]);
+			tempdata[i]=(values[i]);
 		Arrays.sort(tempdata);
 		float[] percentile2=new float[temppercentile.length];
 		for(int i=0;i<temppercentile.length;i++){
 			if(temppercentile[i]<=0.0f){
 				percentile2[i]=tempdata[0];
 			}
-			if(temppercentile[i]>=(float)(length-1)){
+			if(temppercentile[i]>=length-1){
 				percentile2[i]=tempdata[length-1];
 			}
 			int prev=(int)temppercentile[i];
-			float rem=temppercentile[i]-(float)prev;
+			float rem=temppercentile[i]-prev;
 			percentile2[i]=tempdata[prev]+rem*(tempdata[prev+1]-tempdata[prev]);
 		}
 		if(percentile!=null)
@@ -561,28 +588,28 @@ public class jstatistics{
 		float[] temppercentile;
 		if(percentile==null){
 			temppercentile=new float[1];
-			temppercentile[0]=0.95f*(float)(length-1);
+			temppercentile[0]=0.95f*(length-1);
 		}else{
 			temppercentile=new float[percentile.length];
 			for(int i=0;i<percentile.length;i++){
-				temppercentile[i]=percentile[i]*0.01f*(float)(length-1);
+				temppercentile[i]=percentile[i]*0.01f*(length-1);
 			}
 		}
 		// sort the vector
 		float[] tempdata=new float[length];
 		for(int i=0;i<length;i++)
-			tempdata[i]=(float)(values[i]&0xffff);
+			tempdata[i]=values[i]&0xffff;
 		Arrays.sort(tempdata);
 		float[] percentile2=new float[temppercentile.length];
 		for(int i=0;i<temppercentile.length;i++){
 			if(temppercentile[i]<=0.0f){
 				percentile2[i]=tempdata[0];
 			}
-			if(temppercentile[i]>=(float)(length-1)){
+			if(temppercentile[i]>=length-1){
 				percentile2[i]=tempdata[length-1];
 			}
 			int prev=(int)temppercentile[i];
-			float rem=temppercentile[i]-(float)prev;
+			float rem=temppercentile[i]-prev;
 			percentile2[i]=tempdata[prev]+rem*(tempdata[prev+1]-tempdata[prev]);
 		}
 		if(percentile!=null)
@@ -596,28 +623,28 @@ public class jstatistics{
 		float[] temppercentile;
 		if(percentile==null){
 			temppercentile=new float[1];
-			temppercentile[0]=0.95f*(float)(length-1);
+			temppercentile[0]=0.95f*(length-1);
 		}else{
 			temppercentile=new float[percentile.length];
 			for(int i=0;i<percentile.length;i++){
-				temppercentile[i]=percentile[i]*0.01f*(float)(length-1);
+				temppercentile[i]=percentile[i]*0.01f*(length-1);
 			}
 		}
 		// sort the vector
 		float[] tempdata=new float[length];
 		for(int i=0;i<length;i++)
-			tempdata[i]=(float)(values[i]&0xff);
+			tempdata[i]=values[i]&0xff;
 		Arrays.sort(tempdata);
 		float[] percentile2=new float[temppercentile.length];
 		for(int i=0;i<temppercentile.length;i++){
 			if(temppercentile[i]<=0.0f){
 				percentile2[i]=tempdata[0];
 			}
-			if(temppercentile[i]>=(float)(length-1)){
+			if(temppercentile[i]>=length-1){
 				percentile2[i]=tempdata[length-1];
 			}
 			int prev=(int)temppercentile[i];
-			float rem=temppercentile[i]-(float)prev;
+			float rem=temppercentile[i]-prev;
 			percentile2[i]=tempdata[prev]+rem*(tempdata[prev+1]-tempdata[prev]);
 		}
 		if(percentile!=null)
@@ -629,6 +656,7 @@ public class jstatistics{
 	public static float fmax(float[] data){
 		float tempmax=0.0f;
 		tempmax=data[0];
+		if(Float.isNaN(tempmax)) tempmax=0.0f; //this is a pretty big assumption
 		for(int i=0;i<data.length;i++){
 			if(!Float.isInfinite(data[i])){
 				if(!Float.isNaN(data[i])){
@@ -643,9 +671,9 @@ public class jstatistics{
 
 	public static float imax(int[] data){
 		float tempmax=0.0f;
-		tempmax=(float)data[0];
+		tempmax=data[0];
 		for(int i=0;i<data.length;i++){
-			float temp=(float)data[i];
+			float temp=data[i];
 			if(temp>tempmax){
 				tempmax=temp;
 			}
@@ -655,9 +683,9 @@ public class jstatistics{
 
 	public static float smax(short[] data){
 		float tempmax=0.0f;
-		tempmax=(float)(data[0]&0xffff);
+		tempmax=data[0]&0xffff;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xffff);
+			float temp=data[i]&0xffff;
 			if(temp>tempmax){
 				tempmax=temp;
 			}
@@ -667,19 +695,80 @@ public class jstatistics{
 
 	public static float bmax(byte[] data){
 		float tempmax=0.0f;
-		tempmax=(float)(data[0]&0xff);
+		tempmax=data[0]&0xff;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xff);
+			float temp=data[i]&0xff;
 			if(temp>tempmax){
 				tempmax=temp;
 			}
 		}
 		return tempmax;
 	}
+	
+	public static float fmaxpos(float[] data){
+		float tempmax=0.0f;
+		tempmax=data[0];
+		int pos=0;
+		if(Float.isNaN(tempmax)) tempmax=0.0f; //this is a pretty big assumption
+		for(int i=0;i<data.length;i++){
+			if(!Float.isInfinite(data[i])){
+				if(!Float.isNaN(data[i])){
+					if(data[i]>tempmax){
+						tempmax=data[i];
+						pos=i;
+					}
+				}
+			}
+		}
+		return pos;
+	}
+
+	public static float imaxpos(int[] data){
+		float tempmax=0.0f;
+		tempmax=data[0];
+		int pos=0;
+		for(int i=0;i<data.length;i++){
+			float temp=data[i];
+			if(temp>tempmax){
+				tempmax=temp;
+				pos=i;
+			}
+		}
+		return pos;
+	}
+
+	public static float smaxpos(short[] data){
+		float tempmax=0.0f;
+		tempmax=data[0]&0xffff;
+		int pos=0;
+		for(int i=0;i<data.length;i++){
+			float temp=data[i]&0xffff;
+			if(temp>tempmax){
+				tempmax=temp;
+				pos=i;
+			}
+		}
+		return pos;
+	}
+
+	public static float bmaxpos(byte[] data){
+		float tempmax=0.0f;
+		tempmax=data[0]&0xff;
+		int pos=0;
+		for(int i=0;i<data.length;i++){
+			float temp=data[i]&0xff;
+			if(temp>tempmax){
+				tempmax=temp;
+				pos=0;
+			}
+		}
+		return pos;
+	}
 
 	public static float fmin(float[] data){
 		float tempmin=0.0f;
 		tempmin=data[0];
+		if(Float.isNaN(tempmin)) tempmin=0.0f;
 		for(int i=0;i<data.length;i++){
 			if(!Float.isInfinite(data[i])){
 				if(!Float.isNaN(data[i])){
@@ -694,9 +783,9 @@ public class jstatistics{
 
 	public static float imin(int[] data){
 		float tempmin=0.0f;
-		tempmin=(float)(data[0]);
+		tempmin=(data[0]);
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]);
+			float temp=(data[i]);
 			if(temp<tempmin){
 				tempmin=temp;
 			}
@@ -706,9 +795,9 @@ public class jstatistics{
 
 	public static float smin(short[] data){
 		float tempmin=0.0f;
-		tempmin=(float)(data[0]&0xffff);
+		tempmin=data[0]&0xffff;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xffff);
+			float temp=data[i]&0xffff;
 			if(temp<tempmin){
 				tempmin=temp;
 			}
@@ -718,9 +807,9 @@ public class jstatistics{
 
 	public static float bmin(byte[] data){
 		float tempmin=0.0f;
-		tempmin=(float)(data[0]&0xff);
+		tempmin=data[0]&0xff;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xff);
+			float temp=data[i]&0xff;
 			if(temp<tempmin){
 				tempmin=temp;
 			}
@@ -733,7 +822,7 @@ public class jstatistics{
 		for(int i=0;i<data.length;i++){
 			if(!Float.isInfinite(data[i])){
 				if(!Float.isNaN(data[i])){
-					tempsum+=(double)data[i];
+					tempsum+=data[i];
 				}
 			}
 		}
@@ -743,8 +832,8 @@ public class jstatistics{
 	public static float isum(int[] data){
 		double tempsum=0.0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]);
-			tempsum+=(double)temp;
+			float temp=(data[i]);
+			tempsum+=temp;
 		}
 		return (float)tempsum;
 	}
@@ -752,8 +841,8 @@ public class jstatistics{
 	public static float ssum(short[] data){
 		double tempsum=0.0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xffff);
-			tempsum+=(double)temp;
+			float temp=data[i]&0xffff;
+			tempsum+=temp;
 		}
 		return (float)tempsum;
 	}
@@ -761,8 +850,8 @@ public class jstatistics{
 	public static float bsum(byte[] data){
 		double tempsum=0.0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xff);
-			tempsum+=(double)temp;
+			float temp=data[i]&0xff;
+			tempsum+=temp;
 		}
 		return (float)tempsum;
 	}
@@ -774,14 +863,14 @@ public class jstatistics{
 		for(int i=0;i<data.length;i++){
 			if(!Float.isInfinite(data[i])){
 				if(!Float.isNaN(data[i])){
-					tempavg+=(double)data[i];
-					avgsq+=(double)(data[i]*data[i]);
+					tempavg+=data[i];
+					avgsq+=data[i]*data[i];
 					length++;
 				}
 			}
 		}
-		tempavg/=(double)length;
-		avgsq/=(double)length;
+		tempavg/=length;
+		avgsq/=length;
 		avgsq-=tempavg*tempavg;
 		avgsq*=((double)length/(double)(length-1));
 		return (float)avgsq;
@@ -792,13 +881,13 @@ public class jstatistics{
 		double avgsq=0.0;
 		int length=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]);
-			tempavg+=(double)temp;
-			avgsq+=(double)(temp*temp);
+			float temp=(data[i]);
+			tempavg+=temp;
+			avgsq+=temp*temp;
 			length++;
 		}
-		tempavg/=(double)length;
-		avgsq/=(double)length;
+		tempavg/=length;
+		avgsq/=length;
 		avgsq-=tempavg*tempavg;
 		avgsq*=((double)length/(double)(length-1));
 		return (float)avgsq;
@@ -809,13 +898,13 @@ public class jstatistics{
 		double avgsq=0.0;
 		int length=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xffff);
-			tempavg+=(double)temp;
-			avgsq+=(double)(temp*temp);
+			float temp=data[i]&0xffff;
+			tempavg+=temp;
+			avgsq+=temp*temp;
 			length++;
 		}
-		tempavg/=(double)length;
-		avgsq/=(double)length;
+		tempavg/=length;
+		avgsq/=length;
 		avgsq-=tempavg*tempavg;
 		avgsq*=((double)length/(double)(length-1));
 		return (float)avgsq;
@@ -826,13 +915,13 @@ public class jstatistics{
 		double avgsq=0.0;
 		int length=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xff);
-			tempavg+=(double)temp;
-			avgsq+=(double)(temp*temp);
+			float temp=data[i]&0xff;
+			tempavg+=temp;
+			avgsq+=temp*temp;
 			length++;
 		}
-		tempavg/=(double)length;
-		avgsq/=(double)length;
+		tempavg/=length;
+		avgsq/=length;
 		avgsq-=tempavg*tempavg;
 		avgsq*=((double)length/(double)(length-1));
 		return (float)avgsq;
@@ -846,15 +935,15 @@ public class jstatistics{
 			if(!Float.isInfinite(data[i])){
 				if(!Float.isNaN(data[i])){
 					if(data[i]!=0.0f){
-						tempavg+=(double)data[i];
-						avgsq+=(double)(data[i]*data[i]);
+						tempavg+=data[i];
+						avgsq+=data[i]*data[i];
 						length++;
 					}
 				}
 			}
 		}
-		tempavg/=(double)length;
-		avgsq/=(double)length;
+		tempavg/=length;
+		avgsq/=length;
 		avgsq-=tempavg*tempavg;
 		avgsq*=((double)length/(double)(length-1));
 		return (float)avgsq;
@@ -865,15 +954,15 @@ public class jstatistics{
 		double avgsq=0.0;
 		int length=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]);
+			float temp=(data[i]);
 			if(temp!=0.0f){
-				tempavg+=(double)temp;
-				avgsq+=(double)(temp*temp);
+				tempavg+=temp;
+				avgsq+=temp*temp;
 				length++;
 			}
 		}
-		tempavg/=(double)length;
-		avgsq/=(double)length;
+		tempavg/=length;
+		avgsq/=length;
 		avgsq-=tempavg*tempavg;
 		avgsq*=((double)length/(double)(length-1));
 		return (float)avgsq;
@@ -884,15 +973,15 @@ public class jstatistics{
 		double avgsq=0.0;
 		int length=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xffff);
+			float temp=data[i]&0xffff;
 			if(temp!=0.0f){
-				tempavg+=(double)temp;
-				avgsq+=(double)(temp*temp);
+				tempavg+=temp;
+				avgsq+=temp*temp;
 				length++;
 			}
 		}
-		tempavg/=(double)length;
-		avgsq/=(double)length;
+		tempavg/=length;
+		avgsq/=length;
 		avgsq-=tempavg*tempavg;
 		avgsq*=((double)length/(double)(length-1));
 		return (float)avgsq;
@@ -903,15 +992,15 @@ public class jstatistics{
 		double avgsq=0.0;
 		int length=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xff);
+			float temp=data[i]&0xff;
 			if(temp!=0.0f){
-				tempavg+=(double)temp;
-				avgsq+=(double)(temp*temp);
+				tempavg+=temp;
+				avgsq+=temp*temp;
 				length++;
 			}
 		}
-		tempavg/=(double)length;
-		avgsq/=(double)length;
+		tempavg/=length;
+		avgsq/=length;
 		avgsq-=tempavg*tempavg;
 		avgsq*=((double)length/(double)(length-1));
 		return (float)avgsq;
@@ -933,7 +1022,7 @@ public class jstatistics{
 			histogram[j]=0;
 		}
 		for(int i=0;i<data.length;i++){
-			int histval=(int)(((data[i]-histstart)/(histend-histstart))*(float)histbins);
+			int histval=(int)(((data[i]-histstart)/(histend-histstart))*histbins);
 			if(histval>=0&&histval<histbins){
 				histogram[histval]++;
 			}
@@ -946,7 +1035,7 @@ public class jstatistics{
 				histmaxval=j;
 			}
 		}
-		return (((float)histmaxval+0.5f)/(float)histbins)*(histend-histstart)+histstart;
+		return ((histmaxval+0.5f)/histbins)*(histend-histstart)+histstart;
 	}
 
 	public static float imode(int[] data,float[] extras){
@@ -965,8 +1054,8 @@ public class jstatistics{
 			histogram[j]=0;
 		}
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]);
-			int histval=(int)(((temp-histstart)/(histend-histstart))*(float)histbins);
+			float temp=(data[i]);
+			int histval=(int)(((temp-histstart)/(histend-histstart))*histbins);
 			if(histval>=0&&histval<histbins){
 				histogram[histval]++;
 			}
@@ -979,7 +1068,7 @@ public class jstatistics{
 				histmaxval=j;
 			}
 		}
-		return (((float)histmaxval+0.5f)/(float)histbins)*(histend-histstart)+histstart;
+		return ((histmaxval+0.5f)/histbins)*(histend-histstart)+histstart;
 	}
 
 	public static float smode(short[] data,float[] extras){
@@ -998,8 +1087,8 @@ public class jstatistics{
 			histogram[j]=0;
 		}
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xffff);
-			int histval=(int)(((temp-histstart)/(histend-histstart))*(float)histbins);
+			float temp=data[i]&0xffff;
+			int histval=(int)(((temp-histstart)/(histend-histstart))*histbins);
 			if(histval>=0&&histval<histbins){
 				histogram[histval]++;
 			}
@@ -1012,7 +1101,7 @@ public class jstatistics{
 				histmaxval=j;
 			}
 		}
-		return (((float)histmaxval+0.5f)/(float)histbins)*(histend-histstart)+histstart;
+		return ((histmaxval+0.5f)/histbins)*(histend-histstart)+histstart;
 	}
 
 	public static float bmode(byte[] data,float[] extras){
@@ -1031,8 +1120,8 @@ public class jstatistics{
 			histogram[j]=0;
 		}
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xff);
-			int histval=(int)(((temp-histstart)/(histend-histstart))*(float)histbins);
+			float temp=data[i]&0xff;
+			int histval=(int)(((temp-histstart)/(histend-histstart))*histbins);
 			if(histval>=0&&histval<histbins){
 				histogram[histval]++;
 			}
@@ -1045,7 +1134,7 @@ public class jstatistics{
 				histmaxval=j;
 			}
 		}
-		return (((float)histmaxval+0.5f)/(float)histbins)*(histend-histstart)+histstart;
+		return ((histmaxval+0.5f)/histbins)*(histend-histstart)+histstart;
 	}
 
 	public static float fcondavg(float[] data,float[] extras){
@@ -1062,13 +1151,13 @@ public class jstatistics{
 			if(!Float.isInfinite(data[i])){
 				if(!Float.isNaN(data[i])){
 					if(data[i]>=lower&&data[i]<=upper){
-						tempavg+=(double)data[i];
+						tempavg+=data[i];
 						counter++;
 					}
 				}
 			}
 		}
-		return (float)(tempavg/(double)counter);
+		return (float)(tempavg/counter);
 	}
 
 	public static float icondavg(int[] data,float[] extras){
@@ -1082,13 +1171,13 @@ public class jstatistics{
 		double tempavg=0.0;
 		int counter=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]);
+			float temp=(data[i]);
 			if(temp>=lower&&temp<=upper){
-				tempavg+=(double)temp;
+				tempavg+=temp;
 				counter++;
 			}
 		}
-		return (float)(tempavg/(double)counter);
+		return (float)(tempavg/counter);
 	}
 
 	public static float scondavg(short[] data,float[] extras){
@@ -1102,13 +1191,13 @@ public class jstatistics{
 		double tempavg=0.0;
 		int counter=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xffff);
+			float temp=data[i]&0xffff;
 			if(temp>=lower&&temp<=upper){
-				tempavg+=(double)temp;
+				tempavg+=temp;
 				counter++;
 			}
 		}
-		return (float)(tempavg/(double)counter);
+		return (float)(tempavg/counter);
 	}
 
 	public static float bcondavg(byte[] data,float[] extras){
@@ -1122,13 +1211,13 @@ public class jstatistics{
 		double tempavg=0.0;
 		int counter=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xff);
+			float temp=data[i]&0xff;
 			if(temp>=lower&&temp<=upper){
-				tempavg+=(double)temp;
+				tempavg+=temp;
 				counter++;
 			}
 		}
-		return (float)(tempavg/(double)counter);
+		return (float)(tempavg/counter);
 	}
 
 	public static float fn0avg(float[] data){
@@ -1138,52 +1227,52 @@ public class jstatistics{
 			if(!Float.isInfinite(data[i])){
 				if(!Float.isNaN(data[i])){
 					if(data[i]!=0.0f){
-						tempavg+=(double)data[i];
+						tempavg+=data[i];
 						counter++;
 					}
 				}
 			}
 		}
-		return (float)(tempavg/(double)counter);
+		return (float)(tempavg/counter);
 	}
 
 	public static float in0avg(int[] data){
 		double tempavg=0.0;
 		int counter=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]);
+			float temp=(data[i]);
 			if(temp!=0.0f){
-				tempavg+=(double)temp;
+				tempavg+=temp;
 				counter++;
 			}
 		}
-		return (float)(tempavg/(double)counter);
+		return (float)(tempavg/counter);
 	}
 
 	public static float sn0avg(short[] data){
 		double tempavg=0.0;
 		int counter=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xffff);
+			float temp=data[i]&0xffff;
 			if(temp!=0.0f){
-				tempavg+=(double)temp;
+				tempavg+=temp;
 				counter++;
 			}
 		}
-		return (float)(tempavg/(double)counter);
+		return (float)(tempavg/counter);
 	}
 
 	public static float bn0avg(byte[] data){
 		double tempavg=0.0;
 		int counter=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xff);
+			float temp=data[i]&0xff;
 			if(temp!=0.0f){
-				tempavg+=(double)temp;
+				tempavg+=temp;
 				counter++;
 			}
 		}
-		return (float)(tempavg/(double)counter);
+		return (float)(tempavg/counter);
 	}
 
 	public static float fn0sum(float[] data){
@@ -1192,7 +1281,7 @@ public class jstatistics{
 			if(!Float.isInfinite(data[i])){
 				if(!Float.isNaN(data[i])){
 					if(data[i]!=0.0f){
-						tempavg+=(double)data[i];
+						tempavg+=data[i];
 					}
 				}
 			}
@@ -1203,9 +1292,9 @@ public class jstatistics{
 	public static float in0sum(int[] data){
 		double tempavg=0.0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]);
+			float temp=(data[i]);
 			if(temp!=0.0f){
-				tempavg+=(double)temp;
+				tempavg+=temp;
 			}
 		}
 		return (float)tempavg;
@@ -1214,9 +1303,9 @@ public class jstatistics{
 	public static float sn0sum(short[] data){
 		double tempavg=0.0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xffff);
+			float temp=data[i]&0xffff;
 			if(temp!=0.0f){
-				tempavg+=(double)temp;
+				tempavg+=temp;
 			}
 		}
 		return (float)tempavg;
@@ -1225,9 +1314,9 @@ public class jstatistics{
 	public static float bn0sum(byte[] data){
 		double tempavg=0.0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xff);
+			float temp=data[i]&0xff;
 			if(temp!=0.0f){
-				tempavg+=(double)temp;
+				tempavg+=temp;
 			}
 		}
 		return (float)tempavg;
@@ -1235,7 +1324,7 @@ public class jstatistics{
 
 	public static float fcount(float[] data,float[] extras){
 		if(extras==null)
-			return (float)data.length;
+			return data.length;
 		int counter=0;
 		for(int i=0;i<data.length;i++){
 			if(!Float.isInfinite(data[i])){
@@ -1246,7 +1335,7 @@ public class jstatistics{
 				}
 			}
 		}
-		return (float)counter;
+		return counter;
 	}
 
 	public static float icount(int[] data,float[] extras){
@@ -1254,12 +1343,12 @@ public class jstatistics{
 			return data.length;
 		int counter=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]);
+			float temp=(data[i]);
 			if(temp>=extras[1]&&temp<=extras[0]){
 				counter++;
 			}
 		}
-		return (float)counter;
+		return counter;
 	}
 
 	public static float scount(short[] data,float[] extras){
@@ -1267,12 +1356,12 @@ public class jstatistics{
 			return data.length;
 		int counter=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xffff);
+			float temp=data[i]&0xffff;
 			if(temp>=extras[1]&&temp<=extras[0]){
 				counter++;
 			}
 		}
-		return (float)counter;
+		return counter;
 	}
 
 	public static float bcount(byte[] data,float[] extras){
@@ -1280,12 +1369,12 @@ public class jstatistics{
 			return data.length;
 		int counter=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xff);
+			float temp=data[i]&0xff;
 			if(temp>=extras[1]&&temp<=extras[0]){
 				counter++;
 			}
 		}
-		return (float)counter;
+		return counter;
 	}
 
 	public static float fn0count(float[] data){
@@ -1299,40 +1388,40 @@ public class jstatistics{
 				}
 			}
 		}
-		return (float)counter;
+		return counter;
 	}
 
 	public static float in0count(int[] data){
 		int counter=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]);
+			float temp=(data[i]);
 			if(temp!=0.0f){
 				counter++;
 			}
 		}
-		return (float)counter;
+		return counter;
 	}
 
 	public static float sn0count(short[] data){
 		int counter=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xffff);
+			float temp=data[i]&0xffff;
 			if(temp!=0.0f){
 				counter++;
 			}
 		}
-		return (float)counter;
+		return counter;
 	}
 
 	public static float bn0count(byte[] data){
 		int counter=0;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xff);
+			float temp=data[i]&0xff;
 			if(temp!=0.0f){
 				counter++;
 			}
 		}
-		return (float)counter;
+		return counter;
 	}
 
 	public static float fn0min(float[] data){
@@ -1359,7 +1448,7 @@ public class jstatistics{
 		boolean first=true;
 		float min=0.0f;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]);
+			float temp=(data[i]);
 			if(temp!=0.0f){
 				if(first){
 					min=temp;
@@ -1376,7 +1465,7 @@ public class jstatistics{
 		boolean first=true;
 		float min=0.0f;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xffff);
+			float temp=data[i]&0xffff;
 			if(temp!=0.0f){
 				if(first){
 					min=temp;
@@ -1393,7 +1482,7 @@ public class jstatistics{
 		boolean first=true;
 		float min=0.0f;
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xff);
+			float temp=data[i]&0xff;
 			if(temp!=0.0f){
 				if(first){
 					min=temp;
@@ -1649,6 +1738,32 @@ public class jstatistics{
 		}
 		return retarray;
 	}
+	
+	public static boolean[] poly2mask(Polygon poly,int width,int height){
+		Rectangle r=poly.getBounds();
+		boolean[] mask=new boolean[width*height];
+		for(int i=r.y;i<(r.y+r.height);i++){
+			for(int j=r.x;j<(r.x+r.width);j++){
+				if(poly.contains(j,i)){
+					mask[j+i*width]=true;
+				}
+			}
+		}
+		return mask;
+	}
+	
+	public static float[] poly2fmask(Polygon poly,int width,int height){
+		Rectangle r=poly.getBounds();
+		float[] mask=new float[width*height];
+		for(int i=r.y;i<(r.y+r.height);i++){
+			for(int j=r.x;j<(r.x+r.width);j++){
+				if(poly.contains(j,i)){
+					mask[j+i*width]=1.0f;
+				}
+			}
+		}
+		return mask;
+	}
 
 	public static int getmaskarea(Polygon poly){
 		Rectangle r=poly.getBounds();
@@ -1706,7 +1821,7 @@ public class jstatistics{
 		}
 		int[] histogram=new int[histbins];
 		for(int i=0;i<data.length;i++){
-			int histval=(int)(((data[i]-histstart)/(histend-histstart))*(float)histbins);
+			int histval=(int)(((data[i]-histstart)/(histend-histstart))*histbins);
 			if(histval>=0&&histval<histbins){
 				histogram[histval]++;
 			}
@@ -1727,8 +1842,8 @@ public class jstatistics{
 		}
 		int[] histogram=new int[histbins];
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]);
-			int histval=(int)(((temp-histstart)/(histend-histstart))*(float)histbins);
+			float temp=(data[i]);
+			int histval=(int)(((temp-histstart)/(histend-histstart))*histbins);
 			if(histval>=0&&histval<histbins){
 				histogram[histval]++;
 			}
@@ -1749,8 +1864,8 @@ public class jstatistics{
 		}
 		int[] histogram=new int[histbins];
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xffff);
-			int histval=(int)(((temp-histstart)/(histend-histstart))*(float)histbins);
+			float temp=data[i]&0xffff;
+			int histval=(int)(((temp-histstart)/(histend-histstart))*histbins);
 			if(histval>=0&&histval<histbins){
 				histogram[histval]++;
 			}
@@ -1771,8 +1886,8 @@ public class jstatistics{
 		}
 		int[] histogram=new int[histbins];
 		for(int i=0;i<data.length;i++){
-			float temp=(float)(data[i]&0xff);
-			int histval=(int)(((temp-histstart)/(histend-histstart))*(float)histbins);
+			float temp=data[i]&0xff;
+			int histval=(int)(((temp-histstart)/(histend-histstart))*histbins);
 			if(histval>=0&&histval<histbins){
 				histogram[histval]++;
 			}
@@ -1785,15 +1900,15 @@ public class jstatistics{
 		float histstart=extras[1];
 		float histend=extras[2];
 		float[] xvals=new float[histbins];
-		float binsize=(histend-histstart)/(float)histbins;
+		float binsize=(histend-histstart)/histbins;
 		for(int i=0;i<histbins;i++){
 			if(position==0){
-				xvals[i]=histstart+(float)i*binsize;
+				xvals[i]=histstart+i*binsize;
 			}else{
 				if(position==1){
-					xvals[i]=histstart+(float)i*binsize+0.5f*binsize;
+					xvals[i]=histstart+i*binsize+0.5f*binsize;
 				}else{
-					xvals[i]=histstart+(float)(i+1)*binsize;
+					xvals[i]=histstart+(i+1)*binsize;
 				}
 			}
 		}
@@ -1814,9 +1929,9 @@ public class jstatistics{
 	}
 
 	public static float[] getminmax(int[] data){
-		float[] minmax={(float)(data[0]),(float)(data[0])};
+		float[] minmax={(data[0]),(data[0])};
 		for(int i=1;i<data.length;i++){
-			float temp=(float)(data[i]);
+			float temp=(data[i]);
 			if(temp<minmax[0]){
 				minmax[0]=temp;
 			}
@@ -1828,9 +1943,9 @@ public class jstatistics{
 	}
 
 	public static float[] getminmax(short[] data){
-		float[] minmax={(float)(data[0]&0xffff),(float)(data[0]&0xffff)};
+		float[] minmax={data[0]&0xffff,data[0]&0xffff};
 		for(int i=1;i<data.length;i++){
-			float temp=(float)(data[i]&0xffff);
+			float temp=data[i]&0xffff;
 			if(temp<minmax[0]){
 				minmax[0]=temp;
 			}
@@ -1842,9 +1957,9 @@ public class jstatistics{
 	}
 
 	public static float[] getminmax(byte[] data){
-		float[] minmax={(float)(data[0]&0xff),(float)(data[0]&0xff)};
+		float[] minmax={data[0]&0xff,data[0]&0xff};
 		for(int i=1;i<data.length;i++){
-			float temp=(float)(data[i]&0xff);
+			float temp=data[i]&0xff;
 			if(temp<minmax[0]){
 				minmax[0]=temp;
 			}

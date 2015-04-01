@@ -8,6 +8,7 @@
 
 package jalgs.jfft;
 
+
 public class manipulate_quads{
 
 	public float[] shiftxcenter(float[] data,int width,int height){
@@ -54,6 +55,50 @@ public class manipulate_quads{
 			}
 		}
 		return temp;
+	}
+	
+	public static float[] shiftxycenter(float[] data,int xc,int yc,int width,int height){
+		int shiftx=xc-width/2;
+		int shifty=yc-height/2;
+		float[] newdata=new float[width*height];
+		for(int i=0;i<height;i++){
+			int ypos=i+shifty;
+			if(ypos>height) ypos-=height;
+			if(ypos<0) ypos+=height;
+			for(int j=0;j<width;j++){
+				int xpos=j+shiftx;
+				if(xpos>width) xpos-=width;
+				if(xpos<0) xpos+=width;
+				newdata[j+i*width]=data[xpos+ypos*width];
+			}
+		}
+		return newdata;
+	}
+	
+	public static Object[] shiftxyzcenter(Object[] stack,int xc,int yc,int zc,int width,int height){
+		int shiftx=xc-width/2;
+		int shifty=yc-height/2;
+		int shiftz=zc-stack.length/2;
+		float[][] newdata=new float[stack.length][width*height];
+		for(int i=0;i<stack.length;i++){
+			int zpos=i+shiftz;
+			if(zpos>=stack.length) zpos-=stack.length;
+			if(zpos<0) zpos+=stack.length;
+			for(int j=0;j<height;j++){
+				int ypos=j+shifty;
+				if(ypos>=height) ypos-=height;
+				if(ypos<0) ypos+=height;
+				int yindex=ypos*width;
+				int jindex=j*width;
+				for(int k=0;k<width;k++){
+					int xpos=k+shiftx;
+					if(xpos>=width) xpos-=width;
+					if(xpos<0) xpos+=width;
+					newdata[i][k+jindex]=((float[])stack[zpos])[xpos+yindex];
+				}
+			}
+		}
+		return newdata;
 	}
 
 	public float[] avgquadrants(float[] data,int width,int height){

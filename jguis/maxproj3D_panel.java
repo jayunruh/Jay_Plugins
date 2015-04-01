@@ -8,17 +8,38 @@
 
 package jguis;
 
-import j3D.*;
+import ij.CompositeImage;
+import ij.IJ;
+import ij.ImageListener;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.GenericDialog;
+import ij.process.LUT;
+import j3D.element3D;
+import j3D.line3D;
+import j3D.rect3D;
+import j3D.renderer;
+import jalgs.jsim.rngs;
 
-import jalgs.jsim.*;
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
-import ij.*;
-import ij.gui.*;
-import ij.process.*;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.Label;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
 
 public class maxproj3D_panel extends JPanel implements ActionListener,ItemListener,ImageListener{
 
@@ -158,7 +179,7 @@ public class maxproj3D_panel extends JPanel implements ActionListener,ItemListen
 		this.thresh=new float[channels];
 		for(int i=0;i<channels;i++)
 			this.thresh[i]=thresh;
-		newzslices=(int)(zratio*(float)slices);
+		newzslices=(int)(zratio*slices);
 		maxsize=(int)Math.sqrt(width*width+height*height+newzslices*newzslices);
 		int xrem=(maxsize-width)/2;
 		int yrem=(maxsize-height)/2;
@@ -315,7 +336,7 @@ public class maxproj3D_panel extends JPanel implements ActionListener,ItemListen
 		float scaledz=z/zratio;
 		int zprev=(int)scaledz;
 		int znext=zprev+1;
-		float zrem=scaledz-(float)zprev;
+		float zrem=scaledz-zprev;
 		float z1=get_value(index,zprev,channel);
 		float z2=get_value(index,znext,channel);
 		return z1+zrem*(z2-z1);
@@ -328,10 +349,10 @@ public class maxproj3D_panel extends JPanel implements ActionListener,ItemListen
 
 	public float get_value(int index,int index2){
 		if(imagetype==0){
-			return (float)(((byte[])stack.getPixels(index2+1))[index]&0xff);
+			return ((byte[])stack.getPixels(index2+1))[index]&0xff;
 		}else{
 			if(imagetype==1){
-				return (float)(((short[])stack.getPixels(index2+1))[index]&0xffff);
+				return ((short[])stack.getPixels(index2+1))[index]&0xffff;
 			}else{
 				return ((float[])stack.getPixels(index2+1))[index];
 			}
@@ -409,7 +430,7 @@ public class maxproj3D_panel extends JPanel implements ActionListener,ItemListen
 				float val=inline[k];
 				if(val>thresh2){
 					for(int j=0;j<(int)zratio;j++){
-						z=temp+(float)j;
+						z=temp+j;
 						x=xstart+xinc*z;
 						y=ystart+yinc*z;
 						// int xpoint=Math.round(x);
@@ -435,7 +456,7 @@ public class maxproj3D_panel extends JPanel implements ActionListener,ItemListen
 					float val=oldval;
 					float inc=invzr*(newval-oldval);
 					for(int j=0;j<(int)zratio;j++){
-						z=temp+(float)j;
+						z=temp+j;
 						x=xstart+xinc*z;
 						y=ystart+yinc*z;
 						if(val>thresh2){
@@ -624,7 +645,7 @@ class interp_line implements Runnable{
 				float val=line[k];
 				if(val>thresh){
 					for(int j=0;j<(int)fltparams[0];j++){
-						z=temp+(float)j;
+						z=temp+j;
 						x=xstart+xinc*z;
 						y=ystart+yinc*z;
 						// int xpoint=Math.round(x);
@@ -650,7 +671,7 @@ class interp_line implements Runnable{
 					float val=oldval;
 					float inc=fltparams[2]*(newval-oldval);
 					for(int j=0;j<(int)fltparams[0];j++){
-						z=temp+(float)j;
+						z=temp+j;
 						x=xstart+xinc*z;
 						y=ystart+yinc*z;
 						if(val>thresh){

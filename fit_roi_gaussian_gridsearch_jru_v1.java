@@ -28,17 +28,35 @@ public class fit_roi_gaussian_gridsearch_jru_v1 implements PlugIn, NLLSfitinterf
 		Rectangle r=imp.getRoi().getBounds();
 		float[][] charrays=new float[2][];
 		xpts=r.width; ypts=r.height;
+		int centerx=r.x+r.width/2;
+		int centery=r.y+r.height/2;
+		if(r.width<2 && r.height<2){
+			//assume we have a point roi
+			xpts=10; r.width=10;
+			ypts=10; r.height=10;
+			r.x=centerx-xpts/2;
+			r.y=centery-ypts/2;
+		}
 		boolean findmax=true;
 		GenericDialog gd2=new GenericDialog("Options");
 		gd2.addCheckbox("Find_Z_Max",findmax);
+		gd2.addNumericField("X_Size (pixels)",xpts,0);
+		gd2.addNumericField("Y_Size (pixels)",ypts,0);
+		gd2.addCheckbox("Single_Channel",true);
 		gd2.showDialog(); if(gd2.wasCanceled()){return;}
 		findmax=gd2.getNextBoolean();
+		int xpts=(int)gd2.getNextNumber(); r.width=xpts;
+		int ypts=(int)gd2.getNextNumber(); r.height=ypts;
+		boolean singchan=gd2.getNextBoolean();
+		r.x=centerx-xpts/2;
+		r.y=centery-ypts/2;
 		int currz=imp.getSlice();
 		int currt=imp.getFrame();
+		int currc=imp.getChannel();
 		int slices=imp.getNSlices();
 		int frames=imp.getNFrames();
 		int maxslice=0;
-		if(nchannels>1){
+		if(nchannels>1 && !singchan){
 			Object[] temp=jutils.get3DCSeries(imp.getStack(),currz-1,currt-1,frames,slices,nchannels);
 			int ch1=0; int ch2=1;
 			if(nchannels>2){
@@ -64,14 +82,14 @@ public class fit_roi_gaussian_gridsearch_jru_v1 implements PlugIn, NLLSfitinterf
 				temp[ch1]=temp1[maxslice];
 				temp[ch2]=temp2[maxslice];
 			}
-			charrays[0]=algutils.convert_arr_float(algutils.get_region(temp[ch1],r.x+r.width/2,r.y+r.height/2,r.width,r.height,width,height));
-			charrays[1]=algutils.convert_arr_float(algutils.get_region(temp[ch2],r.x+r.width/2,r.y+r.height/2,r.width,r.height,width,height));
+			charrays[0]=algutils.convert_arr_float(algutils.get_region(temp[ch1],centerx,centery,xpts,ypts,width,height));
+			charrays[1]=algutils.convert_arr_float(algutils.get_region(temp[ch2],centerx,centery,xpts,ypts,width,height));
 			data=new float[xpts*ypts];
 			for(int i=0;i<data.length;i++) data[i]=charrays[0][i]+charrays[1][i];
 		} else {
 			Object temp=imp.getProcessor().getPixels();
 			if(findmax){
-				Object[] temp1=jutils.get3DZSeries(imp.getStack(),0,currt-1,frames,slices,nchannels);
+				Object[] temp1=jutils.get3DZSeries(imp.getStack(),currc-1,currt-1,frames,slices,nchannels);
 				float maxint=jstatistics.getstatistic("Avg",temp1[0],width,height,r,null);
 				maxslice=0;
 				for(int i=1;i<slices;i++){
@@ -126,7 +144,7 @@ public class fit_roi_gaussian_gridsearch_jru_v1 implements PlugIn, NLLSfitinterf
 		float[] fit=fitclass.fitdata(params,fixes,constraints,data,null,stats);
 		double[] ampoffset=(new linleastsquares()).get_amp_offset(get_gaussian(params),data,true);
 		double[][] champoffset=new double[2][];
-		if(nchannels>2){
+		if(nchannels>2 && !singchan){
 			champoffset[0]=(new linleastsquares()).get_amp_offset(get_gaussian(params),charrays[0],true);
 			champoffset[1]=(new linleastsquares()).get_amp_offset(get_gaussian(params),charrays[1],true);
 		}
@@ -142,7 +160,7 @@ public class fit_roi_gaussian_gridsearch_jru_v1 implements PlugIn, NLLSfitinterf
 		}
 		if(tableout){
 			TextWindow tw=jutils.selectTable("Gaussian_Output");
-			if(nchannels>1){
+			if(nchannels>1 && !singchan){
 				if(tw==null){
 					tw=new TextWindow("Gaussian_Output","baseline\tamplitude\tstdev\txc\tyc\tzslice\tb1\ta1\tb2\ta2","",400,200);
 				}
@@ -160,7 +178,7 @@ public class fit_roi_gaussian_gridsearch_jru_v1 implements PlugIn, NLLSfitinterf
 			IJ.log("stdev = "+(float)params[0]);
 			IJ.log("x center = "+(float)params[1]);
 			IJ.log("y center = "+(float)params[2]);
-			if(nchannels>1){
+			if(nchannels>1 && !singchan){
 				IJ.log("baseline1 = "+(float)champoffset[0][1]);
 				IJ.log("amp1 = "+(float)champoffset[0][0]);
 				IJ.log("baseline2 = "+(float)champoffset[1][1]);

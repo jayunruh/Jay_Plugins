@@ -8,7 +8,8 @@
 
 package j3D;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
 
 public abstract class element3D implements Cloneable{
 

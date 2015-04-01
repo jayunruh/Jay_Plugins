@@ -9,11 +9,26 @@
 package jguis;
 
 import ij.gui.GenericDialog;
-import ij.process.*;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
 
-import java.awt.*;
-import java.awt.event.*;
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 
 public class ImagePanel extends JPanel implements MouseListener,MouseMotionListener,ActionListener{
 
@@ -23,6 +38,35 @@ public class ImagePanel extends JPanel implements MouseListener,MouseMotionListe
 	private int startx,starty,currx,curry,panelwidth,panelheight,imagewidth,imageheight;
 	private int xMin,yMin,width,height,maxmag,currmag;
 	private float intMin,intMax,aspectratio;
+	
+	public static void launch_frame(ImagePanel pp,String title){
+		final Frame f=new Frame(title);
+		f.setLocation(10,10);
+		f.addWindowListener(new WindowAdapter(){
+			public void windowClosing(WindowEvent e){
+				Component[] comps=f.getComponents();
+				for(int i=0;i<comps.length;i++){
+					comps[i].setVisible(false);
+				}
+				f.dispose();
+			}
+		});
+
+		f.setLayout(null);
+		//Insets ins=f.getInsets();
+		//pp.totalSize.height=AutoCorrFitWindow.H+ins.bottom+ins.top+65;
+		//pp.totalSize.width=AutoCorrFitWindow.WR+ins.left+ins.right;
+		//pp.setBounds(ins.top+5,ins.left+5,pp.totalSize.width,pp.totalSize.height);
+		pp.setBounds(10,20,450,450);
+		f.add(pp);
+		f.pack();
+		f.setResizable(false);
+		//f.setSize(panel.totalSize);
+		f.setSize(new Dimension(512,512));
+		f.setVisible(true);
+		pp.requestFocus();
+	}
+
 
 	public void init(int maxmag1,int currmag1,int imagewidth1,int imageheight1,float[] data){
 		zooming=false;

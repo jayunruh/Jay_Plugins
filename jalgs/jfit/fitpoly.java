@@ -25,7 +25,7 @@ public class fitpoly{
 			indvars=new float[order][npts];
 			for(int i=1;i<=order;i++){
 				for(int j=0;j<npts;j++){
-					indvars[i-1][j]=(float)Math.pow((double)xvals[j],(double)i);
+					indvars[i-1][j]=(float)Math.pow(xvals[j],i);
 				}
 			}
 			lls=new linleastsquares(indvars);
@@ -36,7 +36,7 @@ public class fitpoly{
 			}
 			for(int i=1;i<=order;i++){
 				for(int j=0;j<npts;j++){
-					indvars[i][j]=(float)Math.pow((double)xvals[j],(double)i);
+					indvars[i][j]=(float)Math.pow(xvals[j],i);
 				}
 			}
 			lls=new linleastsquares(indvars);

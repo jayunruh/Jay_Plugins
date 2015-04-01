@@ -8,11 +8,12 @@
 
 package jguis;
 
-import j3D.*;
-
+import ij.process.ColorProcessor;
+import j3D.renderer;
 import jalgs.jdataio;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Image;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.FileInputStream;
@@ -20,8 +21,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import ij.process.*;
 
 public class Plot3D implements EMFexport_interface{
 	// private Label coordinates;
@@ -36,6 +35,7 @@ public class Plot3D implements EMFexport_interface{
 	protected int selected;
 	protected double rotx,roty,rotz;
 	protected int[] shapes,colors;
+	protected String[] annotations;
 	protected String xLabel,yLabel,zLabel;
 	protected boolean logx,logy,logz;
 	public static final int WIDTH=250;
@@ -167,11 +167,11 @@ public class Plot3D implements EMFexport_interface{
 	public Plot3D(String xLabel1,String yLabel1,String zLabel1,float[][] zValues1,int startxy){
 		xValues=new float[1][zValues1.length];
 		for(int i=0;i<zValues1.length;i++){
-			xValues[0][i]=(float)(i+startxy);
+			xValues[0][i]=i+startxy;
 		}
 		yValues=new float[1][zValues1[0].length];
 		for(int i=0;i<zValues1[0].length;i++){
-			yValues[0][i]=(float)(i+startxy);
+			yValues[0][i]=i+startxy;
 		}
 		zValues=new float[1][zValues1.length][zValues1[0].length];
 		for(int i=0;i<zValues1.length;i++){
@@ -256,10 +256,10 @@ public class Plot3D implements EMFexport_interface{
 		yValues=new float[nseries][maxypts];
 		for(int i=0;i<nseries;i++){
 			for(int j=0;j<npts[0][i];j++){
-				xValues[i][j]=(float)(j+startxy);
+				xValues[i][j]=j+startxy;
 			}
 			for(int j=0;j<npts[1][i];j++){
-				yValues[i][j]=(float)(j+startxy);
+				yValues[i][j]=j+startxy;
 			}
 		}
 		float[] temp=findminmax(xValues,npts[0]);
@@ -335,6 +335,14 @@ public class Plot3D implements EMFexport_interface{
 				jdio.readintelfloatfile(is,npts[1][l],zValues[l][i]); // y
 			// values
 		}
+		//read the annotations if they are there
+		boolean annotated=jdio.readintelint(is)==1;
+		if(annotated){
+			annotations=new String[nseries];
+			for(int i=0;i<nseries;i++){
+				annotations[i]=jdio.readstring(is);
+			}
+		}
 		selected=-1;
 		rotx=-60.0;
 		roty=0.0;
@@ -356,6 +364,17 @@ public class Plot3D implements EMFexport_interface{
 			return true;
 		else
 			return false;
+	}
+	
+	public static boolean is_this(InputStream is) throws IOException{
+		jdataio jdio=new jdataio();
+		jdio.readstring(is); // read the label
+		int temp=jdio.readintelint(is); // now the identifier
+		return (temp==1);
+	}
+	
+	public void setAnnotations(String[] annotations){
+		this.annotations=annotations;
 	}
 
 	protected float[] findminmax(float[][] arr,int[] npts1){
@@ -768,11 +787,11 @@ public class Plot3D implements EMFexport_interface{
 	public void addPoints(float[][] zValues1,boolean rescale,int startxy){
 		float[] xValues1=new float[zValues1.length];
 		for(int i=0;i<zValues1.length;i++){
-			xValues1[i]=(float)(i+startxy);
+			xValues1[i]=i+startxy;
 		}
 		float[] yValues1=new float[zValues1[0].length];
 		for(int i=0;i<zValues1[0].length;i++){
-			yValues1[i]=(float)(i+startxy);
+			yValues1[i]=i+startxy;
 		}
 		addPoints(xValues1,yValues1,zValues1,rescale);
 	}
@@ -798,36 +817,36 @@ public class Plot3D implements EMFexport_interface{
 		logzscale=0;
 		if(logx){
 			if(xMin<=0.0f){
-				logxmin=(float)Math.log((double)findmingt0(xValues,npts[0],xMax));
+				logxmin=(float)Math.log(findmingt0(xValues,npts[0],xMax));
 			}else{
-				logxmin=(float)Math.log((double)xMin);
+				logxmin=(float)Math.log(xMin);
 			}
-			logxmax=(float)Math.log((double)xMax);
-			logxscale=(float)WIDTH/(logxmax-logxmin);
+			logxmax=(float)Math.log(xMax);
+			logxscale=WIDTH/(logxmax-logxmin);
 		}
 		if(logy){
 			if(yMin<=0.0f){
-				logymin=(float)Math.log((double)findmingt0(yValues,npts[1],yMax));
+				logymin=(float)Math.log(findmingt0(yValues,npts[1],yMax));
 			}else{
-				logymin=(float)Math.log((double)yMin);
+				logymin=(float)Math.log(yMin);
 			}
-			logymax=(float)Math.log((double)yMax);
-			logyscale=(float)WIDTH/(logymax-logymin);
+			logymax=(float)Math.log(yMax);
+			logyscale=WIDTH/(logymax-logymin);
 		}
 		if(logz){
 			if(zMin<=0.0f){
-				logzmin=(float)Math.log((double)findmingt02(zValues,npts,zMax));
+				logzmin=(float)Math.log(findmingt02(zValues,npts,zMax));
 			}else{
-				logzmin=(float)Math.log((double)zMin);
+				logzmin=(float)Math.log(zMin);
 			}
-			logzmax=(float)Math.log((double)zMax);
-			logzscale=(float)HEIGHT/(logzmax-logzmin);
+			logzmax=(float)Math.log(zMax);
+			logzscale=HEIGHT/(logzmax-logzmin);
 		}
 		// IJ.showMessage("testdraw1");
 
-		xScale=(float)WIDTH/(xMax-xMin);
-		yScale=(float)WIDTH/(yMax-yMin);
-		zScale=(float)HEIGHT/(zMax-zMin);
+		xScale=WIDTH/(xMax-xMin);
+		yScale=WIDTH/(yMax-yMin);
+		zScale=HEIGHT/(zMax-zMin);
 
 		drawAxisLabels(jr);
 		if(!logx&&!logy&&!logz){
@@ -889,7 +908,7 @@ public class Plot3D implements EMFexport_interface{
 					if(logx){
 						float xtemp;
 						if(xValues[j][i]>0.0f){
-							xtemp=(float)Math.log((double)xValues[j][i]);
+							xtemp=(float)Math.log(xValues[j][i]);
 						}else{
 							xtemp=logxmin;
 						}
@@ -908,7 +927,7 @@ public class Plot3D implements EMFexport_interface{
 					if(logy){
 						float ytemp;
 						if(yValues[j][i]>0.0f){
-							ytemp=(float)Math.log((double)yValues[j][i]);
+							ytemp=(float)Math.log(yValues[j][i]);
 						}else{
 							ytemp=logymin;
 						}
@@ -928,7 +947,7 @@ public class Plot3D implements EMFexport_interface{
 						if(logz){
 							float ztemp;
 							if(zValues[j][i][k]>0.0f){
-								ztemp=(float)Math.log((double)zValues[j][i][k]);
+								ztemp=(float)Math.log(zValues[j][i][k]);
 							}else{
 								ztemp=logzmin;
 							}
@@ -970,57 +989,57 @@ public class Plot3D implements EMFexport_interface{
 		float[] zticklabels=new float[4];
 		for(int i=0;i<4;i++){
 			if(logx){
-				float tempx=logxmin+((float)i/3.0f)*(logxmax-logxmin);
-				xticklabels[i]=(float)Math.exp((double)tempx);
+				float tempx=logxmin+(i/3.0f)*(logxmax-logxmin);
+				xticklabels[i]=(float)Math.exp(tempx);
 			}else{
-				xticklabels[i]=xMin+((float)i/3.0f)*(xMax-xMin);
+				xticklabels[i]=xMin+(i/3.0f)*(xMax-xMin);
 			}
 			if(logy){
-				float tempy=logymin+((float)i/3.0f)*(logymax-logymin);
-				yticklabels[i]=(float)Math.exp((double)tempy);
+				float tempy=logymin+(i/3.0f)*(logymax-logymin);
+				yticklabels[i]=(float)Math.exp(tempy);
 			}else{
-				yticklabels[i]=yMin+((float)i/3.0f)*(yMax-yMin);
+				yticklabels[i]=yMin+(i/3.0f)*(yMax-yMin);
 			}
 			if(logz){
-				float tempz=logzmin+((float)i/3.0f)*(logzmax-logzmin);
-				zticklabels[i]=(float)Math.exp((double)tempz);
+				float tempz=logzmin+(i/3.0f)*(logzmax-logzmin);
+				zticklabels[i]=(float)Math.exp(tempz);
 			}else{
-				zticklabels[i]=zMin+((float)i/3.0f)*(zMax-zMin);
+				zticklabels[i]=zMin+(i/3.0f)*(zMax-zMin);
 			}
 		}
 
 		// draw the z axis labels
-		String s=jutils.formatted_string((double)zticklabels[0]);
+		String s=jutils.formatted_string(zticklabels[0]);
 		jr.addText3D(s,LEFT_MARGIN+WIDTH+10,LEFT_MARGIN,TOP_MARGIN+HEIGHT-5,Color.BLACK);
-		s=jutils.formatted_string((double)zticklabels[1]);
-		jr.addText3D(s,LEFT_MARGIN+WIDTH+10,LEFT_MARGIN,TOP_MARGIN+(int)((2*HEIGHT)/3)-5,Color.BLACK);
-		s=jutils.formatted_string((double)zticklabels[2]);
-		jr.addText3D(s,LEFT_MARGIN+WIDTH+10,LEFT_MARGIN,TOP_MARGIN+(int)(HEIGHT/3)-5,Color.BLACK);
-		s=jutils.formatted_string((double)zticklabels[3]);
+		s=jutils.formatted_string(zticklabels[1]);
+		jr.addText3D(s,LEFT_MARGIN+WIDTH+10,LEFT_MARGIN,TOP_MARGIN+(2*HEIGHT)/3-5,Color.BLACK);
+		s=jutils.formatted_string(zticklabels[2]);
+		jr.addText3D(s,LEFT_MARGIN+WIDTH+10,LEFT_MARGIN,TOP_MARGIN+HEIGHT/3-5,Color.BLACK);
+		s=jutils.formatted_string(zticklabels[3]);
 		jr.addText3D(s,LEFT_MARGIN+WIDTH+10,LEFT_MARGIN,TOP_MARGIN-5,Color.BLACK);
 
 		jr.addText3D(zLabel,LEFT_MARGIN+WIDTH+25,LEFT_MARGIN,TOP_MARGIN+HEIGHT/2-15,Color.BLACK);
 
 		// now the x axis labels
-		s=jutils.formatted_string((double)xticklabels[0]);
+		s=jutils.formatted_string(xticklabels[0]);
 		jr.addText3D(s,LEFT_MARGIN-10,LEFT_MARGIN+WIDTH+40,TOP_MARGIN+HEIGHT,Color.BLACK);
-		s=jutils.formatted_string((double)xticklabels[1]);
-		jr.addText3D(s,LEFT_MARGIN+(int)(WIDTH/3)-10,LEFT_MARGIN+WIDTH+40,TOP_MARGIN+HEIGHT,Color.BLACK);
-		s=jutils.formatted_string((double)xticklabels[2]);
-		jr.addText3D(s,LEFT_MARGIN+(int)(2*WIDTH/3)-10,LEFT_MARGIN+WIDTH+40,TOP_MARGIN+HEIGHT,Color.BLACK);
-		s=jutils.formatted_string((double)xticklabels[3]);
+		s=jutils.formatted_string(xticklabels[1]);
+		jr.addText3D(s,LEFT_MARGIN+WIDTH/3-10,LEFT_MARGIN+WIDTH+40,TOP_MARGIN+HEIGHT,Color.BLACK);
+		s=jutils.formatted_string(xticklabels[2]);
+		jr.addText3D(s,LEFT_MARGIN+2*WIDTH/3-10,LEFT_MARGIN+WIDTH+40,TOP_MARGIN+HEIGHT,Color.BLACK);
+		s=jutils.formatted_string(xticklabels[3]);
 		jr.addText3D(s,LEFT_MARGIN+WIDTH-10,LEFT_MARGIN+WIDTH+40,TOP_MARGIN+HEIGHT,Color.BLACK);
 
 		jr.addText3D(xLabel,LEFT_MARGIN+WIDTH/2,LEFT_MARGIN+WIDTH+60,TOP_MARGIN+HEIGHT,Color.BLACK);
 
 		// and the y axis labels
-		s=jutils.formatted_string((double)yticklabels[0]);
+		s=jutils.formatted_string(yticklabels[0]);
 		jr.addText3D(s,LEFT_MARGIN+WIDTH+20,LEFT_MARGIN+10,TOP_MARGIN+HEIGHT,Color.BLACK);
-		s=jutils.formatted_string((double)yticklabels[1]);
-		jr.addText3D(s,LEFT_MARGIN+WIDTH+20,LEFT_MARGIN+(int)(WIDTH/3)+10,TOP_MARGIN+HEIGHT,Color.BLACK);
-		s=jutils.formatted_string((double)yticklabels[2]);
-		jr.addText3D(s,LEFT_MARGIN+WIDTH+20,LEFT_MARGIN+(int)(2*WIDTH/3)+10,TOP_MARGIN+HEIGHT,Color.BLACK);
-		s=jutils.formatted_string((double)yticklabels[3]);
+		s=jutils.formatted_string(yticklabels[1]);
+		jr.addText3D(s,LEFT_MARGIN+WIDTH+20,LEFT_MARGIN+WIDTH/3+10,TOP_MARGIN+HEIGHT,Color.BLACK);
+		s=jutils.formatted_string(yticklabels[2]);
+		jr.addText3D(s,LEFT_MARGIN+WIDTH+20,LEFT_MARGIN+2*WIDTH/3+10,TOP_MARGIN+HEIGHT,Color.BLACK);
+		s=jutils.formatted_string(yticklabels[3]);
 		jr.addText3D(s,LEFT_MARGIN+WIDTH+20,LEFT_MARGIN+WIDTH+10,TOP_MARGIN+HEIGHT,Color.BLACK);
 
 		jr.addText3D(yLabel,LEFT_MARGIN+WIDTH+60,LEFT_MARGIN+WIDTH/2,TOP_MARGIN+HEIGHT,Color.BLACK);
@@ -1177,6 +1196,10 @@ public class Plot3D implements EMFexport_interface{
 	public int[] getColors(){
 		return colors;
 	}
+	
+	public String[] getAnnotations(){
+		return annotations;
+	}
 
 	public ColorProcessor getProcessor(){
 		return new ColorProcessor(getImage());
@@ -1267,7 +1290,11 @@ public class Plot3D implements EMFexport_interface{
 				jdio.writeintelfloatarray(os,zValues[l][i],npts[1][l]); // y
 			// values
 		}
-		// save the errors if they exist
+		// save the annotations if they exist
+		if(annotations!=null && annotations.length==nseries){
+			jdio.writeintelint(os,1);
+			for(int i=0;i<nseries;i++) jdio.writestring(os,annotations[i]);
+		}
 	}
 
 }

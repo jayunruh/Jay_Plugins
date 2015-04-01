@@ -40,7 +40,7 @@ public class corr21{
 			real3[j]=data2[j];
 			avg+=(double)data[j]/(double)length;
 			avg2+=(double)data2[j]/(double)length;
-			avggr+=((double)data[j]*(double)data2[j])/(double)length;
+			avggr+=((double)data[j]*(double)data2[j])/length;
 		}
 		fft.realfft(real,im,false);
 		fft.realfft(real2,im2,false);
@@ -63,9 +63,9 @@ public class corr21{
 		fft.realfft(real2,im2,true);
 		fft.realfft(real3,im3,true);
 		for(int j=0;j<length;j++){
-			real[j]/=(float)(avg*avg*avg2)*(float)length;
-			real[j]-=real2[j]/((float)(avg*avg)*(float)length);
-			real[j]-=real3[j]/((float)(avg*avg2)*(float)length);
+			real[j]/=(float)(avg*avg*avg2)*length;
+			real[j]-=real2[j]/((float)(avg*avg)*length);
+			real[j]-=real3[j]/((float)(avg*avg2)*length);
 			real[j]-=avggr/(float)(avg*avg2);
 			real[j]+=2.0f;
 		}
@@ -88,7 +88,7 @@ public class corr21{
 			real3[j]=data2[j];
 			avg+=(double)data[j]/(double)length;
 			avg2+=(double)data2[j]/(double)length;
-			avggr+=((double)data[j]*(double)data2[j])/(double)length;
+			avggr+=((double)data[j]*(double)data2[j])/length;
 		}
 		fft.realfft(real,im,false);
 		fft.realfft(real2,im2,false);
@@ -111,9 +111,9 @@ public class corr21{
 		fft.realfft(real2,im2,true);
 		fft.realfft(real3,im3,true);
 		for(int j=0;j<length;j++){
-			real[j]/=(float)(avg*avg*avg2)*(float)length;
-			real[j]-=real2[j]/((float)(avg*avg)*(float)length);
-			real[j]-=real3[j]/((float)(avg*avg2)*(float)length);
+			real[j]/=(float)(avg*avg*avg2)*length;
+			real[j]-=real2[j]/((float)(avg*avg)*length);
+			real[j]-=real3[j]/((float)(avg*avg2)*length);
 			real[j]-=avggr/(float)(avg*avg2);
 			real[j]+=2.0f;
 			if(brightcorrindex==1){
@@ -154,7 +154,7 @@ public class corr21{
 			real3[j]=data2[j];
 			avg+=(double)data[j]/(double)minlength;
 			avg2+=(double)data2[j]/(double)minlength;
-			avggr+=((double)data[j]*(double)data2[j])/(double)minlength;
+			avggr+=((double)data[j]*(double)data2[j])/minlength;
 		}
 		for(int j=minlength;j<length;j++){
 			real2[j]=(float)avg;
@@ -182,9 +182,9 @@ public class corr21{
 		fft.realfft(real2,im2,true);
 		fft.realfft(real3,im3,true);
 		for(int j=0;j<length;j++){
-			real[j]/=(float)(avg*avg*avg2)*(float)length;
-			real[j]-=real2[j]/((float)(avg*avg)*(float)length);
-			real[j]-=real3[j]/((float)(avg*avg2)*(float)length);
+			real[j]/=(float)(avg*avg*avg2)*length;
+			real[j]-=real2[j]/((float)(avg*avg)*length);
+			real[j]-=real3[j]/((float)(avg*avg2)*length);
 			real[j]-=avggr/(float)(avg*avg2);
 			real[j]+=2.0f;
 			if(brightcorrindex==1){

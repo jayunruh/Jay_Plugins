@@ -8,22 +8,22 @@
 
 package jguis;
 
-import java.io.IOException;
-
 import ij.CompositeImage;
 import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
-import ij.VirtualStack;
 import ij.io.FileInfo;
 import ij.io.FileOpener;
 import ij.measure.Calibration;
+import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
-import ij.process.LUT;
+
+import java.io.IOException;
 
 public class DV_file_reader{
 	public DVFile file;
 	public FileInfo fi;
+	public boolean complex;
 
 	public ImagePlus open(String dir,String fname){
 		try{
@@ -33,7 +33,7 @@ public class DV_file_reader{
 			return null;
 		}
 		fi=new FileInfo();
-		fi.fileFormat=fi.RAW;
+		fi.fileFormat=FileInfo.RAW;
 		fi.fileName=fname;
 		fi.directory=dir;
 		fi.width=file.getImageWidth();
@@ -64,6 +64,12 @@ public class DV_file_reader{
 		case 7:
 			fi.fileType=FileInfo.GRAY32_INT;
 			break;
+		case 4:
+			//this is the complex data type
+			complex=true;
+			fi.nImages=2*file.getNumOfImages();
+			fi.fileType=FileInfo.GRAY32_FLOAT;
+			break;
 		default: {
 			IJ.error("unsupported pixel type:"+file.getPixelTypeString());
 			return null;
@@ -72,8 +78,16 @@ public class DV_file_reader{
 		fi.unit="um";
 		fi.info=file.getMetaDataString();
 		ImageStack stack=new ImageStack(fi.width,fi.height);
-		for(int i=0;i<fi.nImages;i++){
-			stack.addSlice("",getProcessor(i+1));
+		if(complex){
+			for(int i=0;i<fi.nImages;i+=2){
+				ImageProcessor[] temp=getComplexProcessor(i+1);
+    			stack.addSlice("",temp[0]);
+    			stack.addSlice("",temp[1]);
+    		}
+		} else {
+    		for(int i=0;i<fi.nImages;i++){
+    			stack.addSlice("",getProcessor(i+1));
+    		}
 		}
 		ImagePlus imp=new ImagePlus(fname,stack);
 		imp.setProperty("Info",fi.info);
@@ -84,6 +98,7 @@ public class DV_file_reader{
 		cal.pixelDepth=fi.pixelDepth;
 		cal.setUnit(fi.unit);
 		imp.setOpenAsHyperStack(true);
+		int nslices=file.getNSlices(); if(complex) nslices*=2;
 		imp.setDimensions(file.getNChannels(),file.getNSlices(),file.getNFrames());
 		if(file.getNChannels()>1){
 			imp=new CompositeImage(imp,CompositeImage.COLOR);
@@ -101,6 +116,25 @@ public class DV_file_reader{
 
 	public int getSize(){
 		return fi.nImages;
+	}
+	
+	public ImageProcessor[] getComplexProcessor(int stackslice){
+		ImageProcessor ip1=getProcessor(stackslice);
+		ImageProcessor ip2=getProcessor(stackslice+1);
+		float[] pix1=(float[])ip1.getPixels();
+		float[] pix2=(float[])ip2.getPixels();
+		float[] combined=new float[pix1.length+pix2.length];
+		System.arraycopy(pix1,0,combined,0,pix1.length);
+		System.arraycopy(pix2,0,combined,pix1.length,pix2.length);
+		float[] rpix=new float[pix1.length];
+		float[] ipix=new float[pix1.length];
+		for(int i=0;i<combined.length;i+=2){
+			rpix[i/2]=combined[i];
+			ipix[i/2]=combined[i+1];
+		}
+		ImageProcessor ip3=new FloatProcessor(getWidth(),getHeight(),rpix,null);
+		ImageProcessor ip4=new FloatProcessor(getWidth(),getHeight(),ipix,null);
+		return new ImageProcessor[]{ip3,ip4};
 	}
 
 	public ImageProcessor getProcessor(int stackslice){

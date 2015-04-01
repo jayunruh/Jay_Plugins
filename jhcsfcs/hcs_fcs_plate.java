@@ -43,7 +43,7 @@ public class hcs_fcs_plate{
 		for(int i=0;i<wells1.length;i++){
 			if(wellnumber[i]>=0){
 				wells2[counter]=wells1[i].substring(0);
-				wellnumber2[counter]=(float)wellnumber[i];
+				wellnumber2[counter]=wellnumber[i];
 				counter++;
 			}
 		}

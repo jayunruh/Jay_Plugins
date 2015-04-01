@@ -14,11 +14,10 @@ import java.io.*;
 import jalgs.*;
 import jalgs.jfft.*;
 import jalgs.jfit.*;
-import jguis.AutoCorrFitWindow;
-import jguis.jutils;
-import jguis.Plot4;
+import jguis.*;
 import ij.io.*;
 import java.text.*;
+import ij.text.*;
 
 public class analysis_auto_corr_v2 implements PlugIn {
 	//this plugin is a gui for fitting correlation curves singly or globally for 
@@ -48,6 +47,7 @@ public class analysis_auto_corr_v2 implements PlugIn {
 		gd.addCheckbox("Bright Corr?",brightcorr);
 		boolean pad=false;
 		gd.addCheckbox("Pad Trajectory?",pad);
+		gd.addCheckbox("Simple Analysis?",false);
 		gd.showDialog(); if(gd.wasCanceled()){return;}
 		sfreq=gd.getNextNumber();
 		int psfflag=gd.getNextChoiceIndex();
@@ -58,6 +58,7 @@ public class analysis_auto_corr_v2 implements PlugIn {
 		segments=(int)gd.getNextNumber();
 		brightcorr=gd.getNextBoolean();
 		pad=gd.getNextBoolean();
+		boolean simple=gd.getNextBoolean();
 		trajkhz=((float)sfreq/(float)binby)/1000.0f;
 		khz=(float)sfreq/1000.0f;
 		int nfiles=0;
@@ -223,10 +224,51 @@ public class analysis_auto_corr_v2 implements PlugIn {
 		for(int i=0;i<newsize-1;i++){
 			newxvals[i]=xvals[i+1]/(float)sfreq;
 		}
-
-		final AutoCorrFitWindow cw = new AutoCorrFitWindow();
-		cw.init(names,corr,newxvals,trajectories,avg,var,khz,psfflag,brightcorr);
-		AutoCorrFitWindow.launch_frame(cw);
+		if(simple){
+			double[] dxvals=new double[newsize-1];
+			for(int i=0;i<newsize-1;i++) dxvals[i]=(double)newxvals[i];
+			//here we do a simple grid search fitting
+			GenericDialog gd10=new GenericDialog("Options");
+			gd10.addNumericField("Min taud(ms)",1.0f,5,15,null);
+			gd10.addNumericField("Max taud(s)",5.0f,5,15,null);
+			gd10.addNumericField("Multiplier",1.05,5,15,null);
+			gd10.showDialog(); if(gd10.wasCanceled()){return;}
+			float mintd=0.001f*(float)gd10.getNextNumber();
+			float maxtd=(float)gd10.getNextNumber();
+			float mult=(float)gd10.getNextNumber();
+			fit_corr fc=new fit_corr(mintd,maxtd,mult,5.0); fc.psftype=psfflag;
+			TextWindow tw=jutils.selectTable("AC Results");
+			if(tw==null){
+				String labels="filename\tbase\tg0\ttd\tc2\tavg(kHz)";
+				if(brightcorr) labels="filename\tbase\tB(kHz)\ttd\tc2\tavg(kHz)";
+				tw=new TextWindow("AC Results",labels,"",400,400);
+			}
+			float[][][] corrfit=new float[nfiles][2][];
+			for(int i=0;i<nfiles;i++){
+				double[] params=fc.fitac(corr[i],newxvals,false,true);
+				corrfit[i][0]=corr[i];
+				corrfit[i][1]=fc.corfunc_arrayf(params,dxvals);
+				tw.append(names[i]+"\t"+table_tools.print_double_array(params)+"\t"+khz*avg[i]);
+			}
+			if(nfiles==1){
+				float[][] tempxvals5=new float[2][]; for(int i=0;i<2;i++) tempxvals5[i]=newxvals;
+				PlotWindow4 pwt=null;
+				if(brightcorr) pwt=new PlotWindow4("Avg","tau(s)","B(kHz)",tempxvals5,corrfit[0],null);
+				else pwt=new PlotWindow4("Avg","tau(s)","G(tau)",tempxvals5,corrfit[0],null);
+				pwt.setLogAxes(true,false);
+				pwt.draw();
+			} else {
+				PlotStack4 ps=null;
+				if(brightcorr) ps=new PlotStack4("Correlations","tau(s)","G(tau)",newxvals,corrfit);
+				else ps=new PlotStack4("Correlations","tau(s)","G(tau)",newxvals,corrfit);
+				ps.draw();
+				ps.setAllLogAxes(true,false);
+			}
+		} else {
+			final AutoCorrFitWindow cw = new AutoCorrFitWindow();
+			cw.init(names,corr,newxvals,trajectories,avg,var,khz,psfflag,brightcorr);
+			AutoCorrFitWindow.launch_frame(cw);
+		}
 	}
 
 	float[] bintraj(float[] data,double avgint){

@@ -8,16 +8,29 @@
 
 package jguis;
 
-import org.freehep.graphicsio.ImageGraphics2D;
-import org.freehep.graphicsio.emf.*;
-
 import ij.IJ;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Image;
 import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.awt.image.ColorModel;
+import java.awt.image.DataBuffer;
+import java.awt.image.DataBufferInt;
+import java.awt.image.DirectColorModel;
+import java.awt.image.PixelGrabber;
+import java.awt.image.Raster;
+import java.awt.image.SampleModel;
+import java.awt.image.WritableRaster;
 import java.io.File;
 import java.io.OutputStream;
 import java.util.Properties;
+
+import org.freehep.graphicsio.ImageGraphics2D;
+import org.freehep.graphicsio.emf.EMFGraphics2D;
 
 public class EMFPlotter extends Plotter{
 	public EMFGraphics2D vg2;
@@ -132,7 +145,48 @@ public class EMFPlotter extends Plotter{
 	}
 
 	public void drawImage(Image img,int x,int y){
+		//Image img2=copyImage(img,0);
 		vg2.drawImage(img,x,y,null);
+	}
+	
+	public void setTransparency(Image img,int transparency){
+		int[] pixels=new int[width*height];
+		PixelGrabber pg=new PixelGrabber(img, 0,0,width,height,pixels,0,width);
+		try{
+			pg.grabPixels();
+		}catch(InterruptedException e){
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(int i=0;i<pixels.length;i++){
+			int[] rgb=jutils.intval2rgb(pixels[i]);
+			int temp=(transparency<<24)|(rgb[0]<<16)|(rgb[1]<<8)|rgb[2];
+			pixels[i]=temp;
+		}
+	}
+	
+	public Image copyImage(Image img,int transparency){
+		int[] pixels=new int[width*height];
+		PixelGrabber pg=new PixelGrabber(img, 0,0,width,height,pixels,0,width);
+		try{
+			pg.grabPixels();
+		}catch(InterruptedException e){
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		for(int i=0;i<pixels.length;i++){
+			int[] rgb=jutils.intval2rgb(pixels[i]);
+			int temp=(transparency<<24)|(rgb[0]<<16)|(rgb[1]<<8)|rgb[2];
+			pixels[i]=temp;
+		}
+		DataBuffer dataBuffer=new DataBufferInt(pixels,width*height,0);
+		ColorModel cm=new DirectColorModel(32,0xff0000,0xff00,0xff,0xff000000);
+		WritableRaster wr = cm.createCompatibleWritableRaster(1, 1);
+		SampleModel rgbSampleModel=wr.getSampleModel();
+		rgbSampleModel=rgbSampleModel.createCompatibleSampleModel(width,height);
+		WritableRaster rgbRaster=Raster.createWritableRaster(rgbSampleModel,dataBuffer,null);
+		Image img2=new BufferedImage(cm,rgbRaster,false,null);
+		return img2;
 	}
 
 }

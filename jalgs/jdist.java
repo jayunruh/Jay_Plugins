@@ -122,8 +122,24 @@ public class jdist{
 		double t=(value-mean)/sterr;
 		return tCumProb(dof,t,twotailed);
 	}
+	
+	public double tLim(double dof,double prob,boolean twotailed){
+		//this gets the critical t value for a specific probability
+		double dt=0.001;
+		double t=0.0-dt;
+		double cumprob=0.0;
+		double lastcumprob=0.0;
+		do{
+			t+=dt;
+			lastcumprob=cumprob;
+			cumprob=tCumProb(dof,t,twotailed);
+		}while(cumprob>prob);
+		double fraction=(prob-cumprob)/(lastcumprob-cumprob);
+		return t-fraction*dt;
+	}
 
 	public double tCumProb(double dof,double t,boolean twotailed){
+		//this gets the probabity for a specific t value
 		if(!twotailed){
 			return 0.5*ibeta(0.5*dof,0.5,dof/(dof+t*t));
 		}else{

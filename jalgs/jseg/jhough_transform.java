@@ -26,13 +26,13 @@ public class jhough_transform{
 		nangles=new int[endradius-startradius+1];
 		for(int radius=startradius;radius<=endradius;radius++){
 			int rindex=radius-startradius;
-			double dangle=1.0/(double)radius;
-			nangles[rindex]=(int)(2.0*Math.PI*(double)radius);
+			double dangle=1.0/radius;
+			nangles[rindex]=(int)(2.0*Math.PI*radius);
 			pixelshifts[rindex][0]=new int[nangles[rindex]];
 			pixelshifts[rindex][1]=new int[nangles[rindex]];
 			for(int i=0;i<nangles[rindex];i++){
-				double x=(double)radius*Math.cos(dangle*(double)i);
-				double y=(double)radius*Math.sin(dangle*(double)i);
+				double x=radius*Math.cos(dangle*i);
+				double y=radius*Math.sin(dangle*i);
 				pixelshifts[rindex][0][i]=(int)x;
 				pixelshifts[rindex][1][i]=(int)y;
 			}
@@ -62,7 +62,7 @@ public class jhough_transform{
 					}
 					integral+=image[x+y*width];
 				}
-				newimage[j+i*width]=integral/(float)nangles[rindex];
+				newimage[j+i*width]=integral/nangles[rindex];
 			}
 		}
 		return newimage;
@@ -93,7 +93,7 @@ public class jhough_transform{
 						integral+=1.0f;
 					}
 				}
-				newimage[j+i*width]=integral/(float)nangles[rindex];
+				newimage[j+i*width]=integral/nangles[rindex];
 			}
 		}
 		return newimage;
@@ -240,7 +240,7 @@ public class jhough_transform{
 					for(int j=startx;j<=endx;j++){
 						int xdiff=j-maxx;
 						double r=Math.sqrt(ydiff*ydiff+xdiff*xdiff);
-						if(r<=(double)maxradius){
+						if(r<=maxradius){
 							maxproj[j+i*width]=0.0f;
 							if(outobjects[j+i*width]==0.0f){
 								outobjects[j+i*width]=objid;
@@ -268,7 +268,7 @@ public class jhough_transform{
 				}
 			}
 		}
-		float[] ret={max,(float)maxx,(float)maxy};
+		float[] ret={max,maxx,maxy};
 		return ret;
 	}
 }

@@ -19,6 +19,7 @@ import jguis.jutils;
 import jguis.CrossCorrFitWindow;
 import jguis.table_tools;
 import jguis.PlotStack4;
+import jguis.PlotWindow4;
 import java.awt.event.*;
 import ij.io.*;
 import java.text.*;
@@ -321,8 +322,11 @@ public class analysis_cross_corr_v2 implements PlugIn {
 			fit_corr fcg=new fit_corr(mingtd,maxgtd,1.05,5.0); fcg.psftype=psfflag;
 			fit_corr fcr=new fit_corr(minrtd,maxrtd,1.05,5.0); fcr.psftype=psfflag;
 			fit_corr fccc=new fit_corr(mincctd,maxcctd,1.05,5.0); fccc.psftype=psfflag;
-			String labels="filename\tbaseg\tg0g\ttdg\tc2g\tbaser\tg0r\ttdr\tc2r\tbasecc\tg0cc\ttdcc\tc2cc\tIg\tIr";
-			TextWindow tw=new TextWindow("Results",labels,"",400,400);
+			TextWindow tw=jutils.selectTable("Results");
+			if(tw==null){
+				String labels="filename\tbaseg\tg0g\ttdg\tc2g\tbaser\tg0r\ttdr\tc2r\tbasecc\tg0cc\ttdcc\tc2cc\tIg\tIr";
+				tw=new TextWindow("Results",labels,"",400,400);
+			}
 			float[][][] corrfit=new float[nfiles][6][];
 			for(int i=0;i<nfiles;i++){
 				double[] gparams=fcg.fitac(corr[i][0],newxvals,false,true);
@@ -349,9 +353,16 @@ public class analysis_cross_corr_v2 implements PlugIn {
 				corrfit[i][5]=fccc.corfunc_arrayf(ccparams,dxvals);
 				tw.append(names[i]+"\t"+table_tools.print_double_array(gparams)+"\t"+table_tools.print_double_array(rparams)+"\t"+table_tools.print_double_array(ccparams)+"\t"+khz*avg[0][i]+"\t"+khz*avg[1][i]);
 			}
-			PlotStack4 ps=new PlotStack4("Correlations","tau(s)","G(tau)",newxvals,corrfit);
-			ps.draw();
-			ps.setAllLogAxes(true,false);
+			if(nfiles==1){
+				float[][] tempxvals5=new float[6][]; for(int i=0;i<6;i++) tempxvals5[i]=newxvals;
+				PlotWindow4 pwt=new PlotWindow4("Avg","tau(s)","G(tau)",tempxvals5,corrfit[0],null);
+				pwt.setLogAxes(true,false);
+				pwt.draw();
+			} else {
+				PlotStack4 ps=new PlotStack4("Correlations","tau(s)","G(tau)",newxvals,corrfit);
+				ps.draw();
+				ps.setAllLogAxes(true,false);
+			}
 		} else {
 			//here we do more advanced averaging or global analysis
 			final CrossCorrFitWindow cw = new CrossCorrFitWindow();

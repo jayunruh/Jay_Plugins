@@ -67,9 +67,9 @@ public class STICS_map{
 		int slices=slices1;
 		if((startslice+slices)>image.length)
 			slices=image.length-startslice;
-		xregions=1+(int)(((float)width-(float)subsize)/(float)stepsize);
+		xregions=1+(int)(((float)width-(float)subsize)/stepsize);
 		int newwidth=xregions*subsize;
-		yregions=1+(int)(((float)height-(float)subsize)/(float)stepsize);
+		yregions=1+(int)(((float)height-(float)subsize)/stepsize);
 		int newheight=yregions*subsize;
 		int counter=0;
 		int minsize=(int)(0.25f*subsize*subsize);
@@ -106,8 +106,8 @@ public class STICS_map{
 						// if pixels are outside the roi, set them to the
 						// average values
 						if(count<subsize*subsize){
-							avg1/=(float)count;
-							avg2/=(float)count;
+							avg1/=count;
+							avg2/=count;
 							for(int i=ypos;i<(ypos+subsize);i++){
 								for(int j=xpos;j<(xpos+subsize);j++){
 									if(!(mask[mi1][j+i*width]&&mask[mi2][j+i*width])){
@@ -121,7 +121,7 @@ public class STICS_map{
 						// copy the cc to the correlation array
 						for(int i=0;i<subsize;i++){
 							for(int j=0;j<subsize;j++){
-								STICS[(i+m*subsize)*newwidth+j+l*subsize]+=subarray1[i*subsize+j]/(float)(slices-shift);
+								STICS[(i+m*subsize)*newwidth+j+l*subsize]+=subarray1[i*subsize+j]/(slices-shift);
 							}
 						}
 					}
@@ -150,7 +150,7 @@ public class STICS_map{
 				for(int i=0;i<subsize;i++){
 					for(int j=0;j<subsize;j++){
 						float dist=(float)Math.sqrt((i-subsize/2)*(i-subsize/2)+(j-subsize/2)*(j-subsize/2));
-						if(dist<((float)subsize/4.0f)){
+						if(dist<(subsize/4.0f)){
 							if(subarray[j+i*subsize]>max){
 								max=subarray[j+i*subsize];
 								maxj=j;
@@ -175,8 +175,8 @@ public class STICS_map{
 				float[] tempmax=interpolation.get_local_max(subarray,maxj,maxi,subsize,subsize);
 				float xsum=tempmax[0];
 				float ysum=tempmax[1];
-				xsum-=0.5f*(float)subsize;
-				ysum-=0.5f*(float)subsize;
+				xsum-=0.5f*subsize;
+				ysum-=0.5f*subsize;
 				float mag=(float)Math.sqrt(xsum*xsum+ysum*ysum);
 				velocities[0][m*xregions+l]=xsum;
 				velocities[1][m*xregions+l]=ysum;
@@ -195,14 +195,14 @@ public class STICS_map{
 				float mag=velocities[2][l+m*xregions];
 				float xvel=velocities[0][l+m*xregions];
 				float yvel=velocities[1][l+m*xregions];
-				float scaled_mag=(mag/(float)shift)*scaling/frametime;
+				float scaled_mag=(mag/shift)*scaling/frametime;
 				if(mag>magthresh){
 					fp.setValue(scaled_mag);
 					float xnorm=multiplier*xvel;
 					float ynorm=multiplier*yvel;
 					if(norm){
-						xnorm=(float)length*xvel/mag;
-						ynorm=(float)length*yvel/mag;
+						xnorm=length*xvel/mag;
+						ynorm=length*yvel/mag;
 					}
 					if(center){
 						jutils.draw_arrow(fp,xpos+spacing/2-(int)(0.5f*xnorm),ypos+spacing/2-(int)(0.5f*ynorm),xpos+spacing/2+(int)(0.5f*xnorm),ypos+spacing/2+(int)(0.5f*ynorm));
@@ -224,12 +224,12 @@ public class STICS_map{
 				float mag=velocities[2][l+m*xregions];
 				float xvel=velocities[0][l+m*xregions];
 				float yvel=velocities[1][l+m*xregions];
-				output[0][l+m*xregions]=(xvel/(float)shift)*scaling/frametime;
-				output[1][l+m*xregions]=(yvel/(float)shift)*scaling/frametime;
-				output[2][l+m*xregions]=(mag/(float)shift)*scaling/frametime;
-				output[3][l+m*xregions]=(float)xpos+0.5f*(float)spacing;
+				output[0][l+m*xregions]=(xvel/shift)*scaling/frametime;
+				output[1][l+m*xregions]=(yvel/shift)*scaling/frametime;
+				output[2][l+m*xregions]=(mag/shift)*scaling/frametime;
+				output[3][l+m*xregions]=xpos+0.5f*spacing;
 				output[3][l+m*xregions]*=scaling;
-				output[4][l+m*xregions]=(float)ypos+0.5f*(float)spacing;
+				output[4][l+m*xregions]=ypos+0.5f*spacing;
 				output[4][l+m*xregions]*=scaling;
 			}
 		}

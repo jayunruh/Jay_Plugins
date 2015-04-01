@@ -8,7 +8,8 @@
 
 package j3D;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
 
 public class pt3D extends element3D implements Cloneable{
 	// this is a stripped down point intended to serve as a place holder

@@ -8,7 +8,7 @@
 
 package jalgs;
 
-import java.awt.*;
+import java.awt.Polygon;
 
 public class interpolation{
 	// this class utilizes simple bilinear and polynomial interpolation methods
@@ -17,21 +17,46 @@ public class interpolation{
 		float[] retimage=new float[width*height];
 		for(int i=0;i<height;i++){
 			for(int j=0;j<width;j++){
-				retimage[j+i*width]=interp2D(image,width,height,(float)j-xoff,(float)i-yoff);
+				retimage[j+i*width]=interp2D(image,width,height,j-xoff,i-yoff);
 			}
 		}
 		return retimage;
 	}
+	
+	/**********
+	 * here the destination image must be a float image
+	 * @param src
+	 * @param srcwidth
+	 * @param srcheight
+	 * @param dest
+	 * @param destwidth
+	 * @param destheight
+	 * @param xoff
+	 * @param yoff
+	 */
+	public static void shift_copy_image(Object src,int srcwidth,int srcheight,float[] dest,int destwidth,int destheight,float xoff,float yoff){
+		for(int i=0;i<destheight;i++){
+			float newy=(float)i-yoff;
+			if(newy>=0.0f && newy<(float)(srcheight-1)){
+    			for(int j=0;j<destwidth;j++){
+    				float newx=(float)j-xoff;
+    				if(newx>=0.0f && newx<(float)(srcwidth-1)){
+    					dest[j+i*destwidth]=interp2D(src,srcwidth,srcheight,newx,newy);
+    				}
+    			}
+			}
+		}
+	}
 
 	public static float[] scale_image(Object image,int width,int height,float s){
 		float[] retimage=new float[width*height];
-		float xcenter=0.5f*(float)width;
-		float ycenter=0.5f*(float)height;
+		float xcenter=0.5f*width;
+		float ycenter=0.5f*height;
 		for(int i=0;i<height;i++){
-			float yval=(float)i-ycenter;
+			float yval=i-ycenter;
 			// float yval=(float)i;
 			for(int j=0;j<width;j++){
-				float xval=(float)j-xcenter;
+				float xval=j-xcenter;
 				// float xval=(float)i;
 				float tempx1=xval/s;
 				float tempy1=yval/s;
@@ -42,16 +67,23 @@ public class interpolation{
 	}
 
 	public static float[] rotate_image(Object image,int width,int height,float angle,float xcenter,float ycenter){
+		return rotate_image(image,width,height,angle,xcenter,ycenter,width,height);
+	}
+	
+	public static float[] rotate_image(Object image,int width,int height,float angle,float xcenter,float ycenter,int newwidth,int newheight){
+		//ycenter and x center are in the original image coordinates
 		float cosval=(float)Math.cos(-angle);
 		float sinval=(float)Math.sin(-angle);
-		float[] retimage=new float[width*height];
+		float[] retimage=new float[newwidth*newheight];
+		int xoffset=(newwidth-width)/2;
+		int yoffset=(newheight-height)/2;
 		for(int i=0;i<height;i++){
-			float yval=(float)i-ycenter;
+			float yval=i-ycenter;
 			for(int j=0;j<width;j++){
-				float xval=(float)j-xcenter;
+				float xval=j-xcenter;
 				float tempx1=xval*cosval-yval*sinval;
 				float tempy1=xval*sinval+yval*cosval;
-				retimage[j+i*width]=interp2D(image,width,height,tempx1+xcenter,tempy1+ycenter);
+				retimage[j+xoffset+(i+yoffset)*newwidth]=interp2D(image,width,height,tempx1+xcenter,tempy1+ycenter);
 			}
 		}
 		return retimage;
@@ -64,9 +96,9 @@ public class interpolation{
 		float sinval=(float)Math.sin(-angle);
 		float[][] retimage=new float[width][height];
 		for(int i=0;i<height;i++){
-			float yval=(float)i-ycenter;
+			float yval=i-ycenter;
 			for(int j=0;j<width;j++){
-				float xval=(float)j-xcenter;
+				float xval=j-xcenter;
 				float tempx1=xval*cosval-yval*sinval;
 				float tempy1=xval*sinval+yval*cosval;
 				retimage[j][i]=interp2D(image,tempx1+xcenter,tempy1+ycenter);
@@ -82,9 +114,9 @@ public class interpolation{
 		float sinval=(float)Math.sin(-angle);
 		boolean[][] retimage=new boolean[width][height];
 		for(int i=0;i<height;i++){
-			float yval=(float)i-ycenter;
+			float yval=i-ycenter;
 			for(int j=0;j<width;j++){
-				float xval=(float)j-xcenter;
+				float xval=j-xcenter;
 				float tempx1=xval*cosval-yval*sinval;
 				float tempy1=xval*sinval+yval*cosval;
 				retimage[j][i]=interp2D(image,tempx1+xcenter,tempy1+ycenter);
@@ -92,16 +124,18 @@ public class interpolation{
 		}
 		return retimage;
 	}
+	
+
 
 	public static float[] rotate_image(Object image,int width,int height,float[][] rmat){
 		float[] retimage=new float[width*height];
-		float xcenter=0.5f*(float)width;
-		float ycenter=0.5f*(float)height;
+		float xcenter=0.5f*width;
+		float ycenter=0.5f*height;
 		for(int i=0;i<height;i++){
-			float yval=(float)i-ycenter;
+			float yval=i-ycenter;
 			// float yval=(float)i;
 			for(int j=0;j<width;j++){
-				float xval=(float)j-xcenter;
+				float xval=j-xcenter;
 				// float xval=(float)i;
 				float tempx1=xval*rmat[0][0]+yval*rmat[0][1];
 				float tempy1=xval*rmat[1][0]+yval*rmat[1][1];
@@ -117,8 +151,8 @@ public class interpolation{
 		int[] retxpts=new int[poly.npoints];
 		int[] retypts=new int[poly.npoints];
 		for(int i=0;i<poly.npoints;i++){
-			float yval=(float)poly.ypoints[i]-ycenter;
-			float xval=(float)poly.xpoints[i]-xcenter;
+			float yval=poly.ypoints[i]-ycenter;
+			float xval=poly.xpoints[i]-xcenter;
 			float tempx1=xval*cosval-yval*sinval;
 			float tempy1=xval*sinval+yval*cosval;
 			retxpts[i]=(int)(tempx1+xcenter);
@@ -170,23 +204,23 @@ public class interpolation{
 	}
 
 	public static float[] rotate_image(Object image,int width,int height,float angle){
-		return rotate_image(image,width,height,angle,0.5f*(float)width,0.5f*(float)height);
+		return rotate_image(image,width,height,angle,0.5f*width,0.5f*height);
 	}
 	
 	public static float interp3D(Object[] stack,int width,int height,float x,float y,float z){
 		if(z<0.0f) return 0.0f;
-		if(z>(float)(stack.length-1)) return 0.0f;
+		if(z>stack.length-1) return 0.0f;
 		if(z==0.0f) return interp2D(stack[0],width,height,x,y);
-		if(z==(float)(stack.length-1)) return interp2D(stack[stack.length-1],width,height,x,y);
+		if(z==stack.length-1) return interp2D(stack[stack.length-1],width,height,x,y);
 		int prev=(int)z;
 		int next=prev+1;
 		float prevval=interp2D(stack[prev],width,height,x,y);
 		float nextval=interp2D(stack[next],width,height,x,y);
-		float rem=z-(float)prev;
+		float rem=z-prev;
 		return rem*(prevval-nextval)+prevval;
 	}
-
-	public static float[] interpz(Object image1,Object image2,int width,int height,float z){
+	
+	public static float[] interpz(Object image1,Object image2,int len,float z){
 		if(z<0.0f){
 			return null;
 		}
@@ -199,22 +233,22 @@ public class interpolation{
 		if(z==1.0f){
 			return algutils.convert_arr_float(image2);
 		}
-		float[] retimage=new float[width*height];
+		float[] retimage=new float[len];
 		if(image1 instanceof short[]){
-			for(int i=0;i<width*height;i++){
+			for(int i=0;i<len;i++){
 				float lower=((short[])image1)[i]&0xffff;
 				float upper=((short[])image2)[i]&0xffff;
 				retimage[i]=lower+z*(upper-lower);
 			}
 		}else{
 			if(image1 instanceof byte[]){
-				for(int i=0;i<width*height;i++){
+				for(int i=0;i<len;i++){
 					float lower=((byte[])image1)[i]&0xff;
 					float upper=((byte[])image2)[i]&0xff;
 					retimage[i]=lower+z*(upper-lower);
 				}
 			}else{
-				for(int i=0;i<width*height;i++){
+				for(int i=0;i<len;i++){
 					float lower=((float[])image1)[i];
 					float upper=((float[])image2)[i];
 					retimage[i]=lower+z*(upper-lower);
@@ -222,6 +256,10 @@ public class interpolation{
 			}
 		}
 		return retimage;
+	}
+
+	public static float[] interpz(Object image1,Object image2,int width,int height,float z){
+		return interpz(image1,image2,width*height,z);
 	}
 
 	public static float interp2D(float[][] image,float x,float y){
@@ -241,8 +279,8 @@ public class interpolation{
 		}
 		int intx=(int)x;
 		int inty=(int)y;
-		float remx=x-(float)intx;
-		float remy=y-(float)inty;
+		float remx=x-intx;
+		float remy=y-inty;
 		float ul,ur,ll,lr;
 		ul=image[intx][inty];
 		ur=image[intx+1][inty];
@@ -270,8 +308,8 @@ public class interpolation{
 		}
 		int intx=(int)x;
 		int inty=(int)y;
-		float remx=x-(float)intx;
-		float remy=y-(float)inty;
+		float remx=x-intx;
+		float remy=y-inty;
 		float ul,ur,ll,lr;
 		ul=image[intx][inty]?1.0f:0.0f;
 		ur=image[intx+1][inty]?1.0f:0.0f;
@@ -298,8 +336,8 @@ public class interpolation{
 		}
 		int intx=(int)x;
 		int inty=(int)y;
-		float remx=x-(float)intx;
-		float remy=y-(float)inty;
+		float remx=x-intx;
+		float remy=y-inty;
 		float ul,ur,ll,lr;
 		if(image instanceof short[]){
 			ul=((short[])image)[intx+width*inty]&0xffff;
@@ -332,18 +370,18 @@ public class interpolation{
 			x2=0.0f;
 		}
 		if(x2>(width-1)){
-			x2=(float)(width-1);
+			x2=width-1;
 		}
 		if(y2<0.0f){
 			y2=0.0f;
 		}
 		if(y2>(height-1)){
-			y2=(float)(height-1);
+			y2=height-1;
 		}
 		int intx=(int)x2;
 		int inty=(int)y2;
-		float remx=x2-(float)intx;
-		float remy=y2-(float)inty;
+		float remx=x2-intx;
+		float remy=y2-inty;
 		if(intx==(width-1)){
 			intx-=1;
 			remx=1.0f;
@@ -385,15 +423,15 @@ public class interpolation{
 		}
 		if(x==(width-1)){
 			if(image instanceof short[])
-				return (float)(((short[])image)[width-1]&0xffff);
+				return ((short[])image)[width-1]&0xffff;
 			if(image instanceof byte[])
-				return (float)(((byte[])image)[width-1]&0xff);
+				return ((byte[])image)[width-1]&0xff;
 			if(image instanceof float[])
 				return ((float[])image)[width-1];
 			return 0.0f;
 		}
 		int intx=(int)x;
-		float remx=x-(float)intx;
+		float remx=x-intx;
 		float ul,ur;
 		if(image instanceof short[]){
 			ul=((short[])image)[intx]&0xffff;
@@ -525,7 +563,7 @@ public class interpolation{
 		}
 		float[] temp={data[x-1],data[x],data[x+1]};
 		float temp2=get_neighborhood_max1D(temp);
-		return temp2+(float)x;
+		return temp2+x;
 	}
 
 	public static float get_neighborhood_max1D(float[] arr){
@@ -628,7 +666,7 @@ public class interpolation{
 				minindex=j;
 			}
 		}
-		return new float[]{(float)minindex,mindist};
+		return new float[]{minindex,mindist};
 	}
 	
 	public static float[] get_closest_index_3D(float[][] pl,float[] pt){
@@ -641,7 +679,7 @@ public class interpolation{
 				minindex=j;
 			}
 		}
-		return new float[]{(float)minindex,mindist};
+		return new float[]{minindex,mindist};
 	}
 
 	public static float calcdist(float x1,float y1,float x2,float y2){
@@ -657,11 +695,11 @@ public class interpolation{
 		if(position<=arr[0])
 			return 0.0f;
 		if(position>=arr[length-1])
-			return (float)length-1.0f;
+			return length-1.0f;
 		int i=1;
 		while(arr[i]<position)
 			i++;
-		return (position-arr[i-1])/(arr[i]-arr[i-1])+(float)(i-1);
+		return (position-arr[i-1])/(arr[i]-arr[i-1])+(i-1);
 	}
 
 	public static float center_of_mass(float[] arr){
@@ -672,6 +710,62 @@ public class interpolation{
 			xsum+=arr[i]*(double)i;
 		}
 		return (float)(xsum/count+0.5);
+	}
+	
+	public static float[] center_of_mass_2D(Object arr,int width,int height){
+		if(arr instanceof float[]) return center_of_mass_2D((float[])arr,width,height);
+		else if(arr instanceof byte[]) return center_of_mass_2D((byte[])arr,width,height);
+		else return center_of_mass_2D((short[])arr,width,height);
+	}
+	
+	public static float[] center_of_mass_2D(float[] arr,int width,int height){
+		double count=0.0;
+		double xsum=0.0;
+		double ysum=0.0;
+		int counter=0;
+		for(int i=0;i<height;i++){
+			for(int j=0;j<width;j++){
+				count+=arr[counter];
+				xsum+=arr[counter]*(double)j;
+				ysum+=arr[counter]*(double)i;
+				counter++;
+			}
+		}
+		return new float[]{(float)(xsum/count),(float)(ysum/count)};
+	}
+	
+	public static float[] center_of_mass_2D(short[] arr,int width,int height){
+		double count=0.0;
+		double xsum=0.0;
+		double ysum=0.0;
+		int counter=0;
+		for(int i=0;i<height;i++){
+			for(int j=0;j<width;j++){
+				float temp=arr[counter]&0xffff;
+				count+=temp;
+				xsum+=temp*(double)j;
+				ysum+=temp*(double)i;
+				counter++;
+			}
+		}
+		return new float[]{(float)(xsum/count),(float)(ysum/count)};
+	}
+	
+	public static float[] center_of_mass_2D(byte[] arr,int width,int height){
+		double count=0.0;
+		double xsum=0.0;
+		double ysum=0.0;
+		int counter=0;
+		for(int i=0;i<height;i++){
+			for(int j=0;j<width;j++){
+				float temp=arr[counter]&0xff;
+				count+=temp;
+				xsum+=temp*(double)j;
+				ysum+=temp*(double)i;
+				counter++;
+			}
+		}
+		return new float[]{(float)(xsum/count),(float)(ysum/count)};
 	}
 
 	public static float integrate(Object func,int len,float begin,float end,boolean cumulative){
@@ -685,14 +779,14 @@ public class interpolation{
 		// an
 		// interval
 		else{
-			integral+=((float)next-begin)*interp1D(func,len,0.5f*((float)next+begin)); // get
+			integral+=(next-begin)*interp1D(func,len,0.5f*(next+begin)); // get
 			// the
 			// interval
 			// to
 			// the
 			// next
 			// point
-			integral+=(end-(float)prev)*interp1D(func,len,0.5f*(end+(float)prev)); // get
+			integral+=(end-prev)*interp1D(func,len,0.5f*(end+prev)); // get
 			// the
 			// interval
 			// to
@@ -700,7 +794,7 @@ public class interpolation{
 			// end
 			// point
 			for(int i=next;i<prev;i++)
-				integral+=interp1D(func,len,(float)i+0.5f); // an all the
+				integral+=interp1D(func,len,i+0.5f); // an all the
 			// ones in
 			// between
 		}

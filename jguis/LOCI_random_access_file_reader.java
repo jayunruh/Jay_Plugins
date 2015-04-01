@@ -8,22 +8,24 @@
 
 package jguis;
 
-import ij.*;
-import ij.process.*;
+import ij.IJ;
+import ij.process.ImageProcessor;
 import jalgs.algutils;
 
-import java.io.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 
+import loci.formats.meta.IMetadata;
+import loci.plugins.util.ImageProcessorReader;
+import loci.plugins.util.LociPrefs;
 //import org.slf4j.LoggerFactory;
 //import ch.qos.logback.classic.Level;
 //import ch.qos.logback.classic.Logger;
-
-import loci.formats.*;
-import loci.formats.meta.IMetadata;
-import loci.plugins.util.*;
+import loci.formats.ChannelSeparator;
+import loci.formats.FormatException;
+import loci.formats.MetadataTools;
 
 public class LOCI_random_access_file_reader{
 	// this plugin simply uses the loci library to open files
@@ -129,9 +131,9 @@ public class LOCI_random_access_file_reader{
 			if(pix instanceof float[]){
 				return ((float[])pix)[0];
 			} else if(pix instanceof short[]){
-				return (float)(((short[])pix)[0]&0xffff);
+				return ((short[])pix)[0]&0xffff;
 			} else {
-				return (float)(((byte[])pix)[0]&0xff);
+				return ((byte[])pix)[0]&0xff;
 			}
 		}
 		return Float.NaN;

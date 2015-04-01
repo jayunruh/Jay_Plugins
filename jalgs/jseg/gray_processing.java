@@ -8,7 +8,8 @@
 
 package jalgs.jseg;
 
-import jalgs.*;
+import jalgs.algutils;
+import jalgs.jstatistics;
 
 public class gray_processing{
 

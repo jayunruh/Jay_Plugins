@@ -25,6 +25,13 @@ public class NLLSfit_v2{
 	 * Stowers Institute for Medical Research 4/25/08
 	 */
 
+	/************************
+	 * this is the main constructor
+	 * @param fitinterface: some class implementing the fit interface: usually the calling class
+	 * @param toler1: the fractional convergence tolerance, usually 0.0001
+	 * @param maxiter1: the max iterations, usually 50
+	 * @param lambda1: the levenberg marquardt multiplier, usually 0.1, 0.0 is pure gaus-newton optimization
+	 */
 	public NLLSfit_v2(NLLSfitinterface_v2 fitinterface,double toler1,int maxiter1,double lambda1){
 		// lambda of 0.1 seems to work pretty well
 		fitclass=fitinterface;
@@ -61,6 +68,17 @@ public class NLLSfit_v2{
 		lambda=0.0;
 	}
 
+	/***********************************
+	 * this is the main fitting function
+	 * @param params: the initial parameter values
+	 * @param fixes1: an int array containing 0 for unfixed parameters and 1 for fixed parameters
+	 * @param constraints: an nparams x 2 2D array with the constraints: {{lower0,lower1,...},{upper0,upper1,...}}
+	 * @param data: the data array
+	 * @param weights1: the weights array
+	 * @param stats: a double array of length 2 which will contain number of iterations and chi squared on return
+	 * @param output: a boolean to specify whether or not data is written to the showresults method of the fit interface
+	 * @return
+	 */
 	public float[] fitdata(double[] params,int[] fixes1,double[][] constraints,float[] data,float[] weights1,double[] stats,boolean output){
 		// this function fits the array data to an arbitrary function denoted by
 		// the NLLSfitinterface
@@ -91,7 +109,7 @@ public class NLLSfit_v2{
 			}
 		}else{
 			for(int i=0;i<npts;i++){
-				weights[i]=(double)weights1[i];
+				weights[i]=weights1[i];
 			}
 		}
 		double chisquared=0.0f;
@@ -115,6 +133,7 @@ public class NLLSfit_v2{
 			do{
 				c2old=chisquared;
 				int counter=1;
+				//calculate the shifted parameters for the numerical derivatives
 				for(int i=0;i<nparams;i++){
 					if(fixes[i]==0){
 						shiftparams[counter]=new double[nparams];
@@ -125,9 +144,11 @@ public class NLLSfit_v2{
 						counter++;
 					}
 				}
+				//now calculate the shifted functions
 				for(int i=1;i<=fitparams;i++){
 					shiftfit[i]=fitclass.fitfunc((double[])shiftparams[i]);
 				}
+				//here we calculate the jacobian with derivatives
 				double[][] jacobian=new double[fitparams][fitparams];
 				double[] jvector=new double[fitparams];
 				for(int i=0;i<fitparams;i++){
@@ -141,13 +162,17 @@ public class NLLSfit_v2{
 					}
 
 					for(int k=0;k<npts;k++){
-						jvector[i]+=((((double[])shiftfit[i+1])[k]-((double[])shiftfit[0])[k])/dx)*((double)data[k]-((double[])shiftfit[0])[k])*weights[k];
+						jvector[i]+=((((double[])shiftfit[i+1])[k]-((double[])shiftfit[0])[k])/dx)*(data[k]-((double[])shiftfit[0])[k])*weights[k];
 					}
 				}
+				//implement the levenberg marquardt lagrangian multiplier
 				for(int k=0;k<fitparams;k++){
 					jacobian[k][k]*=(1.0+currlambda);
 				}
+				//solve the matrix equation
 				(new matrixsolve()).gjsolve(jacobian,jvector,dparams,fitparams);
+				//now implement the updates and constraints
+				//parameters are truncated at the constraint boundary
 				counter=0;
 				for(int i=0;i<nparams;i++){
 					if(fixes[i]==0){
@@ -179,12 +204,15 @@ public class NLLSfit_v2{
 					currlambda*=10.0;
 				}
 			}while(tempdouble>toler||c2old<chisquared);
-			stats[0]=(double)iterations;
+			stats[0]=iterations;
 			for(int i=0;i<npts;i++){
 				fit[i]=(float)((double[])shiftfit[0])[i];
 			}
 		}
 		stats[1]=chisquared;
+		if(stats.length>2){
+			stats[2]=calculate_aic_c2(chisquared,fitparams,data.length);
+		}
 		return fit;
 	}
 
@@ -215,7 +243,7 @@ public class NLLSfit_v2{
 		double[] weights=new double[npts];
 		for(int i=0;i<npts;i++){
 			if(data[i]>0.0f&&S>0.0f){
-				weights[i]=1.0/(S*(double)data[i]);
+				weights[i]=1.0/(S*data[i]);
 			}else{
 				weights[i]=1.0;
 			}
@@ -270,7 +298,7 @@ public class NLLSfit_v2{
 
 					for(int k=0;k<npts;k++){
 						if(!fitmask[k]){
-							jvector[i]+=((((double[])shiftfit[i+1])[k]-((double[])shiftfit[0])[k])/dx)*((double)data[k]-((double[])shiftfit[0])[k])*weights[k];
+							jvector[i]+=((((double[])shiftfit[i+1])[k]-((double[])shiftfit[0])[k])/dx)*(data[k]-((double[])shiftfit[0])[k])*weights[k];
 						}
 					}
 				}
@@ -309,13 +337,31 @@ public class NLLSfit_v2{
 					currlambda*=10.0;
 				}
 			}while(tempdouble>toler||c2old<chisquared);
-			stats[0]=(double)iterations;
+			stats[0]=iterations;
 			for(int i=0;i<npts;i++){
 				fit[i]=(float)((double[])shiftfit[0])[i];
 			}
 		}
 		stats[1]=chisquared;
+		if(stats.length>2){
+			int npts2=data.length;
+			if(fitmask!=null){
+				for(int i=0;i<fitmask.length;i++) if(fitmask[i]) npts2--;
+			}
+			stats[2]=calculate_aic_c2(chisquared,fitparams,npts2);
+		}
 		return fit;
+	}
+	
+	public double calculate_aic_c2(double c2,int numfit,int size1){
+		double size=size1;
+		double dof=numfit;
+		return size*Math.log(c2*(size-dof)/size)+2.0*size*dof/(size-dof-1);
+	}
+	
+	public double calculate_aic_params(double[] params,int numfit,float[] data,double[] weights){
+		double c2=calculate_c2_params(params,numfit,data,weights);
+		return calculate_aic_c2(c2,numfit,data.length);
 	}
 
 	public double calculate_c2_params(double[] params,int numfit,float[] data,double[] weights){
@@ -329,9 +375,14 @@ public class NLLSfit_v2{
 		int length=data.length;
 		double tempc2=0.0;
 		for(int i=0;i<length;i++){
-			tempc2+=(fit[i]-(double)data[i])*(fit[i]-(double)data[i])*weights[i];
+			tempc2+=(fit[i]-data[i])*(fit[i]-data[i])*weights[i];
 		}
-		return tempc2/((double)(length-numfit));
+		return tempc2/(length-numfit);
+	}
+	
+	public double calculate_aic_fit(double[] fit,int numfit,float[] data,double[] weights){
+		double c2=calculate_c2_fit(fit,numfit,data,weights);
+		return calculate_aic_c2(c2,numfit,data.length);
 	}
 
 	public double calculate_c2_params(double[] params,int numfit,float[] data,double[] weights,boolean[] fitmask){
@@ -347,11 +398,11 @@ public class NLLSfit_v2{
 		int nonfit=0;
 		for(int i=0;i<length;i++){
 			if(!fitmask[i]){
-				tempc2+=(fit[i]-(double)data[i])*(fit[i]-(double)data[i])*weights[i];
+				tempc2+=(fit[i]-data[i])*(fit[i]-data[i])*weights[i];
 			}else{
 				nonfit++;
 			}
 		}
-		return tempc2/((double)(length-nonfit-numfit));
+		return tempc2/(length-nonfit-numfit);
 	}
 }

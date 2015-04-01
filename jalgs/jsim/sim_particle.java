@@ -37,7 +37,7 @@ public class sim_particle{
 			float[] trate=sm.trate2[speciesID];
 			for(int i=0;i<sm.nspecies;i++){
 				if(i!=speciesID&&trate[i]>0.0f){
-					if(sm.random.expdev(1.0/(double)trate[i])<1.0){
+					if(sm.random.expdev(1.0/trate[i])<1.0){
 						speciesID=i;
 						break transitionlabel;
 					}
@@ -46,7 +46,7 @@ public class sim_particle{
 		}
 		// now look for bleaching events
 		for(int i=0;i<bleach_state.length;i++){
-			double kbleach=(double)sm.sslist[speciesID].kbleach2[i];
+			double kbleach=sm.sslist[speciesID].kbleach2[i];
 			if(bleach_state[i]>0){
 				if(kbleach>0.0){
 					boolean bleachbyphoton=sm.bleachbyphoton;

@@ -8,11 +8,20 @@
 
 package jguis;
 
-import ij.*;
-import ij.io.*;
-import java.io.*;
-import java.util.*;
-import ij.process.*;
+import ij.CompositeImage;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.VirtualStack;
+import ij.io.FileInfo;
+import ij.io.FileOpener;
+import ij.process.ImageProcessor;
+
+import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /**
  * Imports a Z series (image stack) from a Zeiss ZVI file. This plugin was

@@ -8,17 +8,36 @@
 
 package jguis;
 
-import jalgs.*;
-import jalgs.jfit.*;
+import ij.IJ;
+import ij.gui.GenericDialog;
+import ij.text.TextWindow;
+import jalgs.jdist;
+import jalgs.jstatistics;
+import jalgs.jfit.NLLSfit_v2;
+import jalgs.jfit.NLLSfitinterface_v2;
+import jalgs.jfit.NLLSglobalfit_v2;
+import jalgs.jfit.monte_carlo_errors_v2;
+import jalgs.jfit.support_plane_errors_v2;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Button;
+import java.awt.Checkbox;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Insets;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-import javax.swing.event.*;
-
-import ij.*;
-import ij.gui.*;
-import ij.text.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 public class AutoCorrFitWindow extends Panel implements ActionListener,NLLSfitinterface_v2,ListSelectionListener,TableModelListener,ItemListener{
 	public final static int H=775;
@@ -88,7 +107,7 @@ public class AutoCorrFitWindow extends Panel implements ActionListener,NLLSfitin
 		vars=var1;
 		trajectories=trajectories1;
 		brightcorr=brightcorr1;
-		khz=(double)khz1;
+		khz=khz1;
 		ncurves=corr.length;
 		nparams=11;
 		npts=corr[0].length;
@@ -766,7 +785,7 @@ public class AutoCorrFitWindow extends Panel implements ActionListener,NLLSfitin
 			return;
 		}
 		conf=0.01f*(float)gd.getNextNumber();
-		int paramindex=(int)gd.getNextChoiceIndex();
+		int paramindex=gd.getNextChoiceIndex();
 		spacing=0.01*gd.getNextNumber();
 		globalerror=gd.getNextBoolean();
 		dataset=(int)gd.getNextNumber();
@@ -810,7 +829,7 @@ public class AutoCorrFitWindow extends Panel implements ActionListener,NLLSfitin
 			}
 			int dofnum=npts*nsel-(nfit-1)-1;
 			int dofden=npts*nsel-nfit-1;
-			double flim=(new jdist()).FLimit(dofnum,dofden,(double)conf);
+			double flim=(new jdist()).FLimit(dofnum,dofden,conf);
 			IJ.log("FLimit = "+(float)flim);
 			if(flim==Double.NaN&&flim<1.0){
 				IJ.showMessage("Invalid Limiting F Value");
@@ -838,7 +857,7 @@ public class AutoCorrFitWindow extends Panel implements ActionListener,NLLSfitin
 			}
 			int dofnum=npts-(nfit-1)-1;
 			int dofden=npts-nfit-1;
-			double flim=(new jdist()).FLimit(dofnum,dofden,(double)conf);
+			double flim=(new jdist()).FLimit(dofnum,dofden,conf);
 			IJ.log("FLimit = "+(float)flim);
 			if(flim==Double.NaN&&flim<1.0){
 				IJ.showMessage("Invalid Limiting F Value");
@@ -902,10 +921,10 @@ public class AutoCorrFitWindow extends Panel implements ActionListener,NLLSfitin
 
 	private void getintbright(){
 		for(int i=0;i<ncurves;i++){
-			intensity1[i]=khz*(double)avgs[i];
-			g01[i]=(double)((vars[i]-avgs[i])/(avgs[i]*avgs[i]));
+			intensity1[i]=khz*avgs[i];
+			g01[i]=(vars[i]-avgs[i])/(avgs[i]*avgs[i]);
 			if(brightcorr){
-				g01[i]*=khz*(double)avgs[i];
+				g01[i]*=khz*avgs[i];
 			}
 		}
 	}
@@ -936,9 +955,9 @@ public class AutoCorrFitWindow extends Panel implements ActionListener,NLLSfitin
 			}
 		}
 		for(int k=0;k<npts;k++){
-			avg[k]/=(float)ninclude;
+			avg[k]/=ninclude;
 			if(useweights&&ninclude>1){
-				errs[k]/=(float)ninclude;
+				errs[k]/=ninclude;
 				errs[k]-=avg[k]*avg[k];
 				errs[k]*=((float)ninclude)/((float)(ninclude-1));
 				errs[k]=(float)Math.sqrt(errs[k]);
@@ -949,11 +968,11 @@ public class AutoCorrFitWindow extends Panel implements ActionListener,NLLSfitin
 		}
 		if(trajectories!=null){
 			for(int k=0;k<trajectories[0].length;k++){
-				avgtraj[k]/=(float)ninclude;
+				avgtraj[k]/=ninclude;
 			}
 		}
-		tempavg/=(double)ninclude;
-		tempvar/=(double)ninclude;
+		tempavg/=ninclude;
+		tempvar/=ninclude;
 		intensity1[ncurves]=khz*tempavg;
 		g01[ncurves]=(tempvar-tempavg)/(tempavg*tempavg);
 		if(brightcorr){
@@ -985,8 +1004,8 @@ public class AutoCorrFitWindow extends Panel implements ActionListener,NLLSfitin
 		// params are r,baseline,G01,td1,G02,td2,ftrip,ttrip;
 		for(int i=0;i<npts;i++){
 			int indvar=i;
-			double t_td1=(double)xvals[0][indvar]/(params[3]/1000.0);
-			double t_td2=(double)xvals[0][indvar]/(params[5]/1000.0);
+			double t_td1=xvals[0][indvar]/(params[3]/1000.0);
+			double t_td2=xvals[0][indvar]/(params[5]/1000.0);
 			double factor=1.0/(params[0]*params[0]);
 			double temp1=1.0/(1.0+t_td1);
 			if(psfflag==2)

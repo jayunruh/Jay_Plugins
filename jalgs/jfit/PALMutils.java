@@ -33,14 +33,14 @@ public class PALMutils{
 		float xmax=limits[1];
 		float ymin=limits[2];
 		float ymax=limits[3];
-		float scaling=(float)xsize/(xmax-xmin);
+		float scaling=xsize/(xmax-xmin);
 		// recalculate ymax to make sure image size is retained appropriately
-		ymax=(float)ysize/scaling+ymin;
+		ymax=ysize/scaling+ymin;
 		float[] image=new float[xsize*ysize];
 		for(int i=0;i<molecules[0].length;i++){
 			float pixelerr=scaling*stdev2;
-			float pixelx=((molecules[0][i]-xmin)/(xmax-xmin))*(float)xsize;
-			float pixely=((molecules[1][i]-ymin)/(ymax-ymin))*(float)ysize;
+			float pixelx=((molecules[0][i]-xmin)/(xmax-xmin))*xsize;
+			float pixely=((molecules[1][i]-ymin)/(ymax-ymin))*ysize;
 			gf.draw_2D_func(image,pixelx,pixely,xsize,ysize,pixelerr,multiplier*molecules[2][i],2.0f);
 		}
 		return image;
@@ -53,16 +53,16 @@ public class PALMutils{
 		float xmax=limits[1];
 		float ymin=limits[2];
 		float ymax=limits[3];
-		float scaling=(float)xsize/(xmax-xmin);
+		float scaling=xsize/(xmax-xmin);
 		// recalculate ymax to make sure image size is retained appropriately
-		ymax=(float)ysize/scaling+ymin;
+		ymax=ysize/scaling+ymin;
 		float[] image=new float[xsize*ysize];
 		for(int i=0;i<molecules[0].length;i++){
 			float photons=molecules[2][i]*(stdev*stdev*2.0f*(float)Math.PI);
 			photons/=gain;
 			float pixelerr=scaling*geterr(photons);
-			float pixelx=((molecules[0][i]-xmin)/(xmax-xmin))*(float)xsize;
-			float pixely=((molecules[1][i]-ymin)/(ymax-ymin))*(float)ysize;
+			float pixelx=((molecules[0][i]-xmin)/(xmax-xmin))*xsize;
+			float pixely=((molecules[1][i]-ymin)/(ymax-ymin))*ysize;
 			float newamp=scaling*scaling/(pixelerr*pixelerr*2.0f*(float)Math.PI);
 			gf.draw_2D_func(image,pixelx,pixely,xsize,ysize,pixelerr,multiplier*newamp,2.0f);
 		}
@@ -76,15 +76,15 @@ public class PALMutils{
 		float xmax=limits[1];
 		float ymin=limits[2];
 		float ymax=limits[3];
-		float scaling=(float)xsize/(xmax-xmin);
+		float scaling=xsize/(xmax-xmin);
 		// recalculate ymax to make sure image size is retained appropriately
-		ymax=(float)ysize/scaling+ymin;
+		ymax=ysize/scaling+ymin;
 		float[] image=new float[xsize*ysize];
 		for(int i=0;i<molecules[0].length;i++){
 			float photons=molecules[2][i]*(stdev*stdev*2.0f*(float)Math.PI);
 			photons/=gain;
-			float pixelx=((molecules[0][i]-xmin)/(xmax-xmin))*(float)xsize;
-			float pixely=((molecules[1][i]-ymin)/(ymax-ymin))*(float)ysize;
+			float pixelx=((molecules[0][i]-xmin)/(xmax-xmin))*xsize;
+			float pixely=((molecules[1][i]-ymin)/(ymax-ymin))*ysize;
 			int tempx=(int)(pixelx+0.5f);
 			int tempy=(int)(pixely+0.5f);
 			if(tempx>=0&&tempx<xsize&&tempy>=0&&tempy<ysize){
@@ -158,6 +158,79 @@ public class PALMutils{
 			}
 		}
 		return molfilt;
+	}
+	
+	public static float[][] pixels2Molecules(float[] pixels,int width,int height){
+		float[][] mols=new float[width][height-1];
+		for(int i=0;i<(height-1);i++){
+			for(int j=0;j<width;j++){
+				mols[j][i]=pixels[j+(i+1)*width];
+			}
+		}
+		return mols;
+	}
+	
+	public static float[] molecules2Pixels(float[][] molecules,float[] metadata){
+		int nmols=molecules[0].length;
+		int nparams=molecules.length;
+		float[] pixels=new float[nparams*(nmols+1)];
+		System.arraycopy(metadata,0,pixels,0,metadata.length);
+		for(int i=0;i<nmols;i++){
+			for(int j=0;j<nparams;j++){
+				pixels[j+(i+1)*nparams]=molecules[j][i];
+			}
+		}
+		return pixels;
+	}
+	
+	public static float[][] accumulateMolecules(float[][] molecules,float maxdist,float maxoff){
+		// the molecules array has columns with x,y,amp,c2,t,z
+		//here we recursively search molecules detected within maxoff time for maxdist
+		int nparams=molecules.length;
+		int nmols=molecules[0].length;
+		float[][] newmols=new float[nparams][nmols];
+		int nnewmols=1;
+		float maxdist2=maxdist*maxdist;
+		for(int i=0;i<nparams;i++) newmols[i][0]=molecules[i][0];
+		for(int i=1;i<nmols;i++){
+			boolean found=false;
+			for(int j=nnewmols-1;j>=0;j--){
+				float dt=molecules[4][i]-newmols[4][j];
+				if(dt>maxoff){
+					break;
+				}
+				float dist2=getdist2(new float[]{molecules[0][i],molecules[1][i]},new float[]{newmols[0][j],newmols[1][j]});
+				if(dist2<=maxdist2){
+					newmols[0][j]+=molecules[0][i]; newmols[0][j]*=0.5f;
+					newmols[1][j]+=molecules[1][i]; newmols[1][j]*=0.5f;
+					newmols[2][j]+=molecules[2][i];
+					newmols[3][j]+=molecules[3][i]; newmols[3][j]*=0.5f;
+					newmols[4][j]=molecules[4][i];
+					newmols[5][j]+=molecules[5][i]; newmols[5][j]*=0.5f;
+					found=true;
+					break;
+				}
+			}
+			if(!found){
+				for(int k=0;k<nparams;k++) newmols[k][nnewmols]=molecules[k][i];
+				nnewmols++;
+			}
+		}
+		float[][] newmols2=new float[nparams][nnewmols];
+		for(int i=0;i<nparams;i++) System.arraycopy(newmols[i],0,newmols2[i],0,nnewmols);
+		return newmols2;
+	}
+	
+	private static float getdist(float[] coords1,float[] coords2){
+		float d2=0.0f;
+		for(int i=0;i<coords1.length;i++) d2+=(coords2[i]-coords1[i])*(coords2[i]-coords1[i]);
+		return (float)Math.sqrt(d2);
+	}
+	
+	private static float getdist2(float[] coords1,float[] coords2){
+		float d2=0.0f;
+		for(int i=0;i<coords1.length;i++) d2+=(coords2[i]-coords1[i])*(coords2[i]-coords1[i]);
+		return d2;
 	}
 
 	private float geterr(float photons){

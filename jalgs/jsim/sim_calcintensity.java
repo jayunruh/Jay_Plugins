@@ -8,8 +8,9 @@
 
 package jalgs.jsim;
 
-import java.awt.*;
-import java.awt.image.*;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.image.MemoryImageSource;
 
 public class sim_calcintensity{
 	rngs random;
@@ -21,8 +22,8 @@ public class sim_calcintensity{
 	public sim_calcintensity(sim_setup set1){
 		set=set1;
 		random=set.random;
-		stdev=0.5*(double)set.w0pixels;
-		ratio=(double)(set.z0/set.w0);
+		stdev=0.5*set.w0pixels;
+		ratio=set.z0/set.w0;
 		maxdist=(int)(2.0f*set.w0pixels);
 		maxdistz=(int)(2.0f*set.z0pixels);
 		init_gaus();
@@ -30,8 +31,8 @@ public class sim_calcintensity{
 
 	public void change_setup(sim_setup set1){
 		set=set1;
-		stdev=0.5*(double)set.w0pixels;
-		ratio=(double)(set.z0/set.w0);
+		stdev=0.5*set.w0pixels;
+		ratio=set.z0/set.w0;
 		maxdist=(int)(2.0f*set.w0pixels);
 		maxdistz=(int)(2.0f*set.z0pixels);
 		init_gaus();
@@ -64,7 +65,7 @@ public class sim_calcintensity{
 					int starty=(int)sps[i].coords[1]-maxdist;
 					int endy=(int)sps[i].coords[1]+maxdist;
 					for(int pointy=starty;pointy<endy;pointy++){
-						double yr=Math.abs(sps[i].coords[1]-(float)pointy);
+						double yr=Math.abs(sps[i].coords[1]-pointy);
 						float multiplier=(float)getinterpgaus(yr);
 						int startx=(int)sps[i].coords[0]-maxdist;
 						int endx=(int)sps[i].coords[0]+maxdist;
@@ -76,7 +77,7 @@ public class sim_calcintensity{
 							pointy2-=set.boxpixels;
 						}
 						for(int pointx=startx;pointx<endx;pointx++){
-							double xr=Math.abs(sps[i].coords[0]-(float)pointx);
+							double xr=Math.abs(sps[i].coords[0]-pointx);
 							float multiplierx=(float)getinterpgaus(xr);
 							int pointx2=pointx;
 							if(pointx2<0){
@@ -107,7 +108,7 @@ public class sim_calcintensity{
 			float[][] photons=new float[nchannels][set.boxpixels*set.boxpixels];
 			for(int i=0;i<nchannels;i++){
 				for(int j=0;j<set.boxpixels*set.boxpixels;j++){
-					photons[i][j]=(float)set.random.poidev(fintensity[i][j]);
+					photons[i][j]=set.random.poidev(fintensity[i][j]);
 				}
 			}
 			if(set.noiseindex==0){
@@ -155,12 +156,12 @@ public class sim_calcintensity{
 					int starty=(int)sps[i].coords[1]-maxdist;
 					int endy=(int)sps[i].coords[1]+maxdist;
 					if(pointy>=starty&&pointy<endy){
-						double yr=Math.abs(sps[i].coords[1]-(float)pointy);
+						double yr=Math.abs(sps[i].coords[1]-pointy);
 						float multiplier=(float)getinterpgaus(yr);
 						int startx=(int)sps[i].coords[0]-maxdist;
 						int endx=(int)sps[i].coords[0]+maxdist;
 						for(int pointx=startx;pointx<endx;pointx++){
-							double xr=Math.abs(sps[i].coords[0]-(float)pointx);
+							double xr=Math.abs(sps[i].coords[0]-pointx);
 							float multiplierx=(float)getinterpgaus(xr);
 							int pointx2=pointx;
 							if(pointx2<0){
@@ -191,7 +192,7 @@ public class sim_calcintensity{
 			float[][] photons=new float[nchannels][set.boxpixels];
 			for(int i=0;i<nchannels;i++){
 				for(int j=0;j<set.boxpixels;j++){
-					photons[i][j]=(float)set.random.poidev(fintensity[i][j]);
+					photons[i][j]=set.random.poidev(fintensity[i][j]);
 				}
 			}
 			if(set.noiseindex==0){
@@ -250,12 +251,12 @@ public class sim_calcintensity{
 					int starty=(int)sps[i].coords[1]-maxdist;
 					int endy=(int)sps[i].coords[1]+maxdist;
 					if(pointy>=starty&&pointy<endy){
-						double yr=Math.abs(sps[i].coords[1]-(float)pointy);
+						double yr=Math.abs(sps[i].coords[1]-pointy);
 						float multiplier=(float)getinterpgaus(yr);
 						int startx=(int)sps[i].coords[0]-maxdist;
 						int endx=(int)sps[i].coords[0]+maxdist;
 						if(pointx>=startx&&pointx<endx){
-							double xr=Math.abs(sps[i].coords[0]-(float)pointx);
+							double xr=Math.abs(sps[i].coords[0]-pointx);
 							float multiplierx=(float)getinterpgaus(xr);
 							for(int j=0;j<nchannels;j++){
 								float intensity=sps[i].get_brightness(sm,j)*multiplierx*multiplier*multiplierz;
@@ -265,7 +266,7 @@ public class sim_calcintensity{
 						}else{
 							// wrap around detection in the x direction
 							if(startx<0&&pointx>=(startx+set.boxpixels)){
-								double xr=Math.abs(sps[i].coords[0]-(float)(pointx-set.boxpixels));
+								double xr=Math.abs(sps[i].coords[0]-(pointx-set.boxpixels));
 								float multiplierx=(float)getinterpgaus(xr);
 								for(int j=0;j<nchannels;j++){
 									float intensity=sps[i].get_brightness(sm,j)*multiplierx*multiplier*multiplierz;
@@ -274,7 +275,7 @@ public class sim_calcintensity{
 								}
 							}else{
 								if(endx>=set.boxpixels&&pointx<(endx-set.boxpixels)){
-									double xr=Math.abs(sps[i].coords[0]-(float)(pointx+set.boxpixels));
+									double xr=Math.abs(sps[i].coords[0]-(pointx+set.boxpixels));
 									float multiplierx=(float)getinterpgaus(xr);
 									for(int j=0;j<nchannels;j++){
 										float intensity=sps[i].get_brightness(sm,j)*multiplierx*multiplier*multiplierz;
@@ -298,7 +299,7 @@ public class sim_calcintensity{
 		}else{
 			float[] photons=new float[nchannels];
 			for(int i=0;i<nchannels;i++){
-				photons[i]=(float)set.random.poidev(fintensity[i]);
+				photons[i]=set.random.poidev(fintensity[i]);
 			}
 			if(set.noiseindex==0){
 				return photons;
@@ -334,11 +335,11 @@ public class sim_calcintensity{
 					int starty=(int)sps[i].coords[1]-maxdist;
 					int endy=(int)sps[i].coords[1]+maxdist;
 					if(pointy>=starty&&pointy<endy){
-						double yr=Math.abs(sps[i].coords[1]-(float)pointy);
+						double yr=Math.abs(sps[i].coords[1]-pointy);
 						int startx=(int)sps[i].coords[0]-maxdist;
 						int endx=(int)sps[i].coords[0]+maxdist;
 						if(pointx>=startx&&pointx<endx){
-							double xr=Math.abs(sps[i].coords[0]-(float)pointx);
+							double xr=Math.abs(sps[i].coords[0]-pointx);
 							for(int j=0;j<nchannels;j++){
 								float intensity=sps[i].get_brightness(sm,j)*(float)get_tpe_psf(xr,yr,zr);
 								fintensity[j]+=intensity;
@@ -347,7 +348,7 @@ public class sim_calcintensity{
 						}else{
 							// wrap around detection in the x direction
 							if(startx<0&&pointx>=(startx+set.boxpixels)){
-								double xr=Math.abs(sps[i].coords[0]-(float)(pointx-set.boxpixels));
+								double xr=Math.abs(sps[i].coords[0]-(pointx-set.boxpixels));
 								for(int j=0;j<nchannels;j++){
 									float intensity=sps[i].get_brightness(sm,j)*(float)get_tpe_psf(xr,yr,zr);
 									fintensity[j]+=intensity;
@@ -355,7 +356,7 @@ public class sim_calcintensity{
 								}
 							}else{
 								if(endx>=set.boxpixels&&pointx<(endx-set.boxpixels)){
-									double xr=Math.abs(sps[i].coords[0]-(float)(pointx+set.boxpixels));
+									double xr=Math.abs(sps[i].coords[0]-(pointx+set.boxpixels));
 									for(int j=0;j<nchannels;j++){
 										float intensity=sps[i].get_brightness(sm,j)*(float)get_tpe_psf(xr,yr,zr);
 										fintensity[j]+=intensity;
@@ -377,7 +378,7 @@ public class sim_calcintensity{
 		}else{
 			float[] photons=new float[nchannels];
 			for(int i=0;i<nchannels;i++){
-				photons[i]=(float)set.random.poidev(fintensity[i]);
+				photons[i]=set.random.poidev(fintensity[i]);
 			}
 			if(set.noiseindex==0){
 				return photons;
@@ -404,12 +405,12 @@ public class sim_calcintensity{
 		int starty=(int)(set.boxpixels/2.0f)-maxdist;
 		int endy=(int)(set.boxpixels/2.0f)+maxdist;
 		for(int pointy=starty;pointy<endy;pointy++){
-			double yr=Math.abs(set.boxpixels/2.0f-(float)pointy);
+			double yr=Math.abs(set.boxpixels/2.0f-pointy);
 			float multiplier=(float)getinterpgaus(yr);
 			int startx=starty;
 			int endx=endy;
 			for(int pointx=startx;pointx<endx;pointx++){
-				double xr=Math.abs(set.boxpixels/2.0f-(float)pointx);
+				double xr=Math.abs(set.boxpixels/2.0f-pointx);
 				float multiplierx=(float)getinterpgaus(xr);
 				int gintensity=(int)(((signal[0]*multiplierx*multiplier)/maxintensity)*255.0f);
 				// int
@@ -473,7 +474,7 @@ public class sim_calcintensity{
 
 	private double getinterpgaus(double r){
 		int rp=(int)(r*10.0);
-		double rem=r*10.0-(double)rp;
+		double rem=r*10.0-rp;
 		if(rp<999){
 			return rem*(model_gaus[rp+1]-model_gaus[rp])+model_gaus[rp];
 		}else{
@@ -488,7 +489,7 @@ public class sim_calcintensity{
 	private void init_gaus(){
 		model_gaus=new double[1000];
 		for(int i=0;i<1000;i++){
-			double r=0.1*(double)i;
+			double r=0.1*i;
 			model_gaus[i]=Math.exp(-(r*r)/(2.0*stdev*stdev));
 		}
 	}

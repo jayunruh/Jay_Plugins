@@ -77,7 +77,7 @@ public class simplexfit_v2{
 			}
 		}else{
 			for(int i=0;i<data.length;i++){
-				weights[i]=(double)weights1[i];
+				weights[i]=weights1[i];
 			}
 		}
 		if(maxiter==0){
@@ -150,7 +150,7 @@ public class simplexfit_v2{
 			for(int i=0;i<=nfit;i++){
 				if(i!=worst_index){
 					for(int j=0;j<nfit;j++){
-						avg_all_but_worst[j]=avg_all_but_worst[j]+simplex[j][i]/(double)nfit;
+						avg_all_but_worst[j]=avg_all_but_worst[j]+simplex[j][i]/nfit;
 					}
 				}
 			}
@@ -257,7 +257,7 @@ public class simplexfit_v2{
 			}
 			first=false;
 		}while(((iteration<maxiter)&&(Math.abs((c2[best_index]-c2old)/c2old)>toler))||(iteration<miniter));
-		stats[0]=(double)iteration;
+		stats[0]=iteration;
 		stats[1]=c2[best_index];
 		double[] fit=fitclass.fitfunc(params);
 		float[] ffit=new float[fit.length];
@@ -273,7 +273,7 @@ public class simplexfit_v2{
 		double tempc2=0.0;
 		double[] tempfit=fitclass.fitfunc(params);
 		for(int i=0;i<length;i++){
-			tempc2+=(tempfit[i]-(double)data[i])*(tempfit[i]-(double)data[i])*weights[i];
+			tempc2+=(tempfit[i]-data[i])*(tempfit[i]-data[i])*weights[i];
 		}
 		// implement penalties for going outside of constraints
 		for(int i=0;i<params.length;i++){
@@ -285,7 +285,7 @@ public class simplexfit_v2{
 				}
 			}
 		}
-		return tempc2/((double)(length-numfit));
+		return tempc2/(length-numfit);
 	}
 
 }

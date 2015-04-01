@@ -9,6 +9,7 @@
 package jalgs.jseg;
 
 import jalgs.algutils;
+import jalgs.interpolation;
 import jalgs.jfit.gausfunc;
 
 public class jsmooth{
@@ -29,6 +30,47 @@ public class jsmooth{
 		for(int i=0;i<height;i++){
 			for(int j=0;j<width;j++){
 				retdata[j+i*width]=algutils.getNeighbors2Avg(data,j,i,width,height);
+			}
+		}
+		return retdata;
+	}
+	
+	public static float[] smooth2Dnot0(float[] data,int width,int height){
+		float[] retdata=new float[width*height];
+		for(int i=0;i<height;i++){
+			for(int j=0;j<width;j++){
+				if(data[j+i*width]!=0.0f) retdata[j+i*width]=algutils.getNeighbors2Stat(data,j,i,width,height,"Not0Avg");
+			}
+		}
+		return retdata;
+	}
+	
+	public static float[] smooth2Dnot0(float[] data,int width,int height,int size){
+		//here size is the size of the smoothing kernel
+		float[] retdata=new float[width*height];
+		for(int i=0;i<height;i++){
+			for(int j=0;j<width;j++){
+				if(data[j+i*width]!=0.0f) retdata[j+i*width]=algutils.get_region_stat("Not0Avg",data,j,i,size,size,width,height);
+			}
+		}
+		return retdata;
+	}
+	
+	public static float[] smooth2Dobjects(float[] data,int width,int height,int size,float[] objects){
+		//here size is the size of the smoothing kernel
+		float[] retdata=new float[width*height];
+		for(int i=0;i<height;i++){
+			for(int j=0;j<width;j++){
+				if(data[j+i*width]!=0.0f){
+					float id=objects[j+i*width];
+					float[] datareg=algutils.get_region(data,j,i,size,size,width,height);
+					float[] objreg=algutils.get_region(objects,j,i,size,size,width,height);
+					double avg=0.0; int cnt=0;
+					for(int k=0;k<objreg.length;k++){
+						if(objreg[k]==id){avg+=datareg[k]; cnt++;}
+					}
+					retdata[j+i*width]=(float)(avg/cnt);
+				}
 			}
 		}
 		return retdata;
@@ -72,11 +114,48 @@ public class jsmooth{
 				}
 			}
 		}
-		float temp=(float)(binby*binby);
+		float temp=binby*binby;
 		if(avg){
 			for(int i=0;i<newheight*newwidth;i++){
 				newdata[i]/=temp;
 			}
+		}
+		return newdata;
+	}
+	
+	public static Object enlarge2D(Object data,int width,int height,int enlargeby,boolean interp){
+		float[] temp=algutils.convert_arr_float2(data);
+		float[] temp2=enlarge2D(temp,width,height,enlargeby,interp);
+		if(data instanceof float[])
+			return temp2;
+		else if(data instanceof short[])
+			return algutils.convert_arr_short(temp2);
+		else if(data instanceof int[])
+			return algutils.convert_arr_int(temp2);
+		else
+			return algutils.convert_arr_byte(temp2);
+	}
+	
+	public static float[] enlarge2D(float[] data,int width,int height,int enlargeby,boolean interp){
+		int newwidth=width*enlargeby;
+		int newheight=height*enlargeby;
+		float[] newdata=new float[newwidth*newheight];
+		if(!interp){
+    		for(int i=0;i<newheight;i++){
+    			int oldy=(int)((float)i/(float)enlargeby);
+    			for(int j=0;j<newwidth;j++){
+    				int oldx=(int)((float)j/(float)enlargeby);
+    				newdata[j+i*newwidth]=data[oldx+oldy*width];
+    			}
+    		}
+		} else {
+    		for(int i=0;i<newheight;i++){
+    			float oldy=(float)i/(float)enlargeby;
+    			for(int j=0;j<newwidth;j++){
+    				float oldx=(float)j/(float)enlargeby;
+    				newdata[j+i*newwidth]=interpolation.interp2D(data,width,height,oldx,oldy);
+    			}
+    		}
 		}
 		return newdata;
 	}

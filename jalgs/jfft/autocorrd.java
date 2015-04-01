@@ -30,7 +30,7 @@ public class autocorrd{
 		double avg=0.0;
 		for(int j=0;j<length;j++){
 			real[j]=data[j];
-			avg+=data[j]/(double)length;
+			avg+=data[j]/length;
 		}
 		fft.realfft(real,im,false);
 		for(int i=0;i<length;i++){
@@ -41,7 +41,7 @@ public class autocorrd{
 		}
 		fft.realfft(real,im,true);
 		for(int j=0;j<length;j++){
-			real[j]/=(avg*avg)*(double)length;
+			real[j]/=(avg*avg)*length;
 			real[j]-=1.0;
 			if(dobrightcorr){
 				real[j]*=avg;

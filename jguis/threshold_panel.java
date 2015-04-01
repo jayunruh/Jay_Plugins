@@ -8,27 +8,53 @@
 
 package jguis;
 
-import jalgs.*;
-import jalgs.jseg.*;
-
-import java.awt.*;
-import java.awt.event.*;
-import ij.*;
-import ij.gui.*;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.WindowManager;
+import ij.gui.GenericDialog;
+import ij.gui.ImageCanvas;
+import ij.gui.ImageWindow;
+import ij.gui.Line;
+import ij.gui.PolygonRoi;
+import ij.gui.Roi;
+import ij.io.FileSaver;
 import ij.plugin.frame.RoiManager;
-import ij.process.*;
+import ij.process.FloatProcessor;
 import ij.text.TextWindow;
-import ij.io.*;
+import jalgs.jsort;
+import jalgs.jstatistics;
+import jalgs.jseg.findblobs3;
+import jalgs.jseg.jsmooth;
+
+import java.awt.Button;
+import java.awt.Checkbox;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class threshold_panel extends Panel implements ActionListener,ItemListener,MouseMotionListener{
 
 	private Button combine_objects,separate_objects,add_object,delete_object,undo_button;
-	private Button enlarge_object,edit_object,launch_sky,dilate_objects,erode_objects,fill_holes;
-	private Button save_objects,log_number,obj_stats;
+	private Button enlarge_object,edit_object,dilate_objects,erode_objects,fill_holes;
+	private Button save_objects,log_number,obj_stats,to_roi_man,bin_image,enlarge;
 	private Checkbox mask_check,rank_check;
 	private Label idlabel,nobjects,arealabel;
 	public ImagePlus imp;
-	public float[] objects,oldobjects;
+	public float[] objects,oldobjects,unclust;
+	public boolean[] iscluster;
 	private int[] areas;
 	private int[] arearank;
 	public findblobs3 fb;
@@ -48,11 +74,11 @@ public class threshold_panel extends Panel implements ActionListener,ItemListene
 		});
 
 		f.setLayout(null);
-		panel.setBounds(10,40,180,560);
+		panel.setBounds(10,40,180,630);
 		f.add(panel);
 		f.pack();
 		f.setResizable(false);
-		f.setSize(new Dimension(200,600));
+		f.setSize(new Dimension(200,670));
 		f.setVisible(true);
 		panel.requestFocus();
 		return f;
@@ -106,10 +132,10 @@ public class threshold_panel extends Panel implements ActionListener,ItemListene
 		arealabel=new Label("object area = n/a");
 		arealabel.setBounds(10,270,100,20);
 		add(arealabel);
-		launch_sky=new Button("Launch SKY");
+		/*launch_sky=new Button("Launch SKY");
 		launch_sky.setBounds(10,290,100,30);
 		launch_sky.addActionListener(this);
-		add(launch_sky);
+		add(launch_sky);*/
 		dilate_objects=new Button("Dilate Objects");
 		dilate_objects.setBounds(10,320,100,30);
 		dilate_objects.addActionListener(this);
@@ -122,24 +148,40 @@ public class threshold_panel extends Panel implements ActionListener,ItemListene
 		fill_holes.setBounds(10,380,100,30);
 		fill_holes.addActionListener(this);
 		add(fill_holes);
+		bin_image=new Button("Bin Image");
+		bin_image.setBounds(10,410,100,30);
+		bin_image.addActionListener(this);
+		add(bin_image);
+		enlarge=new Button("Enlarge Image");
+		enlarge.setBounds(10,440,100,30);
+		enlarge.addActionListener(this);
+		add(enlarge);
 		save_objects=new Button("Save");
-		save_objects.setBounds(10,410,100,30);
+		save_objects.setBounds(10,470,100,30);
 		save_objects.addActionListener(this);
 		add(save_objects);
 		log_number=new Button("Log");
-		log_number.setBounds(10,440,100,30);
+		log_number.setBounds(10,500,100,30);
 		log_number.addActionListener(this);
 		add(log_number);
 		obj_stats=new Button("Obj Stats");
-		obj_stats.setBounds(10,470,100,30);
+		obj_stats.setBounds(10,530,100,30);
 		obj_stats.addActionListener(this);
 		add(obj_stats);
 		undo_button=new Button("Undo");
-		undo_button.setBounds(10,500,100,30);
+		undo_button.setBounds(10,560,100,30);
 		undo_button.addActionListener(this);
 		add(undo_button);
+		to_roi_man=new Button("To RoiManager");
+		to_roi_man.setBounds(10,590,100,30);
+		to_roi_man.addActionListener(this);
+		add(to_roi_man);
 		update_image();
 		imp.getCanvas().addMouseMotionListener(this);
+	}
+	
+	public static float[] getUnclust(float[] objects1,findblobs3 fb1){
+		return (new findblobs3(fb1.width,fb1.height)).dofindblobs(objects1,0.5f);
 	}
 
 	public void setVisible(boolean b){
@@ -150,6 +192,7 @@ public class threshold_panel extends Panel implements ActionListener,ItemListene
 		if(e.getSource()==undo_button){
 			objects=oldobjects.clone();
 			fb.set_objects(objects);
+			unclust=getUnclust(objects,fb);
 			update_image();
 			return;
 		}
@@ -187,14 +230,14 @@ public class threshold_panel extends Panel implements ActionListener,ItemListene
 			}
 			if(e.getSource()==enlarge_object){
 				Polygon poly=roi.getPolygon();
-				fb.combine_objects(objects,poly);
+				fb.expand_object(objects,poly);
 			}
 			if(e.getSource()==edit_object){
 				Polygon poly=roi.getPolygon();
 				fb.edit_object(objects,poly);
 			}
 		}
-		if(e.getSource()==launch_sky){
+		/*if(e.getSource()==launch_sky){
 			String[] labels={"SKY_Image","Spectral_Image","Spectra"};
 			ImagePlus[] imps=jutils.selectImages(true,3,labels);
 			if(imps==null){
@@ -229,7 +272,7 @@ public class threshold_panel extends Panel implements ActionListener,ItemListene
 			SkyPanel.launch_frame(sp);
 			this.getParent().setVisible(false);
 			return;
-		}
+		}*/
 		if(e.getSource()==save_objects){
 			boolean oldshowmask=showmask;
 			showmask=true;
@@ -253,8 +296,35 @@ public class threshold_panel extends Panel implements ActionListener,ItemListene
 		if(e.getSource()==fill_holes){
 			fb.fill_holes(objects);
 		}
+		if(e.getSource()==bin_image){
+			//findblobs3 fb2=new findblobs3(fb.width,fb.height);
+			Object oldpix=imp.getStack().getPixels(1);
+			float[] binned=(float[])jsmooth.bin2D(oldpix,fb.width,fb.height,2,true);
+			objects=fb.binobjects(objects,2,true);
+			ImageStack stack2=new ImageStack(fb.width,fb.height);
+			stack2.addSlice("",binned);
+			stack2.addSlice("",new float[fb.width*fb.height]);
+			//new ImagePlus("Binned Objects",stack2).show();
+			imp.setStack(stack2);
+			imp.updateAndDraw();
+		}
+		if(e.getSource()==enlarge){
+			//findblobs3 fb2=new findblobs3(fb.width,fb.height);
+			Object oldpix=imp.getStack().getPixels(1);
+			float[] binned=(float[])jsmooth.enlarge2D(oldpix,fb.width,fb.height,2,true);
+			objects=fb.enlarge(objects,2);
+			ImageStack stack2=new ImageStack(fb.width,fb.height);
+			stack2.addSlice("",binned);
+			stack2.addSlice("",new float[fb.width*fb.height]);
+			//new ImagePlus("Binned Objects",stack2).show();
+			imp.setStack(stack2);
+			imp.updateAndDraw();
+		}
 		if(e.getSource()==obj_stats){
 			get_stats();
+		}
+		if(e.getSource()==to_roi_man){
+			toRoiManager();
 		}
 		update_image();
 	}
@@ -268,6 +338,7 @@ public class threshold_panel extends Panel implements ActionListener,ItemListene
 		gd.addChoice("Measurement Statistic",jstatistics.stats,jstatistics.stats[0]);
 		gd.addCheckbox("Outside Edge Measure?",false);
 		gd.addNumericField("Edge Thickness (if edge measure)",4,0);
+		gd.addNumericField("Edge Gap (if edge measure)",0,0);
 		gd.addCheckbox("Show Edge Image (if edge measure",false);
 		gd.showDialog();
 		if(gd.wasCanceled()){
@@ -277,6 +348,7 @@ public class threshold_panel extends Panel implements ActionListener,ItemListene
 		String stat=jstatistics.stats[gd.getNextChoiceIndex()];
 		boolean circ=gd.getNextBoolean();
 		int circrad=(int)gd.getNextNumber();
+		int circgap=(int)gd.getNextNumber();
 		boolean showedge=gd.getNextBoolean();
 		Object[] measurement=null;
 		if(index==ids.length){
@@ -295,12 +367,16 @@ public class threshold_panel extends Panel implements ActionListener,ItemListene
 			labels.append("\tslice"+(i+1));
 		TextWindow tw=new TextWindow("Object Stats",labels.toString(),"",400,400);
 		float[] tempobj=null;
+		float[] tempobj2=null;
 		if(circ){
-			tempobj=objects.clone();
+			tempobj=objects.clone(); //the original object
+			for(int i=0;i<circgap;i++)
+				fb.dilateobjects(objects,false);
+			tempobj2=objects.clone(); //the gap+original object
 			for(int i=0;i<circrad;i++)
 				fb.dilateobjects(objects,false);
 			for(int i=0;i<objects.length;i++){
-				if(tempobj[i]>0.0f)
+				if(tempobj2[i]>0.0f)
 					objects[i]=0.0f;
 			}
 			if(showedge) new ImagePlus("Edge Objects",new FloatProcessor(fb.width,fb.height,objects.clone(),null)).show();
@@ -317,6 +393,23 @@ public class threshold_panel extends Panel implements ActionListener,ItemListene
 		}
 		if(circ){
 			objects=tempobj;
+		}
+	}
+	
+	public void toRoiManager(){
+		Polygon[] outlines=fb.get_object_outlines(objects);
+		if(iscluster==null || iscluster.length!=outlines.length) iscluster=new boolean[outlines.length];
+		for(int i=0;i<outlines.length;i++){
+			if(iscluster[i]){
+				if(unclust==null) unclust=getUnclust(objects,fb);
+				outlines[i]=fb.get_cluster_outline(unclust,objects,i+1);
+			}
+		}
+		RoiManager rman=RoiManager.getInstance();
+		if(rman==null) rman=new RoiManager();
+		for(int i=0;i<outlines.length;i++){
+			PolygonRoi roi=new PolygonRoi(outlines[i].xpoints,outlines[i].ypoints,outlines[i].npoints,Roi.POLYGON);
+			rman.addRoi(roi);
 		}
 	}
 
@@ -348,8 +441,8 @@ public class threshold_panel extends Panel implements ActionListener,ItemListene
 		int x=e.getX();
 		int y=e.getY();
 		ImageCanvas ic=imp.getCanvas();
-		int ox=(int)ic.offScreenX(x);
-		int oy=(int)ic.offScreenY(y);
+		int ox=ic.offScreenX(x);
+		int oy=ic.offScreenY(y);
 		if(ox<imp.getWidth()&&oy<imp.getHeight()){
 			float tempid=objects[ox+imp.getWidth()*oy];
 			if(tempid>0.0f){

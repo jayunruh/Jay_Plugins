@@ -64,16 +64,16 @@ public class kstatsautocorr{
 		kstats ksclass=new kstats();
 		double[] u1=ksclass.rawmoments(data);
 		double[][] u=new double[9][9];
-		double n=(double)length;
+		double n=length;
 		for(int i=1;i<=8;i++){
 			u[i][0]=u1[i];
 			u[0][i]=u1[i];
 		}
 		for(int i=0;i<length;i++){
-			u[1][1]=(double)real3[i]/n;
-			u[2][1]=(double)real[i]/n;
-			u[1][2]=(double)real2[i]/n;
-			u[2][2]=(double)real4[i]/n;
+			u[1][1]=real3[i]/n;
+			u[2][1]=real[i]/n;
+			u[1][2]=real2[i]/n;
+			u[2][2]=real4[i]/n;
 			double[][] tempk=ksclass.kstatistics(u,length);
 			real[i]=(float)tempk[1][1];
 			real2[i]=(float)tempk[2][1];

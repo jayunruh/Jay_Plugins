@@ -1,12 +1,12 @@
 package jguis;
 
+import jalgs.interpolation;
+import jalgs.jsim.rngs;
+
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-
-import jalgs.interpolation;
-import jalgs.jsim.rngs;
 
 public class lututils{
 	// this class contains utility methods creating various luts
@@ -18,7 +18,7 @@ public class lututils{
 		float end=wlend-380f;
 		float inc=(end-start)/255f;
 		for(int i=0;i<256;i++){
-			float pos=start+inc*(float)i;
+			float pos=start+inc*i;
 			float R=interpolation.interp1D(spectrum[0],spectrum[0].length,pos);
 			float G=interpolation.interp1D(spectrum[1],spectrum[1].length,pos);
 			float B=interpolation.interp1D(spectrum[2],spectrum[2].length,pos);
@@ -40,7 +40,7 @@ public class lututils{
 			float R=0f;
 			float G=0f;
 			float B=0f;
-			float wl=380f+(float)i;
+			float wl=380f+i;
 			if(wl<440f){
 				R=(440f-wl)/(440f-380f);
 				G=0f;
@@ -87,42 +87,42 @@ public class lututils{
 		int off=0;
 		for(int i=0;i<43;i++){
 			ctable[2][off]=(byte)255;
-			int temp=(int)((float)i*255.0f/43.0f);
+			int temp=(int)(i*255.0f/43.0f);
 			ctable[1][off]=(byte)temp;
 			off++;
 		}
 		// now from cyan to green
 		for(int i=0;i<43;i++){
 			ctable[1][off]=(byte)255;
-			int temp=255-(int)((float)i*255.0f/43.0f);
+			int temp=255-(int)(i*255.0f/43.0f);
 			ctable[2][off]=(byte)temp;
 			off++;
 		}
 		// now green to yellow
 		for(int i=0;i<42;i++){
 			ctable[1][off]=(byte)255;
-			int temp=(int)((float)i*255.0f/42.0f);
+			int temp=(int)(i*255.0f/42.0f);
 			ctable[0][off]=(byte)temp;
 			off++;
 		}
 		// now yellow to red
 		for(int i=0;i<43;i++){
 			ctable[0][off]=(byte)255;
-			int temp=255-(int)((float)i*255.0f/43.0f);
+			int temp=255-(int)(i*255.0f/43.0f);
 			ctable[1][off]=(byte)temp;
 			off++;
 		}
 		// now red to magenta
 		for(int i=0;i<43;i++){
 			ctable[0][off]=(byte)255;
-			int temp=(int)((float)i*255.0f/43.0f);
+			int temp=(int)(i*255.0f/43.0f);
 			ctable[2][off]=(byte)temp;
 			off++;
 		}
 		// and finally magenta back to blue
 		for(int i=0;i<42;i++){
 			ctable[2][off]=(byte)255;
-			int temp=255-(int)((float)i*255.0f/42.0f);
+			int temp=255-(int)(i*255.0f/42.0f);
 			ctable[0][off]=(byte)temp;
 			off++;
 		}
@@ -162,7 +162,7 @@ public class lututils{
 		// this design came from ryan colyer
 		byte[][] ctable=new byte[3][256];
 		for(int i=1;i<256;i++){
-			float val=((float)i)/255.0f;
+			float val=(i)/255.0f;
 			float bright=128.0f;
 			float sat=124.0f;
 			float hue=(1.0f-0.95f*val-0.2f)*6.28318530717958f;
@@ -206,10 +206,10 @@ public class lututils{
 		byte[][] ctable=new byte[3][256];
 		float logmax=(float)Math.log(255.0);
 		for(int i=1;i<256;i++){
-			float logval=(float)Math.log((double)i);
+			float logval=(float)Math.log(i);
 			logval/=logmax;
 			logval*=255.0f;
-			logval=(float)((int)logval);
+			logval=((int)logval);
 			byte logvalb=(byte)logval;
 			if(color==0){
 				ctable[0][i]=logvalb;

@@ -8,10 +8,16 @@
 
 package jguis;
 
-import ij.*;
-import ij.process.*;
-import java.awt.*;
-import java.awt.print.*;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.process.ImageProcessor;
+
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.print.PageFormat;
+import java.awt.print.Printable;
+import java.awt.print.PrinterException;
+import java.awt.print.PrinterJob;
 
 public class Stack_Printer implements Printable{
 	private ImagePlus imp;

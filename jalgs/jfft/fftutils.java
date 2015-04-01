@@ -8,6 +8,8 @@
 
 package jalgs.jfft;
 
+import jalgs.algutils;
+
 public class fftutils{
 	// here we have static utility methods for ffts
 	public static int[] get_bitrev_order(int length,int divider){
@@ -146,7 +148,7 @@ public class fftutils{
 		}
 		double p2length=Math.log((double)length/(double)divider)/Math.log(2.0);
 		int under=(int)p2length;
-		if(p2length==(double)under)
+		if(p2length==under)
 			return length;
 		if(!over)
 			return divider*(int)Math.pow(2.0,under);
@@ -187,6 +189,48 @@ public class fftutils{
 			}
 		}
 		return new int[]{minindex-4,mintl};
+	}
+	
+	public static float[] complex_amp(Object real,Object im){
+		//here real and im are real and imaginary arrays of arbitrary type
+		//return type is always float
+		float[] rconv=algutils.convert_arr_float2(real);
+		float[] iconv=algutils.convert_arr_float2(im);
+		float[] amp=new float[rconv.length];
+		for(int i=0;i<rconv.length;i++){
+			amp[i]=(float)Math.sqrt(rconv[i]*rconv[i]+iconv[i]*iconv[i]);
+		}
+		return amp;
+	}
+	
+	public static Object[] complex_amp(Object[] real,Object[] im){
+		//return type is always float
+		Object[] amp=new Object[real.length];
+		for(int i=0;i<real.length;i++){
+			amp[i]=complex_amp(real[i],im[i]);
+		}
+		return amp;
+	}
+	
+	public static float[] complex_phase(Object real,Object im){
+		//here real and im are real and imaginary arrays of arbitrary type
+		//return type is always float
+		float[] rconv=algutils.convert_arr_float2(real);
+		float[] iconv=algutils.convert_arr_float2(im);
+		float[] phase=new float[rconv.length];
+		for(int i=0;i<rconv.length;i++){
+			phase[i]=(float)Math.atan2(iconv[i],rconv[i]);
+		}
+		return phase;
+	}
+	
+	public static Object[] complex_phase(Object[] real,Object[] im){
+		//return type is always float
+		Object[] phase=new Object[real.length];
+		for(int i=0;i<real.length;i++){
+			phase[i]=complex_phase(real[i],im[i]);
+		}
+		return phase;
 	}
 
 }

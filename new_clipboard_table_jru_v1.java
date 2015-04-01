@@ -34,6 +34,9 @@ public class new_clipboard_table_jru_v1 implements PlugIn {
 			IJ.error("Error copying from clipboard.");
 			return;
 		}
+		if(textdata.indexOf("\r")>=0){
+			textdata=textdata.replace('\r','\n');
+		}
 		if(titles){
 			int first=textdata.indexOf("\n");
 			String headings=textdata.substring(0,first);

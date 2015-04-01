@@ -192,47 +192,47 @@ public class move_particles implements Cloneable{
 				}
 			}
 			if(temp==0){
-				fcoords[0]=(float)random.unidev((double)(fboxpixels-distance),(double)distance);
+				fcoords[0]=(float)random.unidev(fboxpixels-distance,distance);
 				if(confineindex!=2){
 					fcoords[1]=distance;
 				}
 				if(confineindex!=1){
-					fcoords[2]=(float)random.unidev((double)(fboxpixels-distance),(double)distance);
+					fcoords[2]=(float)random.unidev(fboxpixels-distance,distance);
 				}
 			}else{
 				if(temp==1){
-					fcoords[0]=(float)random.unidev((double)(fboxpixels-distance),(double)distance);
+					fcoords[0]=(float)random.unidev(fboxpixels-distance,distance);
 					if(confineindex!=2){
 						fcoords[1]=fboxpixels-distance;
 					}
 					if(confineindex!=1){
-						fcoords[2]=(float)random.unidev((double)(fboxpixels-distance),(double)distance);
+						fcoords[2]=(float)random.unidev(fboxpixels-distance,distance);
 					}
 				}else{
 					if(temp==2){
-						fcoords[1]=(float)random.unidev((double)(fboxpixels-distance),(double)distance);
+						fcoords[1]=(float)random.unidev(fboxpixels-distance,distance);
 						fcoords[0]=distance;
 						if(confineindex!=1){
-							fcoords[2]=(float)random.unidev((double)(fboxpixels-distance),(double)distance);
+							fcoords[2]=(float)random.unidev(fboxpixels-distance,distance);
 						}
 					}else{
 						if(temp==3){
-							fcoords[1]=(float)random.unidev((double)(fboxpixels-distance),(double)distance);
+							fcoords[1]=(float)random.unidev(fboxpixels-distance,distance);
 							fcoords[0]=fboxpixels-distance;
 							if(confineindex!=1){
-								fcoords[2]=(float)random.unidev((double)(fboxpixels-distance),(double)distance);
+								fcoords[2]=(float)random.unidev(fboxpixels-distance,distance);
 							}
 						}else{
 							if(temp==4){
-								fcoords[0]=(float)random.unidev((double)(fboxpixels-distance),(double)distance);
+								fcoords[0]=(float)random.unidev(fboxpixels-distance,distance);
 								if(confineindex!=2){
-									fcoords[1]=(float)random.unidev((double)(fboxpixels-distance),(double)distance);
+									fcoords[1]=(float)random.unidev(fboxpixels-distance,distance);
 								}
 								fcoords[2]=distance;
 							}else{
-								fcoords[0]=(float)random.unidev((double)(fboxpixels-distance),(double)distance);
+								fcoords[0]=(float)random.unidev(fboxpixels-distance,distance);
 								if(confineindex!=2){
-									fcoords[1]=(float)random.unidev((double)(fboxpixels-distance),(double)distance);
+									fcoords[1]=(float)random.unidev(fboxpixels-distance,distance);
 								}
 								fcoords[2]=fboxpixels-distance;
 							}
@@ -268,15 +268,15 @@ public class move_particles implements Cloneable{
 				if(jumpprob==0.0f||(float)random.unidev(1.0,0.0)>jumpprob){
 					if(fgridunitx!=gridunitx){
 						if(gridunitx>fgridunitx){
-							sp.coords[0]=2.0f*(gridsizepixels*(float)gridunitx)-sp.coords[0];
+							sp.coords[0]=2.0f*(gridsizepixels*gridunitx)-sp.coords[0];
 						}else{
-							sp.coords[0]=2.0f*(gridsizepixels*(float)fgridunitx)-sp.coords[0];
+							sp.coords[0]=2.0f*(gridsizepixels*fgridunitx)-sp.coords[0];
 						}
 					}else{
 						if(gridunity>fgridunity){
-							sp.coords[1]=2.0f*(gridsizepixels*(float)gridunity)-sp.coords[1];
+							sp.coords[1]=2.0f*(gridsizepixels*gridunity)-sp.coords[1];
 						}else{
-							sp.coords[1]=2.0f*(gridsizepixels*(float)fgridunity)-sp.coords[1];
+							sp.coords[1]=2.0f*(gridsizepixels*fgridunity)-sp.coords[1];
 						}
 					}
 					newstuck=oldstuck;
@@ -289,9 +289,9 @@ public class move_particles implements Cloneable{
 				newstuck=!oldstuck;
 				if(jumpprob==0.0f||(float)random.unidev(1.0,0.0)>jumpprob){
 					if(gridunitx>fgridunitx){
-						sp.coords[0]=2.0f*(gridsizepixels*(float)gridunitx)-sp.coords[0];
+						sp.coords[0]=2.0f*(gridsizepixels*gridunitx)-sp.coords[0];
 					}else{
-						sp.coords[0]=2.0f*(gridsizepixels*(float)fgridunitx)-sp.coords[0];
+						sp.coords[0]=2.0f*(gridsizepixels*fgridunitx)-sp.coords[0];
 					}
 					newstuck=oldstuck;
 				}

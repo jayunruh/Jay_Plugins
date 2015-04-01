@@ -77,9 +77,9 @@ public class point3D implements Cloneable{
 
 	public void transform_perspective(double horizon_dist,int centerx,int centery,int centerz){
 		if(horizon_dist>0.0){
-			double tempx=(double)(rx-centerx);
-			double tempy=(double)(ry-centery);
-			double tempz=(double)(rz-centerz);
+			double tempx=rx-centerx;
+			double tempy=ry-centery;
+			double tempz=rz-centerz;
 			double temphordist=(tempz+horizon_dist)/horizon_dist;
 			if(temphordist<=0){
 				tempx=0;
@@ -96,9 +96,9 @@ public class point3D implements Cloneable{
 	public void transform_negative_perspective(double horizon_dist,int centerx,int centery,int centerz){
 		// here the horizon is in the foreground
 		if(horizon_dist>0.0){
-			double tempx=(double)(rx-centerx);
-			double tempy=(double)(ry-centery);
-			double tempz=(double)(centerz-rz);
+			double tempx=rx-centerx;
+			double tempy=ry-centery;
+			double tempz=centerz-rz;
 			double temphordist=(tempz+horizon_dist)/horizon_dist;
 			if(temphordist<=0){
 				tempx=0;
@@ -114,9 +114,9 @@ public class point3D implements Cloneable{
 
 	public void setrotation(double dx,double dy,double dz,int centerx,int centery,int centerz){
 		// rotate about the x, y, and z axes in order
-		double tempx=(double)(x-centerx);
-		double tempy=(double)(y-centery);
-		double tempz=(double)(z-centerz);
+		double tempx=x-centerx;
+		double tempy=y-centery;
+		double tempz=z-centerz;
 		if(dz!=0.0){
 			double sinval=Math.sin(-dz);
 			double cosval=Math.cos(-dz);
@@ -148,9 +148,9 @@ public class point3D implements Cloneable{
 
 	public void setrotation(double cosdx,double cosdy,double cosdz,double sindx,double sindy,double sindz,int centerx,int centery,int centerz){
 		// rotate about the x, y, and z axes in order
-		double tempx=(double)(x-centerx);
-		double tempy=(double)(y-centery);
-		double tempz=(double)(z-centerz);
+		double tempx=x-centerx;
+		double tempy=y-centery;
+		double tempz=z-centerz;
 		if(sindz!=0.0){
 			double sinval=sindz;
 			double cosval=cosdz;
@@ -182,9 +182,9 @@ public class point3D implements Cloneable{
 
 	public void addrotation(double dx,double dy,double dz,int centerx,int centery,int centerz){
 		// rotate about the x, y, and z axes in order
-		double tempx=(double)(rx-centerx);
-		double tempy=(double)(ry-centery);
-		double tempz=(double)(rz-centerz);
+		double tempx=rx-centerx;
+		double tempy=ry-centery;
+		double tempz=rz-centerz;
 		if(dz!=0.0){
 			double sinval=Math.sin(-dz);
 			double cosval=Math.cos(-dz);
@@ -216,9 +216,9 @@ public class point3D implements Cloneable{
 	
 	public void addrotation(double cosdx,double cosdy,double cosdz,double sindx,double sindy,double sindz,int centerx,int centery,int centerz){
 		// rotate about the x, y, and z axes in order
-		double tempx=(double)(rx-centerx);
-		double tempy=(double)(ry-centery);
-		double tempz=(double)(rz-centerz);
+		double tempx=rx-centerx;
+		double tempy=ry-centery;
+		double tempz=rz-centerz;
 		if(sindz!=0.0){
 			double sinval=sindz;
 			double cosval=cosdz;
@@ -253,9 +253,9 @@ public class point3D implements Cloneable{
 	}
 	
 	public void add_rot_about_vector(double cosval,double sinval,double ux,double uy,double uz,int centerx,int centery,int centerz){
-		double tempx=(double)(rx-centerx);
-		double tempy=(double)(ry-centery);
-		double tempz=(double)(rz-centerz);
+		double tempx=rx-centerx;
+		double tempy=ry-centery;
+		double tempz=rz-centerz;
 		double tempx1=tempx*(cosval+ux*ux*(1.0-cosval))+tempy*(ux*uy*(1.0-cosval)-uz*sinval)+tempz*(ux*uy*(1.0-cosval)+uy*sinval);
 		double tempy1=tempx*(ux*uy*(1.0-cosval)+uz*sinval)+tempy*(uy*uy*(1.0-cosval)+cosval)+tempz*(uz*uy*(1.0-cosval)-ux*sinval);
 		double tempz1=tempx*(ux*uz*(1.0-cosval)-uy*sinval)+tempy*(uz*uy*(1.0-cosval)+ux*sinval)+tempz*(uz*uz*(1.0-cosval)+cosval);
@@ -269,9 +269,9 @@ public class point3D implements Cloneable{
 	}
 	
 	public void set_rot_about_vector(double cosval,double sinval,double ux,double uy,double uz,int centerx,int centery,int centerz){
-		double tempx=(double)(x-centerx);
-		double tempy=(double)(y-centery);
-		double tempz=(double)(z-centerz);
+		double tempx=x-centerx;
+		double tempy=y-centery;
+		double tempz=z-centerz;
 		double tempx1=tempx*(cosval+ux*ux*(1.0-cosval))+tempy*(ux*uy*(1.0-cosval)-uz*sinval)+tempz*(ux*uy*(1.0-cosval)+uy*sinval);
 		double tempy1=tempx*(ux*uy*(1.0-cosval)+uz*sinval)+tempy*(uy*uy*(1.0-cosval)+cosval)+tempz*(uz*uy*(1.0-cosval)-ux*sinval);
 		double tempz1=tempx*(ux*uz*(1.0-cosval)-uy*sinval)+tempy*(uz*uy*(1.0-cosval)+ux*sinval)+tempz*(uz*uz*(1.0-cosval)+cosval);
@@ -293,9 +293,9 @@ public class point3D implements Cloneable{
 	}
 	
 	public void transform(double[][] transmat,int centerx,int centery,int centerz){
-		double tempx=(double)(x-centerx);
-		double tempy=(double)(y-centery);
-		double tempz=(double)(z-centerz);
+		double tempx=x-centerx;
+		double tempy=y-centery;
+		double tempz=z-centerz;
 		double tempx2=transmat[0][0]*tempx+transmat[0][1]*tempy+transmat[0][2]*tempz;
 		double tempy2=transmat[1][0]*tempx+transmat[1][1]*tempy+transmat[1][2]*tempz;
 		double tempz2=transmat[2][0]*tempx+transmat[2][1]*tempy+transmat[2][2]*tempz;
@@ -305,9 +305,9 @@ public class point3D implements Cloneable{
 	}
 	
 	public void addtransform(double[][] transmat,int centerx,int centery,int centerz){
-		double tempx=(double)(rx-centerx);
-		double tempy=(double)(ry-centery);
-		double tempz=(double)(rz-centerz);
+		double tempx=rx-centerx;
+		double tempy=ry-centery;
+		double tempz=rz-centerz;
 		double tempx2=transmat[0][0]*tempx+transmat[0][1]*tempy+transmat[0][2]*tempz;
 		double tempy2=transmat[1][0]*tempx+transmat[1][1]*tempy+transmat[1][2]*tempz;
 		double tempz2=transmat[2][0]*tempx+transmat[2][1]*tempy+transmat[2][2]*tempz;

@@ -37,7 +37,7 @@ public class binmultilog{
 		do{
 			tempac[counter1]=0.0f;
 			for(int i=0;i<binsize;i++){
-				tempac[counter1]+=tempac[counter2+i]/(float)binsize;
+				tempac[counter1]+=tempac[counter2+i]/binsize;
 			}
 			counter1++;
 			counter2+=binsize;
@@ -93,7 +93,7 @@ public class binmultilog{
 		float[] newbinned=new float[binlength];
 		for(int i=0;i<binlength;i++){
 			for(int j=0;j<binsize;j++){
-				newbinned[i]+=orig[i*binsize+j]/(float)binsize;
+				newbinned[i]+=orig[i*binsize+j]/binsize;
 			}
 		}
 		return dobinmultilog(newbinned,binlength);
@@ -115,7 +115,7 @@ public class binmultilog{
 		do{
 			xvals[counter1]=0.0f;
 			for(int i=0;i<binsize;i++){
-				xvals[counter1]+=xvals[counter2+i]/(float)binsize;
+				xvals[counter1]+=xvals[counter2+i]/binsize;
 			}
 			counter1++;
 			counter2+=binsize;

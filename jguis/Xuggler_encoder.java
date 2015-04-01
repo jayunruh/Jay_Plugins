@@ -10,11 +10,15 @@ package jguis;
 
 import ij.IJ;
 import ij.ImagePlus;
-import ij.process.*;
-import java.awt.image.*;
+import ij.process.ColorProcessor;
+import jalgs.FrameInterface;
+
+import java.awt.image.BufferedImage;
 import java.util.concurrent.TimeUnit;
-import com.xuggle.mediatool.*;
-import com.xuggle.xuggler.*;
+
+import com.xuggle.mediatool.IMediaWriter;
+import com.xuggle.mediatool.ToolFactory;
+import com.xuggle.xuggler.IRational;
 
 public class Xuggler_encoder{
 	int width,height,stackframes;
@@ -39,7 +43,7 @@ public class Xuggler_encoder{
 			ColorProcessor cp=new ColorProcessor(width,height,(int[])finterface.getNextFrame());
 			BufferedImage bi=new BufferedImage(width,height,BufferedImage.TYPE_3BYTE_BGR);
 			bi.getGraphics().drawImage(cp.createImage(),0,0,null);
-			writer.encodeVideo(0,bi,frameTime*(long)i,TimeUnit.NANOSECONDS);
+			writer.encodeVideo(0,bi,frameTime*i,TimeUnit.NANOSECONDS);
 			IJ.showProgress(i,nframes);
 		}
 		writer.close();

@@ -10,7 +10,9 @@ package j3D;
 
 import jalgs.interpolation;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Polygon;
 
 public class mesh3D extends element3D implements Cloneable{
 	//this is essentially a collection of 3D planar polygons that are connected to make a meshwork
@@ -70,13 +72,13 @@ public class mesh3D extends element3D implements Cloneable{
 	public line3D[] get_connections(polygon3D src,polygon3D dest){
 		float[][] fpdest=new float[3][dest.pt.length];
 		for(int i=0;i<dest.pt.length;i++){
-			fpdest[0][i]=(float)dest.pt[i].rx;
-			fpdest[1][i]=(float)dest.pt[i].ry;
-			fpdest[2][i]=(float)dest.pt[i].rz;
+			fpdest[0][i]=dest.pt[i].rx;
+			fpdest[1][i]=dest.pt[i].ry;
+			fpdest[2][i]=dest.pt[i].rz;
 		}
 		line3D[] conns=new line3D[src.pt.length];
 		for(int i=0;i<src.pt.length;i++){
-			float[] srcpt={(float)src.pt[i].rx,(float)src.pt[i].rx,(float)src.pt[i].rz};
+			float[] srcpt={src.pt[i].rx,src.pt[i].rx,src.pt[i].rz};
 			float[] closest=interpolation.get_closest_index_3D(fpdest,srcpt);
 			conns[i]=new line3D(src.pt[i],dest.pt[(int)closest[0]],color);
 		}

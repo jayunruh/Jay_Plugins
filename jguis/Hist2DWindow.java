@@ -8,14 +8,47 @@
 
 package jguis;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.*;
-import java.io.*;
-import ij.*;
-import ij.process.*;
-import ij.measure.*;
-import ij.gui.*;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.GenericDialog;
+import ij.gui.Roi;
+import ij.measure.Calibration;
+import ij.process.ColorProcessor;
+import ij.process.FloatProcessor;
+
+import java.awt.Button;
+import java.awt.Checkbox;
+import java.awt.CheckboxGroup;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.Scrollbar;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 
 public class Hist2DWindow extends Panel implements ActionListener,AdjustmentListener,MouseListener,MouseMotionListener,ItemListener{
 	public final static int H=612;
@@ -211,9 +244,9 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		score=0.0f;
 		scorelabel=new Label("Score = "+score);
 		scorelabel.setBounds(100+256+10+110+10+100,10+imageheight+50,150,20);
-		xlabel=new Label("x: "+((((float)roix+(float)roiwidth/2.0f)/256.0f)*(xmax-xmin)+xmin));
+		xlabel=new Label("x: "+(((roix+roiwidth/2.0f)/256.0f)*(xmax-xmin)+xmin));
 		xlabel.setBounds(100+256+10+110+10+100,10+imageheight+50+30,100,20);
-		ylabel=new Label("y: "+((((float)roiy+(float)roiheight/2.0f)/256.0f)*(ymax-ymin)+ymin));
+		ylabel=new Label("y: "+(((roiy+roiheight/2.0f)/256.0f)*(ymax-ymin)+ymin));
 		ylabel.setBounds(100+256+10+110+10+100,10+imageheight+50+60,100,20);
 		xavg=0.0f;
 		xavglabel=new Label("x avg = "+xavg);
@@ -423,8 +456,8 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 			histimg=create_2D_histogram();
 			update_mask();
 			dispimg=create_masked_image();
-			xlabel.setText("x: "+((((float)roix+(float)roiwidth/2.0f)/256.0f)*(xmax-xmin)+xmin));
-			ylabel.setText("y: "+((((float)roiy+(float)roiheight/2.0f)/256.0f)*(ymax-ymin)+ymin));
+			xlabel.setText("x: "+(((roix+roiwidth/2.0f)/256.0f)*(xmax-xmin)+xmin));
+			ylabel.setText("y: "+(((roiy+roiheight/2.0f)/256.0f)*(ymax-ymin)+ymin));
 		}
 		if(e.getSource()==medsmooth||e.getSource()==gassmooth||e.getSource()==binsmooth){
 			if(medsmooth.getState()){
@@ -443,8 +476,8 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 				histimg=create_2D_histogram();
 				update_mask();
 				dispimg=create_masked_image();
-				xlabel.setText("x: "+((((float)roix+(float)roiwidth/2.0f)/256.0f)*(xmax-xmin)+xmin));
-				ylabel.setText("y: "+((((float)roiy+(float)roiheight/2.0f)/256.0f)*(ymax-ymin)+ymin));
+				xlabel.setText("x: "+(((roix+roiwidth/2.0f)/256.0f)*(xmax-xmin)+xmin));
+				ylabel.setText("y: "+(((roiy+roiheight/2.0f)/256.0f)*(ymax-ymin)+ymin));
 			}else{
 				ascale=0;
 			}
@@ -458,8 +491,8 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 			histimg=create_2D_histogram();
 			update_mask();
 			dispimg=create_masked_image();
-			xlabel.setText("x: "+((((float)roix+(float)roiwidth/2.0f)/256.0f)*(xmax-xmin)+xmin));
-			ylabel.setText("y: "+((((float)roiy+(float)roiheight/2.0f)/256.0f)*(ymax-ymin)+ymin));
+			xlabel.setText("x: "+(((roix+roiwidth/2.0f)/256.0f)*(xmax-xmin)+xmin));
+			ylabel.setText("y: "+(((roiy+roiheight/2.0f)/256.0f)*(ymax-ymin)+ymin));
 		}
 		repaint();
 		set_options();
@@ -492,8 +525,8 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		roiheight=(int)Float.parseFloat(roiheightval.getText());
 		roix=(int)(Float.parseFloat(roixval.getText())-0.5f*roiwidth);
 		roiy=(int)(Float.parseFloat(roiyval.getText())-0.5f*roiheight);
-		xlabel.setText("x: "+((((float)roix+(float)roiwidth/2.0f)/256.0f)*(xmax-xmin)+xmin));
-		ylabel.setText("y: "+((((float)roiy+(float)roiheight/2.0f)/256.0f)*(ymax-ymin)+ymin));
+		xlabel.setText("x: "+(((roix+roiwidth/2.0f)/256.0f)*(xmax-xmin)+xmin));
+		ylabel.setText("y: "+(((roiy+roiheight/2.0f)/256.0f)*(ymax-ymin)+ymin));
 		s=Float.parseFloat(sval.getText());
 		s0=Float.parseFloat(s0val.getText());
 		off=Float.parseFloat(offval.getText());
@@ -544,25 +577,25 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		if(roishape==1){
 			// roi is oval
 			// calculate the center of the ellipse and the positions of the foci
-			float centerx=(float)roix+0.5f*(float)roiwidth;
-			float centery=(float)roiy+0.5f*(float)roiheight;
+			float centerx=roix+0.5f*roiwidth;
+			float centery=roiy+0.5f*roiheight;
 			float f1x,f1y,f2x,f2y,major;
 			if(roiwidth>=roiheight){
 				f1y=centery;
 				f2y=centery;
-				f1x=centerx+(float)Math.sqrt((float)(roiwidth*roiwidth-roiheight*roiheight)/4.0f);
-				f2x=centerx-(float)Math.sqrt((float)(roiwidth*roiwidth-roiheight*roiheight)/4.0f);
-				major=(float)roiwidth;
+				f1x=centerx+(float)Math.sqrt((roiwidth*roiwidth-roiheight*roiheight)/4.0f);
+				f2x=centerx-(float)Math.sqrt((roiwidth*roiwidth-roiheight*roiheight)/4.0f);
+				major=roiwidth;
 			}else{
 				f1x=centerx;
 				f2x=centerx;
-				f1y=centery+(float)Math.sqrt((float)(roiheight*roiheight-roiwidth*roiwidth)/4.0f);
-				f2y=centery-(float)Math.sqrt((float)(roiheight*roiheight-roiwidth*roiwidth)/4.0f);
-				major=(float)roiheight;
+				f1y=centery+(float)Math.sqrt((roiheight*roiheight-roiwidth*roiwidth)/4.0f);
+				f2y=centery-(float)Math.sqrt((roiheight*roiheight-roiwidth*roiwidth)/4.0f);
+				major=roiheight;
 			}
 			float distance1,distance2;
-			distance1=(float)Math.sqrt(((float)xvalue-f1x)*((float)xvalue-f1x)+((float)yvalue-f1y)*((float)yvalue-f1y));
-			distance2=(float)Math.sqrt(((float)xvalue-f2x)*((float)xvalue-f2x)+((float)yvalue-f2y)*((float)yvalue-f2y));
+			distance1=(float)Math.sqrt((xvalue-f1x)*(xvalue-f1x)+(yvalue-f1y)*(yvalue-f1y));
+			distance2=(float)Math.sqrt((xvalue-f2x)*(xvalue-f2x)+(yvalue-f2y)*(yvalue-f2y));
 			// IJ.log("f1x "+f1x+"f2x "+f2x);
 			if((distance1+distance2)<=major){
 				inroi=true;
@@ -588,8 +621,8 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 			roiy-=(ypos-oldypos);
 			roixval.setText(""+(roix+roiwidth/2));
 			roiyval.setText(""+(roiy+roiheight/2));
-			xlabel.setText("x: "+((((float)roix+(float)roiwidth/2.0f)/256.0f)*(xmax-xmin)+xmin));
-			ylabel.setText("y: "+((((float)roiy+(float)roiheight/2.0f)/256.0f)*(ymax-ymin)+ymin));
+			xlabel.setText("x: "+(((roix+roiwidth/2.0f)/256.0f)*(xmax-xmin)+xmin));
+			ylabel.setText("y: "+(((roiy+roiheight/2.0f)/256.0f)*(ymax-ymin)+ymin));
 			oldxpos=xpos;
 			oldypos=ypos;
 			update_mask();
@@ -651,8 +684,8 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 			}
 		}
 		// if the image is larger than 256, scale it down
-		int scalefactor=1+(int)((float)(width-1)/256.0f);
-		dumint=1+(int)((float)(height-1)/256.0f);
+		int scalefactor=1+(int)((width-1)/256.0f);
+		dumint=1+(int)((height-1)/256.0f);
 		if(dumint>scalefactor){
 			scalefactor=dumint;
 		}
@@ -737,25 +770,25 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 					// roi is oval
 					// calculate the center of the ellipse and the positions of
 					// the foci
-					float centerx=(float)roix+0.5f*(float)roiwidth;
-					float centery=(float)roiy+0.5f*(float)roiheight;
+					float centerx=roix+0.5f*roiwidth;
+					float centery=roiy+0.5f*roiheight;
 					float f1x,f1y,f2x,f2y,major;
 					if(roiwidth>=roiheight){
 						f1y=centery;
 						f2y=centery;
-						f1x=centerx+(float)Math.sqrt((float)(roiwidth*roiwidth-roiheight*roiheight)/4.0f);
-						f2x=centerx-(float)Math.sqrt((float)(roiwidth*roiwidth-roiheight*roiheight)/4.0f);
-						major=(float)roiwidth;
+						f1x=centerx+(float)Math.sqrt((roiwidth*roiwidth-roiheight*roiheight)/4.0f);
+						f2x=centerx-(float)Math.sqrt((roiwidth*roiwidth-roiheight*roiheight)/4.0f);
+						major=roiwidth;
 					}else{
 						f1x=centerx;
 						f2x=centerx;
-						f1y=centery+(float)Math.sqrt((float)(roiheight*roiheight-roiwidth*roiwidth)/4.0f);
-						f2y=centery-(float)Math.sqrt((float)(roiheight*roiheight-roiwidth*roiwidth)/4.0f);
-						major=(float)roiwidth;
+						f1y=centery+(float)Math.sqrt((roiheight*roiheight-roiwidth*roiwidth)/4.0f);
+						f2y=centery-(float)Math.sqrt((roiheight*roiheight-roiwidth*roiwidth)/4.0f);
+						major=roiwidth;
 					}
 					float distance1,distance2;
-					distance1=(float)Math.sqrt(((float)dumint1-f1x)*((float)dumint1-f1x)+((float)dumint2-f1y)*((float)dumint2-f1y));
-					distance2=(float)Math.sqrt(((float)dumint1-f2x)*((float)dumint1-f2x)+((float)dumint2-f2y)*((float)dumint2-f2y));
+					distance1=(float)Math.sqrt((dumint1-f1x)*(dumint1-f1x)+(dumint2-f1y)*(dumint2-f1y));
+					distance2=(float)Math.sqrt((dumint1-f2x)*(dumint1-f2x)+(dumint2-f2y)*(dumint2-f2y));
 					if((distance1+distance2)<=major){
 						mask[i]=1;
 						score+=1.0;
@@ -828,14 +861,14 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		histmax=0;
 		for(int i=0;i<256;i++){
 			for(int j=0;j<256;j++){
-				tempfloat[(255-i)*256+j]=(float)histogram[i][j];
+				tempfloat[(255-i)*256+j]=histogram[i][j];
 				if(histogram[i][j]>histmax){
 					histmax=histogram[i][j];
 				}
 			}
 		}
 		FloatProcessor fp=new FloatProcessor(256,256,tempfloat,null);
-		fp.setMinAndMax(0.0,(double)(((float)histmax)/multiplier));
+		fp.setMinAndMax(0.0,(histmax)/multiplier);
 		update_mask();
 		return fp.createImage();
 	}
@@ -939,9 +972,9 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 								}
 							}
 							if(npix>0){
-								sumx/=(float)npix;
-								sumy/=(float)npix;
-								sumz/=(float)npix;
+								sumx/=npix;
+								sumy/=npix;
+								sumz/=npix;
 							}
 							for(int k=0;k<binsize;k++){
 								for(int l=0;l<binsize;l++){
@@ -980,7 +1013,7 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		int i,length,dumint,imin,j;
 		float min,dumfloat;
 		length=values.length;
-		dumint=1+(int)((float)length/2.0f);
+		dumint=1+(int)(length/2.0f);
 		// sort the vector one at a time
 		for(j=0;j<dumint;j++){
 			imin=j;
@@ -1065,10 +1098,10 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 				float[] tempfloat=new float[256*256];
 				for(int i=0;i<256;i++){
 					for(int j=0;j<256;j++){
-						tempfloat[(255-i)*256+j]=(float)histogram[i][j];
+						tempfloat[(255-i)*256+j]=histogram[i][j];
 					}
 				}
-				out_stack.addSlice("",(Object)tempfloat);
+				out_stack.addSlice("",tempfloat);
 			}
 			if(ascaled==1){
 				ascale=1;
@@ -1079,7 +1112,7 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 			cal.pixelWidth=(double)(xmax-xmin)/256.0f;
 			cal.pixelHeight=(double)(ymax-ymin)/256.0f;
 			cal.xOrigin=-(double)xmin/cal.pixelWidth;
-			cal.yOrigin=(double)ymin/cal.pixelHeight+255.0;
+			cal.yOrigin=ymin/cal.pixelHeight+255.0;
 			cal.setInvertY(true);
 			// IJ.log("ymax = "+ymax);
 			cal.setUnit("nb");
@@ -1247,7 +1280,7 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 					}
 				}
 			}
-			histystack.addSlice("",(Object)filteredypix);
+			histystack.addSlice("",filteredypix);
 		}
 		if(!heatmap){
 			ImagePlus imphisty=new ImagePlus("Y Image",histystack);
@@ -1299,7 +1332,7 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		cp.setColor(Color.BLACK);
 		cp.drawRect(4,10,23,142);
 		for(int i=0;i<140;i++){
-			float val=(float)i/139f;
+			float val=i/139f;
 			Color temp=new Color(getgreenyellowred(val));
 			cp.setColor(temp);
 			cp.drawLine(5,150-i,25,150-i);

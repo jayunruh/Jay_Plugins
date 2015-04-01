@@ -19,7 +19,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.util.*;
+import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
@@ -29,6 +30,7 @@ public class handleextrafiletypes_importer extends JPanel implements ActionListe
 	// which
 	// fiji users can access the old "HandleExtraFileTypes" plugin
 	private JButton openbutton;
+	public boolean usecustomloci;
 
 	public static Frame launch_frame(handleextrafiletypes_importer panel){
 		final Frame f=new Frame("HEFT Importer");
@@ -101,8 +103,13 @@ public class handleextrafiletypes_importer extends JPanel implements ActionListe
 				Class heft=Class.forName("import plot jru v1");
 				IJ.runPlugIn("import plot jru v1",path);
 			}else{
-				Class heft=Class.forName("HandleExtraFileTypesjru");
-				IJ.runPlugIn("HandleExtraFileTypesjru",path);
+				if(usecustomloci){
+					Class customloci=Class.forName("LOCI_file_reader_jru_v1");
+					IJ.runPlugIn("LOCI_file_reader_jru_v1",path);
+				} else {
+					Class heft=Class.forName("HandleExtraFileTypesjru");
+					IJ.runPlugIn("HandleExtraFileTypesjru",path);
+				}
 			}
 		}catch(ClassNotFoundException e){
 			IJ.runPlugIn("HandleExtraFileTypes",path);

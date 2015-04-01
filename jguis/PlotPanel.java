@@ -10,11 +10,34 @@ package jguis;
 
 import ij.gui.GenericDialog;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.awt.datatransfer.*;
-import javax.swing.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FileDialog;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Rectangle;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintWriter;
+
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
 
 public class PlotPanel extends JPanel implements MouseListener,MouseMotionListener,ActionListener,ClipboardOwner{
 	// this class implements a plot panel that can be added to any window
@@ -205,7 +228,7 @@ public class PlotPanel extends JPanel implements MouseListener,MouseMotionListen
 			startx=e.getX();
 			starty=e.getY();
 			float mag=p3.getmagnification();
-			Rectangle frame=new Rectangle((int)(p3.LEFT_MARGIN*mag),(int)(p3.TOP_MARGIN*mag),(int)(p3.WIDTH*mag),(int)(p3.HEIGHT));
+			Rectangle frame=new Rectangle((int)(Plot4.LEFT_MARGIN*mag),(int)(Plot4.TOP_MARGIN*mag),(int)(Plot4.WIDTH*mag),(Plot4.HEIGHT));
 			if(frame.contains(startx,starty)){
 				zooming=true;
 			}

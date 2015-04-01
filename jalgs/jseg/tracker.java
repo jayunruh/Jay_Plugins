@@ -124,7 +124,7 @@ public class tracker{
 		for(int i=0;i<nnewobj;i++){
 			if(newavail[i]){
 				List<float[]> temp=new ArrayList<float[]>();
-				temp.add(add_to_array(params.get(i),(float)currframe));
+				temp.add(add_to_array(params.get(i),currframe));
 				trajlist.add(temp);
 				assignments[i]=trajlist.size();
 			}

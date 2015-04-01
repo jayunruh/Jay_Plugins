@@ -8,7 +8,8 @@
 
 package jalgs.jseg;
 
-import jalgs.*;
+import jalgs.algutils;
+import jalgs.interpolation;
 import jalgs.jstatistics;
 
 public class jthresh{

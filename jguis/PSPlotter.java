@@ -8,16 +8,20 @@
 
 package jguis;
 
-import org.freehep.graphicsio.ImageGraphics2D;
-import org.freehep.graphicsio.ps.PSGraphics2D;
-
 import ij.IJ;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.io.File;
 import java.io.OutputStream;
 import java.util.Properties;
+
+import org.freehep.graphicsio.ImageGraphics2D;
+import org.freehep.graphicsio.ps.PSGraphics2D;
 
 public class PSPlotter extends Plotter{
 	public PSGraphics2D vg2;
@@ -132,7 +136,7 @@ public class PSPlotter extends Plotter{
 	}
 
 	public void drawImage(Image img,int x,int y){
-		vg2.drawImage(img,x,y,null);
+		vg2.drawImage(img,x,y,Color.black,this);
 	}
 
 }

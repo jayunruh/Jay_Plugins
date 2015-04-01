@@ -8,14 +8,26 @@
 
 package jguis;
 
-import jalgs.*;
+import ij.ImagePlus;
+import jalgs.jstatistics;
 import jalgs.jseg.findblobs3;
 import jalgs.jseg.measure_object;
 
-import java.awt.*;
-import java.awt.event.*;
-
-import ij.*;
+import java.awt.Button;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class interactive_counter_panel extends Panel implements ActionListener,MouseMotionListener,MouseListener{
 
@@ -151,7 +163,7 @@ public class interactive_counter_panel extends Panel implements ActionListener,M
 		objstats=new float[temp.length][2];
 		float[] areas=new float[temp.length];
 		for(int i=0;i<temp.length;i++){
-			areas[i]=(float)temp[i];
+			areas[i]=temp[i];
 			objstats[i][0]=areas[i];
 		}
 		// medarea=jstatistics.getstatistic("Median",areas,null);
@@ -234,7 +246,7 @@ public class interactive_counter_panel extends Panel implements ActionListener,M
 		for(int i=r.y;i<(r.y+r.height);i++){
 			for(int j=r.x;j<(r.x+r.width);j++){
 				if(poly.contains(j,i)){
-					objects[j+i*fb.width]=(float)(id+1);
+					objects[j+i*fb.width]=id+1;
 				}
 			}
 		}

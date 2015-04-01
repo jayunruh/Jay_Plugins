@@ -16,8 +16,8 @@ public class pmodeconvert{
 		for(int i=0;i<pmdata.length;i++){
 			total_time+=pmdata[i];
 		}
-		double chan_clocks=(double)pmfreq/sfreq;
-		int numpts=(int)((double)total_time/chan_clocks)-1;
+		double chan_clocks=pmfreq/sfreq;
+		int numpts=(int)(total_time/chan_clocks)-1;
 		float[] data=new float[numpts];
 
 		int j=0;
@@ -29,7 +29,7 @@ public class pmodeconvert{
 				photons++;
 				j++;
 			}
-			data[i]=(float)(photons-1);
+			data[i]=photons-1;
 			temptime-=chan_clocks;
 			photons=1;
 		}
@@ -39,9 +39,9 @@ public class pmodeconvert{
 			j++;
 		}
 		if(j>=pmdata.length){
-			data[numpts-1]=(float)photons;
+			data[numpts-1]=photons;
 		}else{
-			data[numpts-1]=(float)(photons-1);
+			data[numpts-1]=photons-1;
 		}
 		return data;
 	}
@@ -52,8 +52,8 @@ public class pmodeconvert{
 		for(int i=0;i<pmdata.length;i++){
 			total_time+=pmdata[i];
 		}
-		double chan_clocks=(double)pmfreq/sfreq;
-		int numpts=(int)((double)total_time/chan_clocks)-1;
+		double chan_clocks=pmfreq/sfreq;
+		int numpts=(int)(total_time/chan_clocks)-1;
 		float[] data=new float[numpts];
 
 		int j=0;
@@ -65,7 +65,7 @@ public class pmodeconvert{
 				photons++;
 				j++;
 			}
-			data[i]=(float)(photons-1);
+			data[i]=photons-1;
 			temptime-=chan_clocks;
 			photons=1;
 		}
@@ -75,9 +75,9 @@ public class pmodeconvert{
 			j++;
 		}
 		if(j>=pmdata.length){
-			data[numpts-1]=(float)photons;
+			data[numpts-1]=photons;
 		}else{
-			data[numpts-1]=(float)(photons-1);
+			data[numpts-1]=photons-1;
 		}
 		return data;
 	}
@@ -92,8 +92,8 @@ public class pmodeconvert{
 		for(int i=0;i<pmdata.length;i++){
 			total_time+=pmdata[i];
 		}
-		double chan_clocks=(double)pmfreq/sfreq;
-		int numpts=(int)((double)total_time/chan_clocks)-1;
+		double chan_clocks=pmfreq/sfreq;
+		int numpts=(int)(total_time/chan_clocks)-1;
 		float[] data=new float[numpts];
 		double frac_off=ill_delay*sfreq;
 		double clocks_off=chan_clocks*frac_off;
@@ -113,7 +113,7 @@ public class pmodeconvert{
 				temptime+=pmdata[j];
 				j++;
 			}
-			data[i]=(float)(photons-1);
+			data[i]=photons-1;
 			temptime-=clocks_on;
 			photons=1;
 			while(temptime<clocks_off){
@@ -133,9 +133,9 @@ public class pmodeconvert{
 			j++;
 		}
 		if(j>=pmdata.length){
-			data[numpts-1]=(float)photons;
+			data[numpts-1]=photons;
 		}else{
-			data[numpts-1]=(float)(photons-1);
+			data[numpts-1]=photons-1;
 		}
 		return data;
 	}
@@ -210,7 +210,7 @@ public class pmodeconvert{
 		// for wavelength switching data. The switching frequency must be known
 		// here the phase offset must be known as well
 		double swfreq2=2.0*swfreq;
-		int chan_clocks=(int)(((double)pmfreq)/swfreq2);
+		int chan_clocks=(int)((pmfreq)/swfreq2);
 		float[] tmdata1=pm2tm(pmdata,swfreq2,pmfreq,offset);
 		float[] tmdata2=pm2tm(pmdata2,swfreq2,pmfreq,offset+chan_clocks);
 		int length=tmdata1.length;
@@ -233,7 +233,7 @@ public class pmodeconvert{
 		// for wavelength switching data. The switching frequency must be known
 		// here the phase offset must be known as well
 		double swfreq2=2.0*swfreq;
-		int chan_clocks=(int)(((double)pmfreq)/swfreq2);
+		int chan_clocks=(int)((pmfreq)/swfreq2);
 		float[] tmdata1=pm2tm(pmdata,swfreq2,pmfreq,offset,ill_delay);
 		float[] tmdata2=pm2tm(pmdata2,swfreq2,pmfreq,offset+chan_clocks,ill_delay);
 		int length=tmdata1.length;
@@ -279,7 +279,7 @@ public class pmodeconvert{
 				photons++;
 				j++;
 			}
-			data[i]=(float)(photons-1);
+			data[i]=photons-1;
 			temptime-=markers[startpt+i*4];
 			// read in the scanner motion period
 			while(temptime<markers[startpt+i*4+2]){
@@ -296,16 +296,16 @@ public class pmodeconvert{
 			j++;
 		}
 		if(j>=pmdata.length){
-			data[numpts-1]=(float)photons;
+			data[numpts-1]=photons;
 		}else{
-			data[numpts-1]=(float)(photons-1);
+			data[numpts-1]=photons-1;
 		}
 		float[][] tmdata=new float[3][];
 		tmdata[0]=new float[numpts/2];
 		tmdata[1]=new float[numpts/2];
 		tmdata[2]=new float[1];
-		avgperiod/=(double)(numpts-1);
-		tmdata[2][0]=(float)((double)pmfreq/(2.0*avgperiod));
+		avgperiod/=numpts-1;
+		tmdata[2][0]=(float)(pmfreq/(2.0*avgperiod));
 		for(int i=0;i<numpts/2;i++){
 			tmdata[0][i]=data[2*i];
 			tmdata[1][i]=data[2*i+1];
@@ -321,7 +321,7 @@ public class pmodeconvert{
 	}
 
 	public float[] wlswitch_phase_hist(int[] pmdata,double swfreq,int pmfreq){
-		double period=(double)pmfreq/swfreq;
+		double period=pmfreq/swfreq;
 		double currtime=0.0;
 		float[] hist=new float[100];
 		for(int i=0;i<pmdata.length;i++){
@@ -334,7 +334,7 @@ public class pmodeconvert{
 	}
 
 	public float[] wlswitch_phase_hist(int[] pmdata,double swfreq,int pmfreq,double ill_delay){
-		double period=(double)pmfreq/swfreq;
+		double period=pmfreq/swfreq;
 		double frac_delay=ill_delay*swfreq;
 		double currtime=0.0;
 		float[] hist=new float[100];
@@ -415,8 +415,8 @@ public class pmodeconvert{
 	}
 
 	public double calc_wlswitch_freq(int[] pmdata,int pmfreq,double startfreq,double endfreq){
-		int minperiod=(int)((double)pmfreq/endfreq);
-		int maxperiod=1+(int)((double)pmfreq/startfreq);
+		int minperiod=(int)(pmfreq/endfreq);
+		int maxperiod=1+(int)(pmfreq/startfreq);
 		int period=calc_wlswitch_period(pmdata,pmfreq,minperiod,maxperiod);
 		return (double)pmfreq/(double)period;
 	}

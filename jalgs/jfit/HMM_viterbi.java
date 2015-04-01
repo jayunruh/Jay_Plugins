@@ -18,7 +18,7 @@ public class HMM_viterbi{
 		double[][] V=new double[npts][nstates];
 		int[][] path=new int[nstates][npts];
 		for(int i=0;i<nstates;i++){
-			V[0][i]=emit_p((double)data[0],emit_err,states[i])/(double)nstates;
+			V[0][i]=emit_p(data[0],emit_err,states[i])/nstates;
 			path[i][0]=i;
 		}
 		for(int t=1;t<npts;t++){
@@ -66,12 +66,12 @@ public class HMM_viterbi{
 		int[][] path=new int[nstates][npts];
 		if(start_p==null){
 			for(int i=0;i<nstates;i++){
-				V[i]=new large_double(emit_p_poisson((double)data[0],states[i],(double)background[0])/(double)nstates);
+				V[i]=new large_double(emit_p_poisson(data[0],states[i],background[0])/nstates);
 				path[i][0]=i;
 			}
 		}else{
 			for(int i=0;i<nstates;i++){
-				V[i]=new large_double(emit_p_poisson((double)data[0],states[i],(double)background[0])*start_p[i]);
+				V[i]=new large_double(emit_p_poisson(data[0],states[i],background[0])*start_p[i]);
 				path[i][0]=i;
 			}
 		}
@@ -114,7 +114,7 @@ public class HMM_viterbi{
 		int[][] path=new int[nstates][npts];
 		if(start_p==null){
 			for(int i=0;i<nstates;i++){
-				V[i]=new large_double(emit_p((double)data[0]-background,stdev,states[i])/(double)nstates);
+				V[i]=new large_double(emit_p((double)data[0]-background,stdev,states[i])/nstates);
 				path[i][0]=i;
 			}
 		}else{
@@ -191,7 +191,7 @@ public class HMM_viterbi{
 		if(number>0){
 			factval=1.0;
 			for(i=1;i<=number;i++){
-				factval*=(double)i;
+				factval*=i;
 			}
 			return factval;
 		}else{
@@ -202,8 +202,8 @@ public class HMM_viterbi{
 	public double[][] bleach_prob_matrix(int nmolecules,double rate){
 		double[][] mat=new double[nmolecules+1][nmolecules+1];
 		for(int i=nmolecules;i>1;i--){
-			double psingle=(double)i*rate;
-			double pdouble=rate*rate*0.5*(double)(i*i-i);
+			double psingle=i*rate;
+			double pdouble=rate*rate*0.5*(i*i-i);
 			mat[nmolecules-i][nmolecules-i+1]=psingle;
 			mat[nmolecules-i][nmolecules-i+2]=pdouble;
 			mat[nmolecules-i][nmolecules-i]=1.0-psingle-pdouble;

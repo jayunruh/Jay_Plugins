@@ -12,6 +12,11 @@ import java.util.Arrays;
 
 public class algutils{
 
+	/*********************************
+	 * this returns my own array type index: 0 for byte, 1 for short, 2 for float, 3 for double, and 4 for int
+	 * @param arr
+	 * @return
+	 */
 	public static int get_array_type(Object arr){
 		if(arr instanceof byte[])
 			return 0;
@@ -25,7 +30,28 @@ public class algutils{
 			return 4;
 		return -1;
 	}
+	
+	/*********************************
+	 * this gets the length of an array of undefined type
+	 * @param arr
+	 * @return
+	 */
+	public static int get_array_length(Object arr){
+		int atype=get_array_type(arr);
+		if(atype==0) return ((byte[])arr).length;
+		if(atype==1) return ((short[])arr).length;
+		if(atype==2) return ((float[])arr).length;
+		if(atype==3) return ((double[])arr).length;
+		if(atype==4) return ((int[])arr).length;
+		return -1;
+	}
 
+	/************************************
+	 * this converts an array to a specific type, making a copy.  See above for types
+	 * @param oldarr
+	 * @param type
+	 * @return
+	 */
 	public static Object convert_array(Object oldarr,int type){
 		// can convert from and to byte, short, or float
 		switch(type){
@@ -43,6 +69,11 @@ public class algutils{
 		return null;
 	}
 
+	/*************************************
+	 * makes a copy of an array as a byte
+	 * @param oldarr
+	 * @return
+	 */
 	public static byte[] convert_arr_byte(Object oldarr){
 		if(oldarr instanceof double[]){
 			double[] temparr=(double[])oldarr;
@@ -120,7 +151,20 @@ public class algutils{
 		}
 		return null;
 	}
+	
+	public static byte[][] convert_arr_byte(Object[] input){
+		byte[][] out=new byte[input.length][];
+		for(int i=0;i<input.length;i++){
+			out[i]=convert_arr_byte(input[i]);
+		}
+		return out;
+	}
 
+	/*****************************
+	 * makes a copy of an array as a float
+	 * @param oldarr
+	 * @return
+	 */
 	public static float[] convert_arr_float(Object oldarr){
 		if(oldarr instanceof double[]){
 			double[] temparr=(double[])oldarr;
@@ -141,7 +185,7 @@ public class algutils{
 			float[] newarr=new float[temparr.length];
 			for(int i=0;i<temparr.length;i++){
 				int temp=temparr[i]&0xffff;
-				newarr[i]=(float)temp;
+				newarr[i]=temp;
 			}
 			return newarr;
 		}
@@ -149,7 +193,7 @@ public class algutils{
 			int[] temparr=(int[])oldarr;
 			float[] newarr=new float[temparr.length];
 			for(int i=0;i<temparr.length;i++){
-				newarr[i]=(float)temparr[i];
+				newarr[i]=temparr[i];
 			}
 			return newarr;
 		}
@@ -158,13 +202,26 @@ public class algutils{
 			float[] newarr=new float[temparr.length];
 			for(int i=0;i<temparr.length;i++){
 				int temp=temparr[i]&0xff;
-				newarr[i]=(float)temp;
+				newarr[i]=temp;
 			}
 			return newarr;
 		}
 		return null;
 	}
+	
+	public static float[][] convert_arr_float(Object[] input){
+		float[][] out=new float[input.length][];
+		for(int i=0;i<input.length;i++){
+			out[i]=convert_arr_float(input[i]);
+		}
+		return out;
+	}
 
+	/*****************************
+	 * makes a copy of an array as an int
+	 * @param oldarr
+	 * @return
+	 */
 	public static int[] convert_arr_int(Object oldarr){
 		if(oldarr instanceof double[]){
 			double[] temparr=(double[])oldarr;
@@ -206,13 +263,26 @@ public class algutils{
 		}
 		return null;
 	}
+	
+	public static int[][] convert_arr_int(Object[] input){
+		int[][] out=new int[input.length][];
+		for(int i=0;i<input.length;i++){
+			out[i]=convert_arr_int(input[i]);
+		}
+		return out;
+	}
 
+	/*****************************
+	 * makes a copy of an array as a double
+	 * @param oldarr
+	 * @return
+	 */
 	public static double[] convert_arr_double(Object oldarr){
 		if(oldarr instanceof float[]){
 			float[] temparr=(float[])oldarr;
 			double[] newarr=new double[temparr.length];
 			for(int i=0;i<temparr.length;i++){
-				newarr[i]=(double)temparr[i];
+				newarr[i]=temparr[i];
 			}
 			return newarr;
 		}
@@ -227,7 +297,7 @@ public class algutils{
 			double[] newarr=new double[temparr.length];
 			for(int i=0;i<temparr.length;i++){
 				int temp=temparr[i]&0xffff;
-				newarr[i]=(double)temp;
+				newarr[i]=temp;
 			}
 			return newarr;
 		}
@@ -235,7 +305,7 @@ public class algutils{
 			int[] temparr=(int[])oldarr;
 			double[] newarr=new double[temparr.length];
 			for(int i=0;i<temparr.length;i++){
-				newarr[i]=(double)temparr[i];
+				newarr[i]=temparr[i];
 			}
 			return newarr;
 		}
@@ -244,13 +314,26 @@ public class algutils{
 			double[] newarr=new double[temparr.length];
 			for(int i=0;i<temparr.length;i++){
 				int temp=temparr[i]&0xff;
-				newarr[i]=(double)temp;
+				newarr[i]=temp;
 			}
 			return newarr;
 		}
 		return null;
 	}
+	
+	public static double[][] convert_arr_double(Object[] input){
+		double[][] out=new double[input.length][];
+		for(int i=0;i<input.length;i++){
+			out[i]=convert_arr_double(input[i]);
+		}
+		return out;
+	}
 
+	/*****************************
+	 * makes a copy of an array as a short
+	 * @param oldarr
+	 * @return
+	 */
 	public static short[] convert_arr_short(Object oldarr){
 		if(oldarr instanceof double[]){
 			double[] temparr=(double[])oldarr;
@@ -320,7 +403,20 @@ public class algutils{
 		}
 		return null;
 	}
+	
+	public static short[][] convert_arr_short(Object[] input){
+		short[][] out=new short[input.length][];
+		for(int i=0;i<input.length;i++){
+			out[i]=convert_arr_short(input[i]);
+		}
+		return out;
+	}
 
+	/*****************************
+	 * converts an array to byte, doesn't copy if already a byte
+	 * @param oldarr
+	 * @return
+	 */
 	public static byte[] convert_arr_byte2(Object arr){
 		if(arr instanceof byte[])
 			return (byte[])arr;
@@ -328,6 +424,11 @@ public class algutils{
 			return convert_arr_byte(arr);
 	}
 
+	/*****************************
+	 * converts an array to short, doesn't copy if already a short
+	 * @param oldarr
+	 * @return
+	 */
 	public static short[] convert_arr_short2(Object arr){
 		if(arr instanceof short[])
 			return (short[])arr;
@@ -335,6 +436,11 @@ public class algutils{
 			return convert_arr_short(arr);
 	}
 
+	/*****************************
+	 * converts an array to float, doesn't copy if already a float
+	 * @param oldarr
+	 * @return
+	 */
 	public static float[] convert_arr_float2(Object arr){
 		if(arr instanceof float[])
 			return (float[])arr;
@@ -342,6 +448,11 @@ public class algutils{
 			return convert_arr_float(arr);
 	}
 
+	/*****************************
+	 * converts an array to int, doesn't copy if already a int
+	 * @param oldarr
+	 * @return
+	 */
 	public static int[] convert_arr_int2(Object arr){
 		if(arr instanceof int[])
 			return (int[])arr;
@@ -349,13 +460,42 @@ public class algutils{
 			return convert_arr_int(arr);
 	}
 
+	/*****************************
+	 * converts an array to double, doesn't copy if already a double
+	 * @param oldarr
+	 * @return
+	 */
 	public static double[] convert_arr_double2(Object arr){
 		if(arr instanceof double[])
 			return (double[])arr;
 		else
 			return convert_arr_double(arr);
 	}
+	
+	public static float getPixelVal(Object arr,int x,int y,int width,int height,int dtype){
+		if(x<0) return 0.0f;
+		if(y<0) return 0.0f;
+		if(x>=width) return 0.0f;
+		if(y>=height) return 0.0f;
+		return getArrVal(arr,x+y*width,dtype);
+	}
+	
+	public static float getArrVal(Object arr,int index,int dtype){
+		if(dtype==0) return ((byte[])arr)[index]&0xff;
+		if(dtype==1) return ((short[])arr)[index]&0xffff;
+		if(dtype==2) return ((float[])arr)[index];
+		if(dtype==3) return (float)((double[])arr)[index];
+		if(dtype==4) return ((int[])arr)[index];
+		return Float.NaN;
+	}
 
+	/**********************
+	 * converts a 1D image array to and array of rows
+	 * @param arr: the array
+	 * @param width
+	 * @param height
+	 * @return a 2D array with [height][width] indices
+	 */
 	public static float[][] array2multidim(float[] arr,int width,int height){
 		float[][] temp=new float[height][width];
 		int temp2=0;
@@ -366,6 +506,11 @@ public class algutils{
 		return temp;
 	}
 
+	/*******************
+	 * copies a 2D float array
+	 * @param arr
+	 * @return
+	 */
 	public static float[][] clone_multidim_array(float[][] arr){
 		float[][] temp=new float[arr.length][];
 		for(int i=0;i<arr.length;i++){
@@ -373,7 +518,25 @@ public class algutils{
 		}
 		return temp;
 	}
+	
+	/*******************
+	 * copies a 2D int array
+	 * @param arr
+	 * @return
+	 */
+	public static int[][] clone_multidim_array(int[][] arr){
+		int[][] temp=new int[arr.length][];
+		for(int i=0;i<arr.length;i++){
+			temp[i]=arr[i].clone();
+		}
+		return temp;
+	}
 
+	/************************
+	 * copies a 2D short array
+	 * @param arr
+	 * @return
+	 */
 	public static short[][] clone_multidim_array(short[][] arr){
 		short[][] temp=new short[arr.length][];
 		for(int i=0;i<arr.length;i++){
@@ -382,6 +545,11 @@ public class algutils{
 		return temp;
 	}
 
+	/************************
+	 * copies a 2D byte array
+	 * @param arr
+	 * @return
+	 */
 	public static byte[][] clone_multidim_array(byte[][] arr){
 		byte[][] temp=new byte[arr.length][];
 		for(int i=0;i<arr.length;i++){
@@ -408,6 +576,15 @@ public class algutils{
 		}
 	}
 
+	public static float getNeighbors2Stat(Object image,int x,int y,int width,int height,String stat){
+		Object neighbors=getNeighbors2(image,x,y,width,height);
+		if(neighbors!=null){
+			return jstatistics.getstatistic(stat,neighbors,null);
+		}else{
+			return 0.0f;
+		}
+	}
+
 	public static float getNeighborsAvg(Object[] image,int x,int y,int z,int width,int height){
 		Object neighbors=getNeighbors(image,x,y,z,width,height);
 		if(neighbors!=null){
@@ -421,6 +598,15 @@ public class algutils{
 		Object neighbors=getNeighbors2(image,x,y,z,width,height);
 		if(neighbors!=null){
 			return jstatistics.getstatistic("Avg",neighbors,null);
+		}else{
+			return 0.0f;
+		}
+	}
+	
+	public static float getNeighbors2Stat(Object[] image,int x,int y,int z,int width,int height,String stat){
+		Object neighbors=getNeighbors2(image,x,y,z,width,height);
+		if(neighbors!=null){
+			return jstatistics.getstatistic(stat,neighbors,null);
 		}else{
 			return 0.0f;
 		}
@@ -458,15 +644,15 @@ public class algutils{
 		Object temp2=getNeighbors2(image[z+1],x,y,width,height);
 		if(isfloat){
 			float[] temp=new float[9+9+8];
-			System.arraycopy((float[])temp0,0,temp,0,9);
-			System.arraycopy((float[])temp1,0,temp,9,8);
-			System.arraycopy((float[])temp2,0,temp,17,9);
+			System.arraycopy(temp0,0,temp,0,9);
+			System.arraycopy(temp1,0,temp,9,8);
+			System.arraycopy(temp2,0,temp,17,9);
 			return temp;
 		}else{
 			short[] temp=new short[9+9+8];
-			System.arraycopy((short[])temp0,0,temp,0,9);
-			System.arraycopy((short[])temp1,0,temp,9,8);
-			System.arraycopy((short[])temp2,0,temp,17,9);
+			System.arraycopy(temp0,0,temp,0,9);
+			System.arraycopy(temp1,0,temp,9,8);
+			System.arraycopy(temp2,0,temp,17,9);
 			return temp;
 		}
 	}
@@ -499,25 +685,25 @@ public class algutils{
 			float[] temp=new float[size];
 			int counter=0;
 			if(z>0){
-				System.arraycopy((float[])temp0,0,temp,0,9);
+				System.arraycopy(temp0,0,temp,0,9);
 				counter+=9;
 			}
-			System.arraycopy((float[])temp1,0,temp,counter,9);
+			System.arraycopy(temp1,0,temp,counter,9);
 			counter+=9;
 			if(z<image.length)
-				System.arraycopy((float[])temp2,0,temp,counter,9);
+				System.arraycopy(temp2,0,temp,counter,9);
 			return temp;
 		}else{
 			short[] temp=new short[size];
 			int counter=0;
 			if(z>0){
-				System.arraycopy((short[])temp0,0,temp,0,9);
+				System.arraycopy(temp0,0,temp,0,9);
 				counter+=9;
 			}
-			System.arraycopy((short[])temp1,0,temp,counter,9);
+			System.arraycopy(temp1,0,temp,counter,9);
 			counter+=9;
 			if(z<image.length)
-				System.arraycopy((short[])temp2,0,temp,counter,9);
+				System.arraycopy(temp2,0,temp,counter,9);
 			return temp;
 		}
 	}
@@ -751,10 +937,40 @@ public class algutils{
 		return stats;
 	}
 
+	/*****************
+	 * gets a region of a stack
+	 * @param stack
+	 * @param xc: x center of the region
+	 * @param yc: y center of the region
+	 * @param rwidth
+	 * @param rheight
+	 * @param width
+	 * @param height
+	 * @return
+	 */
 	public static float[][] get_region(Object[] stack,int xc,int yc,int rwidth,int rheight,int width,int height){
 		float[][] profile=new float[stack.length][];
 		for(int i=0;i<stack.length;i++){
 			profile[i]=get_region(stack[i],xc,yc,rwidth,rheight,width,height);
+		}
+		return profile;
+	}
+	
+	/*****************
+	 * gets a region of a stack
+	 * @param stack
+	 * @param x: x origin of the region
+	 * @param y: y origin of the region
+	 * @param rwidth
+	 * @param rheight
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	public static float[][] get_region2(Object[] stack,int x,int y,int rwidth,int rheight,int width,int height){
+		float[][] profile=new float[stack.length][];
+		for(int i=0;i<stack.length;i++){
+			profile[i]=get_region2(stack[i],x,y,rwidth,rheight,width,height);
 		}
 		return profile;
 	}
@@ -771,13 +987,48 @@ public class algutils{
 			}
 		}
 	}
+	
+	public static float[] get_region2(Object image,int x,int y,int rwidth,int rheight,int width,int height){
+		// note that x and y are the origin
+		if(image instanceof float[]){
+			return get_region2((float[])image,x,y,rwidth,rheight,width,height);
+		}else{
+			if(image instanceof byte[]){
+				return get_region2((byte[])image,x,y,rwidth,rheight,width,height);
+			}else{
+				return get_region2((short[])image,x,y,rwidth,rheight,width,height);
+			}
+		}
+	}
 
 	public static float[] get_region(float[] image,int xc,int yc,int rwidth,int rheight,int width,int height){
 		// here we return the rectangular region centered on x and y
-		if(!inbounds(xc,yc,width,height))
-			return null;
+		if(!inbounds(xc,yc,width,height)) return null;
 		int startx=xc-rwidth/2;
 		int starty=yc-rheight/2;
+		return get_region2(image,startx,starty,rwidth,rheight,width,height);
+	}
+
+	public static float[] get_region(short[] image,int xc,int yc,int rwidth,int rheight,int width,int height){
+		// here we return the rectangular region centered on x and y
+		if(!inbounds(xc,yc,width,height)) return null;
+		int startx=xc-rwidth/2;
+		int starty=yc-rheight/2;
+		return get_region2(image,startx,starty,rwidth,rheight,width,height);
+	}
+
+	public static float[] get_region(byte[] image,int xc,int yc,int rwidth,int rheight,int width,int height){
+		// here we return the rectangular region centered on x and y
+		if(!inbounds(xc,yc,width,height)) return null;
+		int startx=xc-rwidth/2;
+		int starty=yc-rheight/2;
+		return get_region2(image,startx,starty,rwidth,rheight,width,height);
+	}
+	
+	public static float[] get_region2(float[] image,int x,int y,int rwidth,int rheight,int width,int height){
+		//here we return the region starting at x,y
+		if(!inbounds(x,y,width,height)) return null;
+		int startx=x; int starty=y;
 		int endx=startx+rwidth-1;
 		int endy=starty+rheight-1;
 		if(startx<0)
@@ -800,13 +1051,11 @@ public class algutils{
 		}
 		return output;
 	}
-
-	public static float[] get_region(short[] image,int xc,int yc,int rwidth,int rheight,int width,int height){
-		// here we return the rectangular region centered on x and y
-		if(!inbounds(xc,yc,width,height))
-			return null;
-		int startx=xc-rwidth/2;
-		int starty=yc-rheight/2;
+	
+	public static float[] get_region2(short[] image,int x,int y,int rwidth,int rheight,int width,int height){
+		//here we return the region starting at x,y
+		if(!inbounds(x,y,width,height)) return null;
+		int startx=x; int starty=y;
 		int endx=startx+rwidth-1;
 		int endy=starty+rheight-1;
 		if(startx<0)
@@ -823,19 +1072,17 @@ public class algutils{
 		int counter=0;
 		for(int i=starty;i<=endy;i++){
 			for(int j=startx;j<=endx;j++){
-				output[counter]=(float)(image[j+i*width]&0xffff);
+				output[counter]=image[j+i*width]&0xffff;
 				counter++;
 			}
 		}
 		return output;
 	}
-
-	public static float[] get_region(byte[] image,int xc,int yc,int rwidth,int rheight,int width,int height){
-		// here we return the rectangular region centered on x and y
-		if(!inbounds(xc,yc,width,height))
-			return null;
-		int startx=xc-rwidth/2;
-		int starty=yc-rheight/2;
+	
+	public static float[] get_region2(byte[] image,int x,int y,int rwidth,int rheight,int width,int height){
+		//here we return the region starting at x,y
+		if(!inbounds(x,y,width,height)) return null;
+		int startx=x; int starty=y;
 		int endx=startx+rwidth-1;
 		int endy=starty+rheight-1;
 		if(startx<0)
@@ -852,7 +1099,7 @@ public class algutils{
 		int counter=0;
 		for(int i=starty;i<=endy;i++){
 			for(int j=startx;j<=endx;j++){
-				output[counter]=(float)(image[j+i*width]&0xff);
+				output[counter]=image[j+i*width]&0xff;
 				counter++;
 			}
 		}
@@ -906,6 +1153,31 @@ public class algutils{
 			}
 		}
 	}
+	
+	public static void set_region(float[] image,int x,int y,int rwidth,int rheight,int width,int height,float[] value){
+		// here we set the rectangular region centered on x and y equal to value
+		if(!inbounds(x,y,width,height))
+			return;
+		int startx=x-rwidth/2;
+		int starty=y-rheight/2;
+		int endx=startx+rwidth-1;
+		int endy=starty+rheight-1;
+		if(startx<0)
+			startx=0;
+		if(starty<0)
+			starty=0;
+		if(endx>(width-1))
+			endx=width-1;
+		if(endy>(height-1))
+			endy=height-1;
+		int counter=0;
+		for(int i=starty;i<=endy;i++){
+			for(int j=startx;j<=endx;j++){
+				image[j+i*width]=value[counter];
+				counter++;
+			}
+		}
+	}
 
 	public static void set_region(short[] image,int x,int y,int rwidth,int rheight,int width,int height,short value){
 		// here we set the rectangular region centered on x and y equal to value
@@ -944,15 +1216,15 @@ public class algutils{
 
 	public static void copy_subarray(Object source,int soff,Object dest,int doff,int length){
 		if(source instanceof float[]){
-			System.arraycopy((float[])source,soff,(float[])dest,doff,length);
+			System.arraycopy(source,soff,dest,doff,length);
 		}else{
 			if(source instanceof short[]){
-				System.arraycopy((short[])source,soff,(short[])dest,doff,length);
+				System.arraycopy(source,soff,dest,doff,length);
 			}else{
 				if(source instanceof byte[]){
-					System.arraycopy((byte[])source,soff,(byte[])dest,doff,length);
+					System.arraycopy(source,soff,dest,doff,length);
 				}else{
-					System.arraycopy((int[])source,soff,(int[])dest,doff,length);
+					System.arraycopy(source,soff,dest,doff,length);
 				}
 			}
 		}
@@ -961,21 +1233,21 @@ public class algutils{
 	public static Object get_subarray(Object source,int off,int length){
 		if(source instanceof float[]){
 			float[] temp=new float[length];
-			System.arraycopy((float[])source,off,temp,0,length);
+			System.arraycopy(source,off,temp,0,length);
 			return temp;
 		}else{
 			if(source instanceof short[]){
 				short[] temp=new short[length];
-				System.arraycopy((short[])source,off,temp,0,length);
+				System.arraycopy(source,off,temp,0,length);
 				return temp;
 			}else{
 				if(source instanceof byte[]){
 					byte[] temp=new byte[length];
-					System.arraycopy((byte[])source,off,temp,0,length);
+					System.arraycopy(source,off,temp,0,length);
 					return temp;
 				}else{
 					int[] temp=new int[length];
-					System.arraycopy((int[])source,off,temp,0,length);
+					System.arraycopy(source,off,temp,0,length);
 					return temp;
 				}
 			}
@@ -1303,6 +1575,89 @@ public class algutils{
 			}
 		}
 		return newimg;
+	}
+	
+	public static float get3DSliceStat(Object[] is,int frame,int slice,int channel,int frames,int slices,int channels,String stat){
+		Object pixels=get3DSlice(is,frame,slice,channel,frames,slices,channels);
+		return jstatistics.getstatistic(stat,pixels,null);
+	}
+
+	public static Object get3DSlice(Object[] is,int frame,int slice,int channel,int frames,int slices,int channels){
+		return is[channel+slice*channels+frame*channels*slices];
+	}
+	
+	public static Object get3DSliceInterp(Object[] is,int frame,float slice,int channel,int frames,int slices,int channels){
+		int prev=(int)slice;
+		Object sl1=get3DSlice(is,frame,prev,channel,frames,slices,channels);
+		if(prev==slice) return sl1;
+		int next=prev+1;
+		Object sl2=get3DSlice(is,frame,next,channel,frames,slices,channels);
+		return interpolation.interpz(sl1,sl2,get_array_length(sl1),slice-prev);
+	}
+
+	public static void set3DSlice(Object[] is,Object pixels,int frame,int slice,int channel,int frames,int slices,int channels){
+		is[channel+slice*channels+frame*channels*slices]=pixels;
+	}
+
+	public static Object[] get3DTSeries(Object[] is,int slice,int channel,int frames,int slices,int channels){
+		Object[] temp=new Object[frames];
+		for(int i=0;i<frames;i++){
+			temp[i]=get3DSlice(is,i,slice,channel,frames,slices,channels);
+		}
+		return temp;
+	}
+
+	public static void set3DTSeries(Object[] source,Object[] is,int slice,int channel,int frames,int slices,int channels){
+		for(int i=0;i<frames;i++){
+			set3DSlice(is,source[i],i,slice,channel,frames,slices,channels);
+		}
+	}
+
+	public static Object[] get3DZSeries(Object[] is,int frame,int channel,int frames,int slices,int channels){
+		Object[] temp=new Object[slices];
+		for(int i=0;i<slices;i++){
+			temp[i]=get3DSlice(is,frame,i,channel,frames,slices,channels);
+		}
+		return temp;
+	}
+
+	public static void set3DZSeries(Object[] source,Object[] is,int frame,int channel,int frames,int slices,int channels){
+		for(int i=0;i<slices;i++){
+			set3DSlice(is,source[i],frame,i,channel,frames,slices,channels);
+		}
+	}
+
+	public static Object[] get3DCSeries(Object[] is,int frame,int slice,int frames,int slices,int channels){
+		Object[] temp=new Object[channels];
+		for(int i=0;i<channels;i++){
+			temp[i]=get3DSlice(is,frame,slice,i,frames,slices,channels);
+		}
+		return temp;
+	}
+
+	public static void set3DCSeries(Object[] source,Object[] is,int frame,int slice,int frames,int slices,int channels){
+		for(int i=0;i<channels;i++){
+			set3DSlice(is,source[i],frame,slice,i,frames,slices,channels);
+		}
+	}
+
+	public static float[] get3DProjZStat(Object[] is,int frame,int channel,int frames,int slices,int channels,String stat,float[] extras){
+		Object[] zseries=get3DZSeries(is,frame,channel,frames,slices,channels);
+		int len=get_array_length(zseries[0]);
+		return get_stack_proj_stat(stat,zseries,len,1,slices,extras);
+	}
+
+	public static Object get3DProjZStat2(Object[] is,int frame,int channel,int frames,int slices,int channels,String stat,float[] extras){
+		// here we convert back to original data type
+		int typeindex=get_array_type(is[0]);
+		float[] proj=get3DProjZStat(is,frame,channel,frames,slices,channels,stat,extras);
+		return convert_array(proj,typeindex);
+	}
+
+	public static float[] get3DProjTStat(Object[] is,int slice,int channel,int frames,int slices,int channels,String stat,float[] extras){
+		Object[] tseries=get3DTSeries(is,slice,channel,frames,slices,channels);
+		int len=get_array_length(tseries[0]);
+		return get_stack_proj_stat(stat,tseries,len,1,frames,extras);
 	}
 
 }

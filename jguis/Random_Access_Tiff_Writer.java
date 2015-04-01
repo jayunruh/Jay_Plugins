@@ -8,16 +8,17 @@
 
 package jguis;
 
-import ij.*;
-import ij.process.*;
-import jalgs.*;
+import ij.IJ;
+import ij.ImageJ;
+import ij.ImagePlus;
+import ij.io.TiffDecoder;
+import ij.measure.Calibration;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.OutputStream;
 
 import ome.scifio.common.DataTools;
 import ome.scifio.io.RandomAccessOutputStream;
-import ij.io.*;
-import ij.measure.*;
 
 public class Random_Access_Tiff_Writer{
 	// many parts of this code have been adapted from the ImageJ TiffEncoder
@@ -67,7 +68,7 @@ public class Random_Access_Tiff_Writer{
 			nextIFD=imageOffset+stackframes;
 			if(nextIFD+stackframes*ifdSize>0xffffffffL)
 				nextIFD=0L;
-			writeIFD(out,(int)imageOffset,(int)nextIFD);
+			writeIFD(out,imageOffset,(int)nextIFD);
 			if(type==ImagePlus.COLOR_RGB)
 				writeBitsPerPixel(out);
 			writeDescription(out);
@@ -92,7 +93,7 @@ public class Random_Access_Tiff_Writer{
 	public void write_line(Object line,int channel,int slice,int frame,int y){
 		//int framesize=width*height*bytesperpixel;
 		int pos=frame*slices*channels+slice*channels+channel;
-		long offset=(long)pos*(long)imageSize+(long)y*(long)width*(long)bytesperpixel;
+		long offset=(long)pos*(long)imageSize+(long)y*(long)width*bytesperpixel;
 		write_array(line,offset);
 	}
 	
@@ -131,7 +132,7 @@ public class Random_Access_Tiff_Writer{
     				else
     					nextIFD+=ifdSize2;
     				imageOffset+=imageSize;
-    				writeIFD(out,(int)imageOffset,(int)nextIFD);
+    				writeIFD(out,imageOffset,(int)nextIFD);
     			}
     		}
     		out.close();

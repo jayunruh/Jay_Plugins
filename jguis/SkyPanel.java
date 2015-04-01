@@ -8,18 +8,54 @@
 
 package jguis;
 
-import ij.*;
-import ij.gui.*;
-import ij.process.*;
-import ij.text.*;
+import ij.CompositeImage;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.GenericDialog;
+import ij.gui.ImageCanvas;
+import ij.gui.Line;
+import ij.gui.Roi;
+import ij.process.ColorProcessor;
+import ij.process.ImageProcessor;
+import ij.process.LUT;
+import ij.text.TextWindow;
+import jalgs.interpolation;
+import jalgs.jdataio;
+import jalgs.jsort;
+import jalgs.jstatistics;
+import jalgs.jseg.findblobs3;
+import jalgs.jseg.measure_object;
+import jalgs.jsim.rngs;
 
-import jalgs.*;
-import jalgs.jseg.*;
-import jalgs.jsim.*;
-
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
+import java.awt.Button;
+import java.awt.Checkbox;
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FileDialog;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class SkyPanel extends Panel implements ActionListener,ItemListener,MouseMotionListener,MouseListener{
 
@@ -324,9 +360,9 @@ public class SkyPanel extends Panel implements ActionListener,ItemListener,Mouse
 				float[] c2=new float[code.length];
 				for(int i=0;i<code.length;i++){
 					for(int j=0;j<5;j++){
-						c2[i]+=(object_stats[currobj-1][j]-(float)code[i][j])*(object_stats[currobj-1][j]-(float)code[i][j]);
+						c2[i]+=(object_stats[currobj-1][j]-code[i][j])*(object_stats[currobj-1][j]-code[i][j]);
 					}
-					c2[i]+=0.0001f*(object_stats[currobj-1][5]-(float)code[i][5])*(object_stats[currobj-1][5]-(float)code[i][5]);
+					c2[i]+=0.0001f*(object_stats[currobj-1][5]-code[i][5])*(object_stats[currobj-1][5]-code[i][5]);
 				}
 				// IJ.log(""+object_stats[currobj-1][0]+" , "+object_stats[currobj-1][1]+" , "+object_stats[currobj-1][2]+" , "+object_stats[currobj-1][3]+" , "+object_stats[currobj-1][4]);
 				int[] order=jsort.javasort_order(c2);
@@ -471,8 +507,8 @@ public class SkyPanel extends Panel implements ActionListener,ItemListener,Mouse
 			if(e.getSource()==ic){
 				int x=e.getX();
 				int y=e.getY();
-				int ox=(int)ic.offScreenX(x);
-				int oy=(int)ic.offScreenY(y);
+				int ox=ic.offScreenX(x);
+				int oy=ic.offScreenY(y);
 				if(ox<threshimp.getWidth()&&oy<threshimp.getHeight()){
 					currobj=(int)objects[ox+threshimp.getWidth()*oy];
 					update_object_stats(currobj);
@@ -481,8 +517,8 @@ public class SkyPanel extends Panel implements ActionListener,ItemListener,Mouse
 			if(e.getSource()==ic2){
 				int x=e.getX();
 				int y=e.getY();
-				int ox=(int)ic2.offScreenX(x);
-				int oy=(int)ic2.offScreenY(y);
+				int ox=ic2.offScreenX(x);
+				int oy=ic2.offScreenY(y);
 				if(ox<threshimp.getWidth()&&oy<threshimp.getHeight()){
 					currobj=(int)objects[ox+threshimp.getWidth()*oy];
 					update_object_stats(currobj);
@@ -491,8 +527,8 @@ public class SkyPanel extends Panel implements ActionListener,ItemListener,Mouse
 			if(e.getSource()==ic3){
 				int x=e.getX();
 				int y=e.getY();
-				int ox=(int)ic3.offScreenX(x);
-				int oy=(int)ic3.offScreenY(y);
+				int ox=ic3.offScreenX(x);
+				int oy=ic3.offScreenY(y);
 				if(ox<karyoimp.getWidth()&&oy<karyoimp.getHeight()){
 					currobj=(int)karyoobj[ox+karyoimp.getWidth()*oy];
 					update_object_stats(currobj);
@@ -515,8 +551,8 @@ public class SkyPanel extends Panel implements ActionListener,ItemListener,Mouse
 			if(e.getClickCount()==2){
 				int x=e.getX();
 				int y=e.getY();
-				int ox=(int)ic.offScreenX(x);
-				int oy=(int)ic.offScreenY(y);
+				int ox=ic.offScreenX(x);
+				int oy=ic.offScreenY(y);
 				if(ox<karyoimp.getWidth()&&oy<karyoimp.getHeight()){
 					int tempobj=(int)karyoobj[ox+karyoimp.getWidth()*oy];
 					if(tempobj>0){
@@ -577,7 +613,7 @@ public class SkyPanel extends Panel implements ActionListener,ItemListener,Mouse
 	public void update_object_stats(int id){
 		if(id>0){
 			int sortid=arearank[id-1]+1;
-			idlabel.setText("id = "+(int)id+" rank = "+sortid);
+			idlabel.setText("id = "+id+" rank = "+sortid);
 			ColorProcessor cp=new ColorProcessor(100,140);
 			barimg=cp.createImage();
 			Graphics g=barimg.getGraphics();
@@ -649,7 +685,7 @@ public class SkyPanel extends Panel implements ActionListener,ItemListener,Mouse
 					maxs[i]=object_stats[j][i];
 				}
 				if(i==0){
-					object_stats[j][5]=(float)areas[j];
+					object_stats[j][5]=areas[j];
 					if(object_stats[j][5]>maxs[5]){
 						maxs[5]=object_stats[j][5];
 					}
@@ -746,19 +782,19 @@ public class SkyPanel extends Panel implements ActionListener,ItemListener,Mouse
 					int rank=arearank[(int)objects[j]-1];
 					int chromosome=0;
 					if(rank<8){
-						chromosome=(int)(0.5f*(float)rank);
+						chromosome=(int)(0.5f*rank);
 					}else{
 						if(rank>=8){
 							if(rank==8){
 								chromosome=22;
 							}else{
 								if(rank<37){
-									chromosome=(int)(0.5f*(float)(rank-1));
+									chromosome=(int)(0.5f*(rank-1));
 								}else{
 									if(rank==37){
 										chromosome=23;
 									}else{
-										chromosome=(int)(0.5f*(float)(rank-2));
+										chromosome=(int)(0.5f*(rank-2));
 									}
 								}
 							}
@@ -823,7 +859,7 @@ public class SkyPanel extends Panel implements ActionListener,ItemListener,Mouse
 		for(int i=0;i<5;i++)
 			pixels[i]=unmixed[i];
 		pixels[5]=(float[])threshimp.getStack().getPixels(1);
-		for(int i=0;i<6;i++){
+		for(int i=0;i<5;i++){
 			float[] temp=new float[nobjects];
 			for(int j=0;j<nobjects;j++){
 				temp_obj_stats[j][i]=fb.get_object_stats(objects,j+1,pixels[i],"Avg");
@@ -1028,7 +1064,7 @@ public class SkyPanel extends Panel implements ActionListener,ItemListener,Mouse
 			for(int j=0;j<rr.width;j++){
 				if((x+j)>=0&&(x+j)<dstwidth&&(y+i)>=0&&(y+i)<dstheight){
 					if(rotroi.contains(j+rr.x,i+rr.y)){
-						objimg[j+x+(i+y)*dstwidth]=(float)objid;
+						objimg[j+x+(i+y)*dstwidth]=objid;
 					}
 				}
 			}

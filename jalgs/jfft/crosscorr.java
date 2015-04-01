@@ -56,7 +56,7 @@ public class crosscorr{
 		}
 		fft.realfft(real1,im1,true);
 		for(int j=0;j<length;j++){
-			real1[j]/=(float)(avg1*avg2)*(float)length;
+			real1[j]/=(float)(avg1*avg2)*length;
 			real1[j]-=1.0f;
 		}
 		return real1;
@@ -87,7 +87,7 @@ public class crosscorr{
 		}
 		fft.realfft(real1,im1,true);
 		for(int j=0;j<length;j++){
-			real1[j]/=(float)(avg1*avg2)*(float)length;
+			real1[j]/=(float)(avg1*avg2)*length;
 			real1[j]-=1.0f;
 			if(dobrightcorr){
 				real1[j]*=(float)Math.sqrt(avg1*avg2);
@@ -137,7 +137,7 @@ public class crosscorr{
 		}
 		fft.realfft(real1,im1,true);
 		for(int j=0;j<length;j++){
-			real1[j]/=(float)(avg1*avg2)*(float)length;
+			real1[j]/=(float)(avg1*avg2)*length;
 			real1[j]-=1.0f;
 			real1[j]*=(float)length/(float)minlength;
 			if(dobrightcorr){
@@ -165,12 +165,12 @@ public class crosscorr{
 					temp2-=length;
 				temp3+=(double)data1[j]*(double)data2[temp2];
 			}
-			temp[i]=(float)(temp3/(double)length);
-			avg1+=(double)data1[i];
-			avg2+=(double)data2[i];
+			temp[i]=(float)(temp3/length);
+			avg1+=data1[i];
+			avg2+=data2[i];
 		}
-		avg1/=(double)length;
-		avg2/=(double)length;
+		avg1/=length;
+		avg2/=length;
 		for(int i=0;i<length;i++){
 			temp[i]/=(float)(avg1*avg2);
 			temp[i]-=1.0f;

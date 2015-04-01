@@ -100,10 +100,7 @@ public class bin_image_jru_v1 implements PlugIn {
 					for(int j=0;j<slices;j++){
 						for(int k=0;k<channels;k++){
 							Object frame=get3DSlice(is,i,j,k,frames,slices,channels);
-							float[] result=null;
-							if(isfloat) result=spatial_bin((float[])frame,width,height);
-							else if(isbyte) result=spatial_bin((byte[])frame,width,height);
-							else result=spatial_bin((short[])frame,width,height);
+							float[] result=spatial_bin(frame,width,height,binx,biny);
 							result_stack.addSlice("",result);
 						}
 					}
@@ -214,7 +211,14 @@ public class bin_image_jru_v1 implements PlugIn {
 		return is.getPixels(1+channel+slice*channels+frame*channels*slices);
 	}
 
-	float[] spatial_bin(float[] image,int width,int height){
+	public float[] spatial_bin(Object image,int width,int height,int binx,int biny){
+		if(image instanceof float[]) return spatial_bin((float[])image,width,height,binx,biny);
+		if(image instanceof short[]) return spatial_bin((short[])image,width,height,binx,biny);
+		if(image instanceof byte[]) return spatial_bin((byte[])image,width,height,binx,biny);
+		return null;
+	}
+
+	float[] spatial_bin(float[] image,int width,int height,int binx,int biny){
 		int binwidth=(int)(width/binx);
 		int binheight=(int)(height/biny);
 		float[] result=new float[binwidth*binheight];
@@ -237,7 +241,7 @@ public class bin_image_jru_v1 implements PlugIn {
 		return result;
 	}
 
-	float[] spatial_bin(short[] image,int width,int height){
+	float[] spatial_bin(short[] image,int width,int height,int binx,int biny){
 		int binwidth=(int)(width/binx);
 		int binheight=(int)(height/biny);
 		float[] result=new float[binwidth*binheight];
@@ -260,7 +264,7 @@ public class bin_image_jru_v1 implements PlugIn {
 		return result;
 	}
 
-	float[] spatial_bin(byte[] image,int width,int height){
+	float[] spatial_bin(byte[] image,int width,int height,int binx,int biny){
 		int binwidth=(int)(width/binx);
 		int binheight=(int)(height/biny);
 		float[] result=new float[binwidth*binheight];

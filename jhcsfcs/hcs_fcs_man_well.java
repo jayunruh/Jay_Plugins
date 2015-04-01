@@ -8,9 +8,9 @@
 
 package jhcsfcs;
 
-import jalgs.*;
+import jalgs.jsort;
 
-import java.io.*;
+import java.io.File;
 
 public class hcs_fcs_man_well extends hcs_fcs_well{
 
@@ -47,7 +47,7 @@ public class hcs_fcs_man_well extends hcs_fcs_well{
 					String tempcell=rawnames[i].substring(0);
 					for(int j=0;j<ncells;j++){
 						if(cellnames[j].equals(tempcell)){
-							cellid[counter]=(float)j;
+							cellid[counter]=j;
 							cellfilenum[j]++;
 							break;
 						}
@@ -55,7 +55,7 @@ public class hcs_fcs_man_well extends hcs_fcs_well{
 					if(cellid[counter]<0.0f){
 						cellnames[ncells]=tempcell.substring(0);
 						cellfilenum[ncells]=1;
-						cellid[counter]=(float)ncells;
+						cellid[counter]=ncells;
 						ncells++;
 					}
 					counter++;
@@ -119,7 +119,7 @@ public class hcs_fcs_man_well extends hcs_fcs_well{
 				String tempcell=rawnames[i].substring(0);
 				for(int j=0;j<ncells;j++){
 					if(cellnames[j].equals(tempcell)){
-						cellid[counter]=(float)j;
+						cellid[counter]=j;
 						cellfilenum[j]++;
 						break;
 					}
@@ -127,7 +127,7 @@ public class hcs_fcs_man_well extends hcs_fcs_well{
 				if(cellid[counter]<0.0f){
 					cellnames[ncells]=tempcell.substring(0);
 					cellfilenum[ncells]=1;
-					cellid[counter]=(float)ncells;
+					cellid[counter]=ncells;
 					ncells++;
 				}
 				counter++;

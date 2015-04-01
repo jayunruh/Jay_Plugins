@@ -8,7 +8,7 @@
 
 package jhcsfcs;
 
-import jalgs.*;
+import jalgs.jdataio;
 
 import java.io.File;
 

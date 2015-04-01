@@ -25,7 +25,7 @@ public class sim_common_setups{
 			confineindex=2;
 		}
 		sim_setup set=new sim_setup(10.0f,3.2f,64,0,confineindex,0.17f,0.7f);
-		float[] tempbright={brightvals[0][sampleindex]*(float)clustersize,brightvals[1][sampleindex]*(float)clustersize};
+		float[] tempbright={brightvals[0][sampleindex]*clustersize,brightvals[1][sampleindex]*clustersize};
 		sim_species ss=new sim_species(set,Dvals[locationindex][sampleindex],tempbright,new float[1],new int[]{1},false,0);
 		return new sim_multispecies(ss,num);
 	}
@@ -41,8 +41,8 @@ public class sim_common_setups{
 			confineindex=2;
 		}
 		sim_setup set=new sim_setup(10.0f,3.2f,64,0,confineindex,0.17f,0.7f);
-		float[] tempbright1={brightvals[0][sampleindex1]*(float)clustersize1,brightvals[1][sampleindex1]*(float)clustersize1};
-		float[] tempbright2={brightvals[0][sampleindex2]*(float)clustersize2,brightvals[1][sampleindex2]*(float)clustersize2};
+		float[] tempbright1={brightvals[0][sampleindex1]*clustersize1,brightvals[1][sampleindex1]*clustersize1};
+		float[] tempbright2={brightvals[0][sampleindex2]*clustersize2,brightvals[1][sampleindex2]*clustersize2};
 		float[] tempbright3={tempbright1[0]+tempbright2[0],tempbright1[1]+tempbright2[1]};
 		sim_species[] sslist=new sim_species[3];
 		float dval=Dvals[locationindex][sampleindex1];
@@ -52,7 +52,7 @@ public class sim_common_setups{
 		sslist[0]=new sim_species(set,Dvals[locationindex][sampleindex1],tempbright1,new float[1],new int[]{1},false,0);
 		sslist[1]=new sim_species(set,Dvals[locationindex][sampleindex2],tempbright2,new float[1],new int[]{1},false,0);
 		sslist[0]=new sim_species(set,dval,tempbright3,new float[1],new int[]{1},false,0);
-		int numinteracting=(int)(finteracting*(float)num);
+		int numinteracting=(int)(finteracting*num);
 		int numnotinteracting=num-numinteracting;
 		int[] numarray={numnotinteracting,numnotinteracting,numinteracting};
 		return new sim_multispecies(sslist,null,numarray);

@@ -8,7 +8,7 @@
 
 package jhcsfcs;
 
-import java.io.*;
+import java.io.File;
 
 public class hcs_fcs_run{
 	public String[] filenames;

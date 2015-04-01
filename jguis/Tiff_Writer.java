@@ -8,13 +8,26 @@
 
 package jguis;
 
-import ij.*;
-import ij.process.*;
-import jalgs.*;
+import ij.CompositeImage;
+import ij.IJ;
+import ij.ImageJ;
+import ij.ImagePlus;
+import ij.io.TiffDecoder;
+import ij.measure.Calibration;
+import ij.process.ByteProcessor;
+import ij.process.ColorProcessor;
+import ij.process.FloatProcessor;
+import ij.process.ImageProcessor;
+import ij.process.LUT;
+import ij.process.ShortProcessor;
+import jalgs.FrameInterface;
+import jalgs.jdataio;
 
-import java.io.*;
-import ij.io.*;
-import ij.measure.*;
+import java.io.BufferedOutputStream;
+import java.io.DataOutputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 public class Tiff_Writer{
 	// many parts of this code have been adapted from the ImageJ TiffEncoder
@@ -33,6 +46,8 @@ public class Tiff_Writer{
 	private FrameInterface finterface;
 
 	long stackSize;
+	
+	public Tiff_Writer(){} //this is only if saving as single plane tif
 
 	public Tiff_Writer(ImagePlus imp,int nframes,FrameInterface finterface){
 		this.imp=imp;
@@ -42,6 +57,51 @@ public class Tiff_Writer{
 		this.height=imp.getHeight();
 		this.stackframes=nframes;
 		this.cal=imp.getCalibration();
+	}
+	
+	public boolean saveAsTiff(String path,ImagePlus imp){
+		this.imp=imp;
+		ip=imp.getProcessor();
+		width=imp.getWidth();
+		height=imp.getHeight();
+		stackframes=1;
+		cal=imp.getCalibration();
+		saveSizes();
+		try{
+			DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path)));
+			byte[] hdr={73,73,42,0,8,0,0,0};
+			// write the header
+			out.write(hdr);
+			long nextIFD=0L;
+			writeIFD(out,imageOffset,(int)nextIFD);
+			if(ip instanceof ColorProcessor)
+				writeBitsPerPixel(out);
+			writeDescription(out);
+			if(scaleSize>0)
+				writeScale(out);
+			if(metaDataSize>0)
+				writeMetaData(out);
+			// write the image data
+			jdataio jdio=new jdataio();
+			if(ip instanceof ByteProcessor){
+				jdio.writebytearray(out,(byte[])imp.getProcessor().getPixels());
+			}else{
+				if(ip instanceof ShortProcessor){
+					jdio.writeintelshortarray(out,(short[])imp.getProcessor().getPixels());
+				}else{
+					if(ip instanceof FloatProcessor){
+						jdio.writeintelfloatarray(out,(float[])imp.getProcessor().getPixels());
+					}else{
+						jdio.writeintelintarray(out,(int[])imp.getProcessor().getPixels());
+					}
+				}
+			}
+			out.close();
+		}catch(IOException e){
+			IJ.showMessage(e.getMessage());
+			return false;
+		}
+		return true;
 	}
 
 	public boolean saveAsTiffStack(String path){
@@ -57,7 +117,7 @@ public class Tiff_Writer{
 			long nextIFD=imageOffset+stackframes;
 			if(nextIFD+stackframes*ifdSize>0xffffffffL)
 				nextIFD=0L;
-			writeIFD(out,(int)imageOffset,(int)nextIFD);
+			writeIFD(out,imageOffset,(int)nextIFD);
 			if(ip instanceof ColorProcessor)
 				writeBitsPerPixel(out);
 			writeDescription(out);
@@ -95,7 +155,7 @@ public class Tiff_Writer{
 					else
 						nextIFD+=ifdSize2;
 					imageOffset+=imageSize;
-					writeIFD(out,(int)imageOffset,(int)nextIFD);
+					writeIFD(out,imageOffset,(int)nextIFD);
 				}
 			}
 			out.close();

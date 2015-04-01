@@ -19,12 +19,12 @@ public class fit_loess{
 		if(this.span>=length) this.span=length;
 		if(this.span%2==0) this.span--;
 		float[] xvals=new float[span];
-		for(int i=0;i<this.span;i++) xvals[i]=(float)i;
+		for(int i=0;i<this.span;i++) xvals[i]=i;
 		int torder=order;
 		if(torder<1) torder=1;
 		//if(torder>3) torder=3;
 		fp=new fitpoly(torder,xvals,false);
-		halfspan=(int)(0.5f*(float)this.span);
+		halfspan=(int)(0.5f*this.span);
 		initweights();
 	}
 	

@@ -54,7 +54,7 @@ public class autocorr3D{
 				im[i]=new float[width*height];
 			}
 		}
-		avg/=((double)width*(double)height*(double)slices);
+		avg/=((double)width*(double)height*slices);
 		fft.dorealfft3D(real,im,false);
 		for(int i=0;i<slices;i++){
 			for(int j=0;j<width*height;j++){
@@ -65,14 +65,14 @@ public class autocorr3D{
 			im[i]=new float[width*height];
 		}
 		fft.dorealfft3D(real,im,true);
-		float tempfloat=(float)width*(float)height*(float)slices*(float)(avg*avg);
+		float tempfloat=(float)width*(float)height*slices*(float)(avg*avg);
 		for(int i=0;i<slices;i++){
 			for(int j=0;j<width*height;j++){
 				((float[])real[i])[j]/=tempfloat;
 				((float[])real[i])[j]-=1.0f;
 			}
 			if(doshiftxycenter){
-				real[i]=(Object)shiftxycenter((float[])real[i]);
+				real[i]=shiftxycenter((float[])real[i]);
 			}
 		}
 		return real;

@@ -24,7 +24,6 @@ import java.awt.image.IndexColorModel;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.util.ArrayList;
 
@@ -323,7 +322,7 @@ public class LSM_file_reader{
 				}
 				ch=(char)in;
 				if(addchar==true){
-					String achar=new Character((char)ch).toString();
+					String achar=new Character(ch).toString();
 					if(ch!=0x00){
 						tempstr+=achar;
 					}else{
@@ -453,7 +452,7 @@ public class LSM_file_reader{
 		lsmFi.pixelWidth=cz.VoxelSizeX*1000000;
 		lsmFi.unit=micrometer;
 		lsmFi.valueUnit=micrometer;
-		lsmFi.nImages=1;
+		//lsmFi.nImages=1;
 		lsmFi.intelByteOrder=true;
 		ImageStack st=null;
 		int datatype=(int)cz.IntensityDataType;
@@ -483,6 +482,7 @@ public class LSM_file_reader{
 			cm=LookUpTable.createGrayscaleColorModel(lsmFi.whiteIsZero);
 		}
 		st=new ImageStack((int)firstImDir.TIF_IMAGEWIDTH,(int)firstImDir.TIF_IMAGELENGTH,cm);
+		//st=new ImageStack((int)firstImDir.TIF_IMAGEWIDTH,(int)firstImDir.TIF_IMAGELENGTH,null);
 		firstImDir=null;
 		ImageReader reader=null;
 		int flength=0;
@@ -539,17 +539,22 @@ public class LSM_file_reader{
 						}catch(IOException e){
 							e.printStackTrace();
 						}
-						pixels=reader.readPixels((InputStream)stream);
+						pixels=reader.readPixels(stream);
 						st.addSlice("",pixels);
 					}
 				}
 			}
 		}
 		ImagePlus imp=new ImagePlus(lsmFi.fileName,st);
-		imp.setDimensions((int)cz.DimensionChannels,(int)cz.DimensionZ,(int)cz.DimensionTime);
+		//IJ.log(""+(int)cz.DimensionChannels);
+		int tempframes=(int)cz.DimensionTime;
+		if(cz.ScanType==2) tempframes=1;
+		imp.setDimensions((int)cz.DimensionChannels,(int)cz.DimensionZ,tempframes);
+		//IJ.log(""+(int)cz.DimensionChannels+" , "+(int)cz.DimensionZ+" , "+(int)cz.DimensionTime);
 		if((int)cz.DimensionChannels>1){
 			imp=new CompositeImage(imp,CompositeImage.COLOR);
 		}
+		lsmFi.nImages=st.getSize();
 		imp.setFileInfo(lsmFi);
 		Calibration cal=new Calibration();
 		cal.setUnit(lsmFi.unit);
@@ -600,7 +605,7 @@ public class LSM_file_reader{
 		String height=IJ.d2s(lsm.height,0);
 		String channels=IJ.d2s(cz.DimensionChannels,0);
 		String scantype="";
-		switch((int)cz.ScanType){
+		switch(cz.ScanType){
 		case 0:
 			scantype="Normal X-Y-Z scan";
 			break;
@@ -630,6 +635,7 @@ public class LSM_file_reader{
 		String voxelsize_y=IJ.d2s(cz.VoxelSizeY*1000000,2)+" "+micrometer;
 		String voxelsize_z=IJ.d2s(cz.VoxelSizeZ*1000000,2)+" "+micrometer;
 		String timestacksize=IJ.d2s(cz.DimensionTime,0);
+		if(cz.ScanType==2) timestacksize=IJ.d2s(1,0);
 		String plane_width=IJ.d2s(cz.DimensionX*cz.VoxelSizeX,2)+" "+micrometer;
 		String plane_height=IJ.d2s(cz.DimensionY*cz.VoxelSizeY,2)+" "+micrometer;
 		String volume_depth=IJ.d2s(cz.DimensionZ*cz.VoxelSizeZ,2)+" "+micrometer;
@@ -657,11 +663,11 @@ public class LSM_file_reader{
 	}
 
 	private int swap(int x){
-		return (int)((swap((short)x)<<16)|(swap((short)(x>>16))&0xffff));
+		return (swap((short)x)<<16)|(swap((short)(x>>16))&0xffff);
 	}
 
 	private long swap(long x){
-		return (long)(((long)swap((int)(x))<<32)|((long)swap((int)(x>>32))&0xffffffffL));
+		return ((long)swap((int)(x))<<32)|(swap((int)(x>>32))&0xffffffffL);
 	}
 
 	private double swap(double x){

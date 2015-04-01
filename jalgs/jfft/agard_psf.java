@@ -11,6 +11,7 @@ package jalgs.jfft;
 import jalgs.bessel;
 
 public class agard_psf{
+	//here we implement the algorithm of Agard 1984 Ann. Rev. Biophys. Bioeng. vol 13, pp 191-219.
 
 	public static String[] manufacturers={"Zeiss","Olympus","Leica","Nikon"};
 	public static float[] tllengths={165000.0f,180000.0f,200000.0f,200000.0f};
@@ -21,28 +22,28 @@ public class agard_psf{
 	public float[] rzpsf;
 
 	public agard_psf(double mag,double NA,double lem,double n,int man){
-		double rresolution=(double)res;
+		double rresolution=res;
 		maxsize=halfsize*2;
-		halfsize2=res*(float)halfsize;
-		double qresolution=1.0/(rresolution*(double)maxsize);
-		double zresolution=(double)res;
+		halfsize2=res*halfsize;
+		double qresolution=1.0/(rresolution*maxsize);
+		double zresolution=res;
 		double alpha=Math.asin(NA/n);
 		double fc=(2.0*NA)/lem;
 		int fclim=(int)(fc/qresolution);
-		if((double)fclim<(fc/qresolution)){
+		if(fclim<(fc/qresolution)){
 			fclim++;
 		}
-		double tllength=(double)tllengths[man];
+		double tllength=tllengths[man];
 		double df=tllength/mag;
 		bessel b=new bessel();
 		rzpsf=new float[halfsize*halfsize];
 		for(int i=0;i<halfsize;i++){
 			float[] ctf=new float[halfsize];
-			double z=zresolution*(double)i;
+			double z=zresolution*i;
 			double temp=Math.cos(alpha);
 			double w=-df-z*temp+Math.sqrt(df*df+2.0*df*z+z*z*temp*temp);
 			for(int j=0;j<fclim;j++){
-				double q=qresolution*(double)j;
+				double q=qresolution*j;
 				double temp2=(8.0*Math.PI*w*(1.0-q/fc)*(q/fc))/lem;
 				double temp3;
 				if(temp2!=0.0){
@@ -57,9 +58,9 @@ public class agard_psf{
 			// the psf is just the zero order hankel transfrom of the 2D ctf
 			double twopi=2.0*Math.PI;
 			for(int j=0;j<halfsize;j++){
-				double r=rresolution*(double)j;
+				double r=rresolution*j;
 				for(int k=0;k<fclim;k++){
-					double q=qresolution*(double)k;
+					double q=qresolution*k;
 					rzpsf[j+i*halfsize]+=(float)(ctf[k]*q*b.besselval(twopi*q*r,0));
 				}
 			}
@@ -82,11 +83,11 @@ public class agard_psf{
 		if(z2>=(halfsize-1))
 			return 0.0f;
 		int prevr=(int)r2;
-		float rrem=r2-(float)prevr;
+		float rrem=r2-prevr;
 		int prevz=(int)z2;
 		float prevval=rzpsf[prevr+prevz*halfsize]+rrem*(rzpsf[prevr+1+prevz*halfsize]-rzpsf[prevr+prevz*halfsize]);
 		float nextval=rzpsf[prevr+(prevz+1)*halfsize]+rrem*(rzpsf[prevr+1+(prevz+1)*halfsize]-rzpsf[prevr+(prevz+1)*halfsize]);
-		float zrem=z2-(float)prevz;
+		float zrem=z2-prevz;
 		return prevval+zrem*(nextval-prevval);
 	}
 
@@ -115,9 +116,9 @@ public class agard_psf{
 		if(xend<0)
 			return;
 		for(int i=ystart;i<yend;i++){
-			float ypos=dx*(float)i-y;
+			float ypos=dx*i-y;
 			for(int j=xstart;j<xend;j++){
-				float xpos=dx*(float)j-x;
+				float xpos=dx*j-x;
 				image[j+i*width]=intensity*getvalue(xpos,ypos,zpos);
 			}
 		}
@@ -138,7 +139,7 @@ public class agard_psf{
 		if(zend<0)
 			return;
 		for(int i=zstart;i<zend;i++){
-			float zpos=dz*(float)i-z;
+			float zpos=dz*i-z;
 			draw_psf((float[])stack[i],width,height,x,y,dx,zpos,maxsizex,intensity);
 		}
 	}

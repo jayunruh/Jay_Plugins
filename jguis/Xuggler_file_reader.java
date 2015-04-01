@@ -8,13 +8,26 @@
 
 package jguis;
 
-import ij.*;
-import ij.process.*;
-import java.io.*;
-import java.awt.*;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.process.ColorProcessor;
+import ij.process.ImageProcessor;
+
+import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
-import com.xuggle.xuggler.*;
-import com.xuggle.xuggler.video.*;
+import java.io.File;
+
+import com.xuggle.xuggler.ICodec;
+import com.xuggle.xuggler.IContainer;
+import com.xuggle.xuggler.IPacket;
+import com.xuggle.xuggler.IPixelFormat;
+import com.xuggle.xuggler.IStream;
+import com.xuggle.xuggler.IStreamCoder;
+import com.xuggle.xuggler.IVideoPicture;
+import com.xuggle.xuggler.IVideoResampler;
+import com.xuggle.xuggler.video.ConverterFactory;
+import com.xuggle.xuggler.video.IConverter;
 
 public class Xuggler_file_reader{
 
@@ -183,7 +196,7 @@ public class Xuggler_file_reader{
 				double interval=duration/5.0;
 				double sum=0.0;
 				for(int i=0;i<5;i++){
-					double time=interval*(double)i;
+					double time=interval*i;
 					double[] temp=get_frame_interval(false,time,2.0);
 					sum+=temp[0];
 				}
@@ -232,10 +245,10 @@ public class Xuggler_file_reader{
 			}
 		}
 		// first get the time interval in seconds
-		double interval=(double)(thisendtime-thisstarttime)/1000000.0;
+		double interval=(thisendtime-thisstarttime)/1000000.0;
 		// now divide by the number of measured pictures
-		interval/=(double)npictures;
-		double[] temp2={interval,(double)npictures};
+		interval/=npictures;
+		double[] temp2={interval,npictures};
 		return temp2;
 	}
 
@@ -287,7 +300,7 @@ public class Xuggler_file_reader{
 		}
 		packetstamps=new long[npackets];
 		System.arraycopy(temp,0,packetstamps,0,npackets);
-		duration=ptimebase*(double)(packetstamps[npackets-1]-packetstamps[0]);
+		duration=ptimebase*(packetstamps[npackets-1]-packetstamps[0]);
 		reset_container();
 	}
 
@@ -304,7 +317,7 @@ public class Xuggler_file_reader{
 			return seek_packet(npackets,packet);
 		}else{
 			for(int i=0;i<npackets;i++){
-				double currtime=ptimebase*(double)(packetstamps[i]-packetstamps[0]);
+				double currtime=ptimebase*(packetstamps[i]-packetstamps[0]);
 				if(currtime>=time){
 					// System.out.println("selected packet = "+(i+offset));
 					return seek_packet(i+offset,packet);

@@ -8,13 +8,10 @@
 
 package jguis;
 
-import ij.*;
+import ij.ImageJ;
+import ij.ImagePlus;
 
-import java.io.*;
-
-import ome.scifio.common.DataTools;
-import ome.xml.model.primitives.*;
-import ome.xml.model.enums.*;
+import java.io.IOException;
 
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
@@ -26,6 +23,12 @@ import loci.formats.ImageWriter;
 import loci.formats.MetadataTools;
 import loci.formats.meta.IMetadata;
 import loci.formats.services.OMEXMLService;
+import ome.scifio.common.DataTools;
+import ome.xml.model.enums.DimensionOrder;
+import ome.xml.model.enums.EnumerationException;
+import ome.xml.model.enums.PixelType;
+import ome.xml.model.primitives.PositiveFloat;
+import ome.xml.model.primitives.PositiveInteger;
 
 public class LOCI_random_access_file_writer{
 	// this plugin simply uses the loci library to write tif files by random access

@@ -8,9 +8,9 @@
 
 package jalgs.jsim;
 
-import jalgs.*;
+import jalgs.jsort;
 
-import java.util.*;
+import java.util.Random;
 
 public class rngs{
 	public Random jrnd;
@@ -29,7 +29,7 @@ public class rngs{
 
 	public rngs(int seed1){
 		// seed=seed1;
-		jrnd=new Random((long)seed1);
+		jrnd=new Random(seed1);
 		prev=0;
 		oldavg=-1.0;
 	}

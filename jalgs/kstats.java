@@ -30,11 +30,11 @@ public class kstats{
 
 	public double[] rawmoments(float[] data){
 		double[] moms=new double[9];
-		double dlength=(double)data.length;
+		double dlength=data.length;
 		for(int i=0;i<data.length;i++){
-			double temp=(double)data[i];
+			double temp=data[i];
 			for(int j=1;j<=8;j++){
-				moms[j]+=intpow((double)temp,j)/dlength;
+				moms[j]+=intpow(temp,j)/dlength;
 			}
 		}
 		return moms;
@@ -42,11 +42,11 @@ public class kstats{
 
 	public double[] rawmomentsshort(float[] data){
 		double[] moms=new double[5];
-		double dlength=(double)data.length;
+		double dlength=data.length;
 		for(int i=0;i<data.length;i++){
-			double temp=(double)data[i];
+			double temp=data[i];
 			for(int j=1;j<=4;j++){
-				moms[j]+=intpow((double)temp,j)/dlength;
+				moms[j]+=intpow(temp,j)/dlength;
 			}
 		}
 		return moms;
@@ -58,7 +58,7 @@ public class kstats{
 		if(data2.length<data1.length){
 			length=data2.length;
 		}
-		double dlength=(double)length;
+		double dlength=length;
 
 		double[] moms1=rawmoments(data1);
 		double[] moms2=rawmoments(data2);
@@ -67,8 +67,8 @@ public class kstats{
 			moms[0][i]=moms2[i];
 		}
 		for(int i=0;i<length;i++){
-			double temp1=(double)data1[i];
-			double temp2=(double)data2[i];
+			double temp1=data1[i];
+			double temp2=data2[i];
 			for(int a=1;a<=6;a++){
 				for(int b=1;b<=6;b++){
 					moms[a][b]+=(intpow(temp1,a)*intpow(temp2,b))/dlength;
@@ -84,7 +84,7 @@ public class kstats{
 		if(data2.length<data1.length){
 			length=data2.length;
 		}
-		double dlength=(double)length;
+		double dlength=length;
 
 		double[] moms1=rawmomentsshort(data1);
 		double[] moms2=rawmomentsshort(data2);
@@ -93,8 +93,8 @@ public class kstats{
 			moms[0][i]=moms2[i];
 		}
 		for(int i=0;i<length;i++){
-			double temp1=(double)data1[i];
-			double temp2=(double)data2[i];
+			double temp1=data1[i];
+			double temp2=data2[i];
 			for(int a=1;a<=3;a++){
 				for(int b=1;b<=3;b++){
 					moms[a][b]+=(intpow(temp1,a)*intpow(temp2,b))/dlength;
@@ -155,7 +155,7 @@ public class kstats{
 	}
 
 	public double[][] kstatistics(double[][] u,int n1){
-		double n=(double)n1;
+		double n=n1;
 		double[][] k=new double[9][9];
 		// start with the univariate cases
 		double[] u1=new double[9];
@@ -193,7 +193,7 @@ public class kstats{
 	}
 
 	public double[][] kstatisticsshort(double[][] u,int n1){
-		double n=(double)n1;
+		double n=n1;
 		double[][] k=new double[5][5];
 		// start with the univariate cases
 		double[] u1=new double[5];
@@ -221,7 +221,7 @@ public class kstats{
 
 	public double[] kstatistics(double[] u,int nn){
 		double[] k=new double[9];
-		double n=(double)nn;
+		double n=nn;
 
 		k[8]=-((n*n*(n
 				*n
@@ -300,7 +300,7 @@ public class kstats{
 
 	public double[] kstatisticsshort(double[] u,int nn){
 		double[] k=new double[5];
-		double n=(double)nn;
+		double n=nn;
 
 		k[4]=-(-3.0*u[2]*u[2]+4.0*u[1]*u[3]+n*(6.0*u[1]*u[1]*u[1]*u[1]-12.0*u[1]*u[1]*u[2]+3.0*u[2]*u[2]+4.0*u[1]*u[3]-u[4])-u[4])*((n*n)/(-6.0+11.0*n-6.0*n*n+n*n*n));
 
@@ -315,7 +315,7 @@ public class kstats{
 
 	public double[] kstatsvars(double[] K,int nn){
 		double[] kvars=new double[5];
-		double n=(double)nn;
+		double n=nn;
 
 		kvars[1]=K[2]/n;
 
@@ -387,7 +387,7 @@ public class kstats{
 		double[] rawmoments=new double[9];
 		for(int i=1;i<=8;i++){
 			rawmoments[i]=amp1*intpow(tau1,i)+(1.0-amp1)*intpow(tau2,i);
-			rawmoments[i]*=(double)factorial(i);
+			rawmoments[i]*=factorial(i);
 		}
 		double avgint=rawmoments[1];
 		for(int i=1;i<8;i++){
@@ -400,7 +400,7 @@ public class kstats{
 		double[] rawmoments=new double[9];
 		for(int i=1;i<=8;i++){
 			rawmoments[i]=intpow(tau,i);
-			rawmoments[i]*=(double)factorial(i);
+			rawmoments[i]*=factorial(i);
 		}
 		double avgint=rawmoments[1];
 		for(int i=1;i<8;i++){
@@ -441,11 +441,11 @@ public class kstats{
 		// first calculate the analog factorial cumulants
 		for(int i=1;i<=4;i++){
 			for(int j=0;j<brightnesses.length;j++){
-				afcums[i]+=intpow((double)brightnesses[j],i)*(double)numbers[j];
+				afcums[i]+=intpow(brightnesses[j],i)*numbers[j];
 			}
 		}
 		for(int i=1;i<=4;i++){
-			afcums[i]*=(double)gammas[i]*intpow(gain,i);
+			afcums[i]*=gammas[i]*intpow(gain,i);
 		}
 		// now calculate the analog cumulants from these
 		acums[1]=offsets[1]+afcums[1];
@@ -734,7 +734,7 @@ public class kstats{
 	public double[] gamma2GL(){
 		double[] gammas=new double[9];
 		for(int i=1;i<=8;i++){
-			gammas[i]=(double)factorial(4*i-4)/(intpow(4.0*Math.PI*Math.PI,i-1)*(double)i*intpow((double)factorial(2*i-2),2));
+			gammas[i]=factorial(4*i-4)/(intpow(4.0*Math.PI*Math.PI,i-1)*i*intpow(factorial(2*i-2),2));
 		}
 		return gammas;
 	}
@@ -742,7 +742,7 @@ public class kstats{
 	public double[] gamma2GLxz(){
 		double[] gammas=new double[9];
 		for(int i=1;i<=8;i++){
-			gammas[i]=(intpow(2.0,6*i-5)*intpow((double)factorial(2*i-2),2)*(double)(2*i-1))/(Math.sqrt((double)i)*intpow(Math.PI,2*i-2)*(double)factorial(4*i-2));
+			gammas[i]=(intpow(2.0,6*i-5)*intpow(factorial(2*i-2),2)*(2*i-1))/(Math.sqrt(i)*intpow(Math.PI,2*i-2)*factorial(4*i-2));
 		}
 		return gammas;
 	}
@@ -750,7 +750,7 @@ public class kstats{
 	public double[] gamma3DG(){
 		double[] gammas=new double[9];
 		for(int i=1;i<=8;i++){
-			gammas[i]=Math.pow((double)i,-1.5);
+			gammas[i]=Math.pow(i,-1.5);
 		}
 		return gammas;
 	}
@@ -758,7 +758,7 @@ public class kstats{
 	public double[] gamma2DG(){
 		double[] gammas=new double[9];
 		for(int i=1;i<=8;i++){
-			gammas[i]=1.0/(double)i;
+			gammas[i]=1.0/i;
 		}
 		return gammas;
 	}
@@ -768,7 +768,7 @@ public class kstats{
 		double[] factcums=new double[9];
 		for(int i=1;i<=8;i++){
 			for(int j=0;j<brightnesses.length;j++){
-				factcums[i]+=gammas[i]*intpow((double)brightnesses[j],i)*(double)numbers[j];
+				factcums[i]+=gammas[i]*intpow(brightnesses[j],i)*numbers[j];
 			}
 		}
 		// now calculate the cumulants from these
@@ -809,7 +809,7 @@ public class kstats{
 		int pts=1+(int)((maxe2-mine2)/delta);
 		boolean underzero=true;
 		for(int i=0;i<pts;i++){
-			double e2=mine2+delta*(double)i;
+			double e2=mine2+delta*i;
 			double N2=(k[2]-k[1]-gamma2*k[1]*e1)/(gamma2*e2*(e2-e1));
 			double N1=(k[1]-e2*N2)/e1;
 			float[] brightnesses={(float)e1,(float)e2};

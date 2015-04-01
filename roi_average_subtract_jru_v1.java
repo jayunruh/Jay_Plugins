@@ -10,68 +10,14 @@ import ij.process.*;
 import ij.gui.*;
 import java.awt.*;
 import ij.plugin.*;
+import jalgs.*;
 
 public class roi_average_subtract_jru_v1 implements PlugIn {
 
 	public void run(String arg) {
 		ImagePlus imp = WindowManager.getCurrentImage();
-		int width=imp.getWidth();
-		int height=imp.getHeight();
-		ImageProcessor ip = imp.getProcessor();
-		Rectangle r = ip.getRoi();
-		ImageStack stack = imp.getStack();
-		int slices=stack.getSize();
-		ImageStack result_stack=new ImageStack(width,height);
-		for(int i=0;i<slices;i++){
-			if(ip instanceof FloatProcessor){
-				float[] pixels = (float[])stack.getPixels(i+1);
-				float[] temp=new float[width*height];
-				float avg=0.0f;
-				for(int j=0;j<r.height;j++){
-					for(int k=0;k<r.width;k++){
-						avg+=pixels[r.y*width+r.x+j*width+k]/(float)(r.width*r.height);
-					}
-				}
-				for(int j=0;j<width*height;j++){
-					temp[j]=pixels[j]-avg;
-				}
-				result_stack.addSlice("",(Object)temp);
-			}
-			if(ip instanceof ShortProcessor){
-				short[] pixels = (short[])stack.getPixels(i+1);
-				float[] temp=new float[width*height];
-				float avg=0.0f;
-				for(int j=0;j<r.height;j++){
-					for(int k=0;k<r.width;k++){
-						float temp2=pixels[r.y*width+r.x+j*width+k]&0xffff;
-						avg+=temp2/((float)(r.width*r.height));
-					}
-				}
-				for(int j=0;j<width*height;j++){
-					float temp2=pixels[j]&0xffff;
-					temp[j]=temp2-avg;
-				}
-				result_stack.addSlice("",(Object)temp);
-			}
-			if(ip instanceof ByteProcessor){
-				byte[] pixels = (byte[])stack.getPixels(i+1);
-				float[] temp=new float[width*height];
-				float avg=0.0f;
-				for(int j=0;j<r.height;j++){
-					for(int k=0;k<r.width;k++){
-						float temp2=pixels[r.y*width+r.x+j*width+k]&0xff;
-						avg+=temp2/((float)(r.width*r.height));
-					}
-				}
-				for(int j=0;j<width*height;j++){
-					float temp2=pixels[j]&0xff;
-					temp[j]=temp2-avg;
-				}
-				result_stack.addSlice("",(Object)temp);
-			}
-			IJ.showProgress(i,slices);
-		}
-		ImagePlus imp2  = new ImagePlus("Subtracted",result_stack);
+		Object[] temp=exec(imp);
+		ImagePlus imp2 =(ImagePlus)exec(imp)[0];
 		imp2.copyScale(imp);
 		imp2.setOpenAsHyperStack(true);
 		imp2.setDimensions(imp.getNChannels(),imp.getNSlices(),imp.getNFrames());
@@ -86,6 +32,31 @@ public class roi_average_subtract_jru_v1 implements PlugIn {
 		} else {
 			imp2.show();
 		}
+	}
+
+	public Object[] exec(ImagePlus imp){
+		return exec(imp,imp.getRoi());
+	}
+
+	public Object[] exec(ImagePlus imp,Roi roi){
+		ImageStack stack = imp.getStack();
+		int slices=stack.getSize();
+		int width=stack.getWidth();
+		int height=stack.getHeight();
+		ImageStack result_stack=new ImageStack(width,height);
+		boolean[] mask=jstatistics.poly2mask(roi.getPolygon(),width,height);
+		Rectangle r=roi.getPolygon().getBounds();
+		int[] lims={r.x,r.x+r.width,r.y,r.y+r.height};
+		for(int i=0;i<slices;i++){
+			Object temp2=stack.getPixels(i+1);
+			float avg=jstatistics.getstatistic("Avg",temp2,width,height,mask,lims,null);
+			float[] pixels=algutils.convert_arr_float(temp2);
+			float[] temp=new float[width*height];
+			for(int j=0;j<width*height;j++) temp[j]=pixels[j]-avg;
+			result_stack.addSlice("",(Object)temp);
+			IJ.showProgress(i,slices);
+		}
+		return new Object[]{new ImagePlus("Subtracted",result_stack)};
 	}
 
 }

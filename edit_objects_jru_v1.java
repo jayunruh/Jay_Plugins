@@ -13,6 +13,7 @@ import ij.plugin.*;
 import ij.plugin.frame.*;
 import jguis.*;
 import jalgs.jseg.*;
+import jalgs.*;
 
 public class edit_objects_jru_v1 implements PlugIn {
 
@@ -22,13 +23,15 @@ public class edit_objects_jru_v1 implements PlugIn {
 		int slices=imp2.getStack().getSize();
 		if(slices!=2){
 			float[] pix=(float[])imp2.getProcessor().convertToFloat().getPixels();
-			if(!(imp2.getProcessor() instanceof ByteProcessor)){
-				IJ.showMessage("Need thresholded object image");
-				return;
-			}
 			ImageStack dispstack=new ImageStack(width,height);
 			dispstack.addSlice("",pix);
-			dispstack.addSlice("",pix.clone());
+			if(!(imp2.getProcessor() instanceof ByteProcessor)){
+				IJ.showMessage("Assuming indexed objects image");
+				//return;
+				dispstack.addSlice("",algutils.convert_arr_float(findblobs3.threshimage(pix,0.5f)));
+			} else {
+				dispstack.addSlice("",pix.clone());
+			}
 			imp2=new ImagePlus("Outlined Objects",dispstack);
 			imp2.setOpenAsHyperStack(true);
 			imp2.setDimensions(2,1,1);

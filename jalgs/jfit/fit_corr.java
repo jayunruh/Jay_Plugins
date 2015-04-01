@@ -45,7 +45,7 @@ public class fit_corr{
 	public double[] fitac(float[] ac,float[] xvals,boolean skip,boolean base){
 		double[] newxvals=new double[xvals.length];
 		for(int i=0;i<xvals.length;i++){
-			newxvals[i]=(double)xvals[i];
+			newxvals[i]=xvals[i];
 		}
 		return fitac(ac,newxvals,skip,base);
 	}
@@ -106,7 +106,7 @@ public class fit_corr{
 	public double[] fitac_2comp(float[] ac,float[] xvals,boolean skip,boolean base){
 		double[] newxvals=new double[xvals.length];
 		for(int i=0;i<xvals.length;i++){
-			newxvals[i]=(double)xvals[i];
+			newxvals[i]=xvals[i];
 		}
 		return fitac_2comp(ac,newxvals,skip,base);
 	}
@@ -214,7 +214,7 @@ public class fit_corr{
 		// and baseline values
 		double[] temp=new double[xvals.length];
 		for(int i=0;i<xvals.length;i++)
-			temp[i]=(double)xvals[i];
+			temp[i]=xvals[i];
 		return fit_linear_ac(td,ac,temp,skip,base);
 	}
 
@@ -235,13 +235,13 @@ public class fit_corr{
 			double corval=corfunc(tempparams,i,xvals);
 			sumx2+=corval*corval;
 			sumx+=corval;
-			sumy+=(double)ac[i];
-			sumxy+=(double)ac[i]*corval;
+			sumy+=ac[i];
+			sumxy+=ac[i]*corval;
 		}
 		if(base){
-			double divider=(double)(corrlength-starti)*sumx2-sumx*sumx;
+			double divider=(corrlength-starti)*sumx2-sumx*sumx;
 			double baseline=(sumx2*sumy-sumx*sumxy)/divider;
-			double g0=((double)(corrlength-starti)*sumxy-sumx*sumy)/divider;
+			double g0=((corrlength-starti)*sumxy-sumx*sumy)/divider;
 			double[] fitparams={baseline,g0};
 			return fitparams;
 		}else{
@@ -309,7 +309,7 @@ public class fit_corr{
 		// and baseline values
 		double[] temp=new double[xvals.length];
 		for(int i=0;i<xvals.length;i++)
-			temp[i]=(double)xvals[i];
+			temp[i]=xvals[i];
 		return c2(params,ac,temp,skip);
 	}
 
@@ -320,7 +320,7 @@ public class fit_corr{
 			startx=1;
 		}
 		for(int i=startx;i<data.length;i++){
-			double resid=corfunc(params,i,xvals)-(double)data[i];
+			double resid=corfunc(params,i,xvals)-data[i];
 			tempc2+=resid*resid;
 		}
 		return tempc2;
@@ -335,7 +335,7 @@ public class fit_corr{
 		double[] params1={0.0,params[1],params[2]};
 		double[] params2={0.0,params[3],params[4]};
 		for(int i=startx;i<data.length;i++){
-			double resid=corfunc(params1,i,xvals)+corfunc(params2,i,xvals)+params[0]-(double)data[i];
+			double resid=corfunc(params1,i,xvals)+corfunc(params2,i,xvals)+params[0]-data[i];
 			tempc2+=resid*resid;
 		}
 		return tempc2;

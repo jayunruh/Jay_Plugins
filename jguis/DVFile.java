@@ -8,8 +8,9 @@
 
 package jguis;
 
-import java.io.*;
-import java.lang.Float;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 /* DeltaVision File Opener by Fabrice Cordelières  & Sebastien HUART
  Institut Curie
@@ -186,7 +187,8 @@ public class DVFile{
 		dvExtendedHeaderNumInts=sBtosS(fileisbigendian,dvHeader,128);
 		dvExtendedHeaderNumFloats=sBtosS(fileisbigendian,dvHeader,130);
 		int sectionSize=4*(dvExtendedHeaderNumFloats+dvExtendedHeaderNumInts);
-		int sections=dvExtendedHeaderSize/sectionSize;
+		int sections=0;
+		if(sectionSize>0) sections=dvExtendedHeaderSize/sectionSize;
 		if(sections<dvNumOfImages){
 			setError("Bad number of sections in Extended Header, will not parse...");
 			return;
@@ -207,11 +209,13 @@ public class DVFile{
 		String xtdinfos="";
 		StringBuffer sb=new StringBuffer(1024);
 
-		int sections=dvExtendedHeaderFloats.length;
-		setStatus("getting ExtendedHeaderInfos:\nsections:"+sections);
-		for(int i=0;i<sections;i++){
-			for(int j=0;j<dvExtendedHeaderFloats[0].length;j++)
-				sb.append("\nSection["+i+"]_"+dvExtendedHeaderFloatsDesc[j]+":"+dvExtendedHeaderFloats[i][j]);
+		if(dvExtendedHeaderFloats!=null){
+			int sections=dvExtendedHeaderFloats.length;
+    		setStatus("getting ExtendedHeaderInfos:\nsections:"+sections);
+    		for(int i=0;i<sections;i++){
+    			for(int j=0;j<dvExtendedHeaderFloats[0].length;j++)
+    				sb.append("\nSection["+i+"]_"+dvExtendedHeaderFloatsDesc[j]+":"+dvExtendedHeaderFloats[i][j]);
+    		}
 		}
 		xtdinfos=sb.toString();
 		return xtdinfos;

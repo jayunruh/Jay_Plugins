@@ -8,7 +8,7 @@
 
 package jalgs.jseg;
 
-import jalgs.*;
+import jalgs.jstatistics;
 
 public class segment_yeast_trans{
 	public static byte[] segment_image(float[] image,int width,int height,float sobel_thresh,int minarea,int maxarea){

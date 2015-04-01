@@ -8,14 +8,26 @@
 
 package jguis;
 
-import jalgs.*;
-
-import java.awt.*;
-import java.awt.event.*;
-
-import ij.*;
+import ij.ImageListener;
+import ij.ImagePlus;
+import ij.ImageStack;
 import ij.gui.Roi;
 import ij.plugin.frame.RoiManager;
+import jalgs.jstatistics;
+
+import java.awt.Button;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Panel;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class dynamic_profile_panel extends Panel implements ActionListener,MouseMotionListener,ImageListener{
 
@@ -226,7 +238,7 @@ public class dynamic_profile_panel extends Panel implements ActionListener,Mouse
 				 */
 				float[] xvals=new float[newlength];
 				for(int i=0;i<xvals.length;i++)
-					xvals[i]=(float)(i+1);
+					xvals[i]=i+1;
 				for(int i=0;i<spectrum.length;i++){
 					pw.updateSeries(xvals,spectrum[i],i,true);
 				}

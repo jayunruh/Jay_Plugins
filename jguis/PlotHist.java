@@ -8,9 +8,14 @@
 
 package jguis;
 
+import ij.gui.Roi;
+import ij.process.ColorProcessor;
 import jalgs.jdataio;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Rectangle;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -19,11 +24,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
-import ij.*;
-import ij.process.*;
-import ij.gui.*;
-import java.text.*;
+import java.text.DecimalFormat;
 
 public class PlotHist{
 	// this is a class that draws a plot usually associated with a PlotWindow3
@@ -53,7 +54,7 @@ public class PlotHist{
 	public static final int TOP_MARGIN=20;
 	public static final int BOTTOM_MARGIN=50;
 	public static final int shapesize=8;
-	public static final int fontsize=12;
+	public static final int fontsize=14;
 	protected float magnification,magratio;
 	public static final String[] color_names={"black","blue","green","red","magenta","cyan","yellow","orange"};
 	public static final String[] shape_names={"line","square","+","x","triangle"};
@@ -94,6 +95,7 @@ public class PlotHist{
 				counter++;
 			}
 		}
+		npts=new int[]{xValues.length};
 		xLabel=xLabel1;
 		yLabel=yLabel1;
 		xMin=startx;
@@ -140,9 +142,10 @@ public class PlotHist{
 		logy=jdio.readintelint(is)==1;
 		color=jdio.readintelint(is);
 		binSize=jdio.readintelfloat(is);
-		int npts=jdio.readintelint(is);
-		xValues=new float[1][npts];
-		jdio.readintelfloatfile(is,npts,xValues[0]);
+		npts=new int[1];
+		npts[0]=jdio.readintelint(is);
+		xValues=new float[1][npts[0]];
+		jdio.readintelfloatfile(is,npts[0],xValues[0]);
 		updateHistogram();
 		magnification=1.0f;
 		magratio=(float)HEIGHT/(float)WIDTH;
@@ -164,6 +167,14 @@ public class PlotHist{
 			return true;
 		else
 			return false;
+	}
+	
+	public static boolean is_this(InputStream is) throws IOException{
+		jdataio jdio=new jdataio();
+		jdio.readstring(is); // read the label
+		int temp=jdio.readintelint(is); // now the identifier
+		if(temp==3) return true;
+		return false;
 	}
 
 	private float[] findminmax(float[] arr){
@@ -219,31 +230,35 @@ public class PlotHist{
 			float tbinsize=(binSize/histSize)*(xMax-xMin);
 			histogram=new float[newhistsize];
 			for(int i=0;i<xValues[0].length;i++){
-				int dumint1=(int)Math.floor((xValues[0][i]-xMin)/tbinsize);
-				if(dumint1>=0&&dumint1<newhistsize){
-					histogram[dumint1]++;
+				if(!Float.isNaN(xValues[0][i])){
+    				int dumint1=(int)Math.floor((xValues[0][i]-xMin)/tbinsize);
+    				if(dumint1>=0&&dumint1<newhistsize){
+    					histogram[dumint1]++;
+    				}
 				}
 			}
 		}else{
 			// need to implement logarithmic histograming here
 			histogram=new float[newhistsize];
 			if(xMin<=0.0f){
-				logxmin=(float)Math.log((double)findmingt0(xValues[0],xMax));
+				logxmin=(float)Math.log(findmingt0(xValues[0],xMax));
 			}else{
-				logxmin=(float)Math.log((double)xMin);
+				logxmin=(float)Math.log(xMin);
 			}
-			logxmax=(float)Math.log((double)xMax);
+			logxmax=(float)Math.log(xMax);
 			float tbinsize=(binSize/histSize)*(logxmax-logxmin);
 			for(int i=0;i<xValues[0].length;i++){
-				float temp=0.0f;
-				if(xValues[0][i]>0.0f){
-					temp=(float)Math.log(xValues[0][i]);
-				}else{
-					temp=logxmin;
-				}
-				int dumint1=(int)Math.floor((temp-logxmin)/tbinsize);
-				if(dumint1>=0&&dumint1<newhistsize){
-					histogram[dumint1]++;
+				if(!Float.isNaN(xValues[0][i])){
+    				float temp=0.0f;
+    				if(xValues[0][i]>0.0f){
+    					temp=(float)Math.log(xValues[0][i]);
+    				}else{
+    					temp=logxmin;
+    				}
+    				int dumint1=(int)Math.floor((temp-logxmin)/tbinsize);
+    				if(dumint1>=0&&dumint1<newhistsize){
+    					histogram[dumint1]++;
+    				}
 				}
 			}
 		}
@@ -315,35 +330,36 @@ public class PlotHist{
 	public void scalerect(Rectangle rect){
 		float ymag=magnification*magratio/((float)HEIGHT/(float)WIDTH);
 		if(rect!=null){
-			float tempxmin=((float)(rect.x-LEFT_MARGIN*magnification)/(float)(WIDTH*magnification))*(xMax-xMin)+xMin;
-			float tempymax=((float)(HEIGHT*ymag+TOP_MARGIN*ymag-rect.y)/(float)(HEIGHT*ymag))*(yMax-yMin)+yMin;
-			float tempxmax=((float)(rect.x+rect.width-LEFT_MARGIN*magnification)/(float)(WIDTH*magnification))*(xMax-xMin)+xMin;
-			float tempymin=((float)(HEIGHT*ymag+TOP_MARGIN*ymag-rect.y-rect.height)/(float)(HEIGHT*ymag))*(yMax-yMin)+yMin;
+			float tempxmin=((rect.x-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(xMax-xMin)+xMin;
+			float tempymax=((HEIGHT*ymag+TOP_MARGIN*ymag-rect.y)/(HEIGHT*ymag))*(yMax-yMin)+yMin;
+			float tempxmax=((rect.x+rect.width-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(xMax-xMin)+xMin;
+			float tempymin=((HEIGHT*ymag+TOP_MARGIN*ymag-rect.y-rect.height)/(HEIGHT*ymag))*(yMax-yMin)+yMin;
 			if(logx){
-				float templogxmin=((float)(rect.x-LEFT_MARGIN*magnification)/(float)(WIDTH*magnification))*(logxmax-logxmin)+logxmin;
+				float templogxmin=((rect.x-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(logxmax-logxmin)+logxmin;
 				tempxmin=(float)Math.exp(templogxmin);
-				float templogxmax=((float)(rect.x+rect.width-LEFT_MARGIN*magnification)/(float)(WIDTH*magnification))*(logxmax-logxmin)+logxmin;
+				float templogxmax=((rect.x+rect.width-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(logxmax-logxmin)+logxmin;
 				tempxmax=(float)Math.exp(templogxmax);
 			}
 			if(logy){
-				float templogymax=((float)(HEIGHT*ymag+TOP_MARGIN*ymag-rect.y)/(float)(HEIGHT*ymag))*(logymax-logymin)+logymin;
+				float templogymax=((HEIGHT*ymag+TOP_MARGIN*ymag-rect.y)/(HEIGHT*ymag))*(logymax-logymin)+logymin;
 				tempymax=(float)Math.exp(templogymax);
-				float templogymin=((float)(HEIGHT*ymag+TOP_MARGIN*ymag-rect.y-rect.height)/(float)(HEIGHT*ymag))*(logymax-logymin)+logymin;
+				float templogymin=((HEIGHT*ymag+TOP_MARGIN*ymag-rect.y-rect.height)/(HEIGHT*ymag))*(logymax-logymin)+logymin;
 				tempymin=(float)Math.exp(templogymin);
 			}
 			xMin=tempxmin;
 			xMax=tempxmax;
 			yMin=tempymin;
 			yMax=tempymax;
+			updateHistogram();
 		}
 	}
 
 	public int[] getrectindices(Rectangle rect){
 		if(rect!=null){
-			float tempxmin=((float)(rect.x-LEFT_MARGIN*magnification)/(float)(WIDTH*magnification))*(xMax-xMin)+xMin;
-			float tempxmax=((float)(rect.x+rect.width-LEFT_MARGIN*magnification)/(float)(WIDTH*magnification))*(xMax-xMin)+xMin;
+			float tempxmin=((rect.x-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(xMax-xMin)+xMin;
+			float tempxmax=((rect.x+rect.width-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(xMax-xMin)+xMin;
 			if(logx){
-				float templogxmin=((float)(rect.x-LEFT_MARGIN*magnification)/(float)(WIDTH*magnification))*(logxmax-logxmin)+logxmin;
+				float templogxmin=((rect.x-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(logxmax-logxmin)+logxmin;
 				tempxmin=(float)Math.exp(templogxmin);
 			}
 			int[] temp=new int[xValues.length];
@@ -360,6 +376,52 @@ public class PlotHist{
 		}else{
 			return null;
 		}
+	}
+	
+	public float getPlotCoords(int x){
+		float tempx=((x-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(xMax-xMin)+xMin;
+		if(logx){
+			float templogx=((x-LEFT_MARGIN*magnification)/(WIDTH*magnification))*(logxmax-logxmin)+logxmin;
+			tempx=(float)Math.exp(templogx);
+		}
+		return tempx;
+	}
+	
+	public int getPlotPosition(float x){
+		// this maps a value to the image
+		float posx=(int)((x-xMin)/(xMax-xMin)*WIDTH);
+		if(logx){
+			// assume that logxmin has already been updated
+			float temp=0.0f;
+			if(x>0.0f)
+				temp=(float)Math.log(x);
+			else
+				temp=logxmin;
+			posx=((temp-logxmin)/(logxmax-logxmin)*WIDTH);
+		}
+		posx*=magnification;
+		posx+=LEFT_MARGIN*magnification;
+		return (int)posx;
+	}
+	
+	public float get_score(Roi roi){
+		if(roi!=null){
+			int counter=0;
+			Rectangle r=roi.getBounds();
+			int nvalid=npts[0];
+			for(int i=0;i<npts[0];i++){
+				if(xValues[0][i]!=Float.NaN){
+    				int location=getPlotPosition(xValues[0][i]);
+    				if(location>=r.x && location<(r.x+r.width)){
+    					counter++;
+    				}
+				} else {
+					nvalid--;
+				}
+			}
+			return (float)counter/(float)nvalid;
+		}
+		return 0.0f;
 	}
 
 	public void updateSeries(float[] xValues1,boolean rescale){
@@ -420,19 +482,19 @@ public class PlotHist{
 		logymax=0;
 		if(logy){
 			if(yMin<=0.0f){
-				logymin=(float)Math.log((double)findmingt0(histogram,yMax));
+				logymin=(float)Math.log(findmingt0(histogram,yMax));
 			}else{
-				logymin=(float)Math.log((double)yMin);
+				logymin=(float)Math.log(yMin);
 			}
-			logymax=(float)Math.log((double)yMax);
-			logyscale=(float)newheight/(logymax-logymin);
+			logymax=(float)Math.log(yMax);
+			logyscale=newheight/(logymax-logymin);
 		}
 		// IJ.showMessage("testdraw1");
 
 		drawAxisLabels(pr);
 		pr.setClipRect(frame.x,frame.y,frame.width,frame.height);
-		xScale=(float)newwidth/(xMax-xMin);
-		yScale=(float)newheight/(yMax-yMin);
+		xScale=newwidth/(xMax-xMin);
+		yScale=newheight/(yMax-yMin);
 
 		// IJ.showMessage("testdraw2");
 		Color fillcolor=getColor(color);
@@ -446,8 +508,8 @@ public class PlotHist{
 					temp2=frame.height;
 				int ystart=newtopmargin+frame.height-temp2;
 				int yend=newtopmargin+frame.height;
-				int xstart=(int)((float)i*binwidth+(float)frame.x);
-				int xend=(int)((float)i*binwidth+binwidth+(float)frame.x);
+				int xstart=(int)(i*binwidth+frame.x);
+				int xend=(int)(i*binwidth+binwidth+frame.x);
 				// first fill the rectangle
 				pr.setColor(fillcolor);
 				pr.fillRect(xstart,ystart,xend-xstart,yend-ystart);
@@ -460,14 +522,14 @@ public class PlotHist{
 			for(int i=0;i<histogram.length;i++){
 				float ytemp;
 				if(histogram[i]>0.0f){
-					ytemp=(float)Math.log((double)histogram[i]);
+					ytemp=(float)Math.log(histogram[i]);
 				}else{
 					ytemp=logymin;
 				}
 				int ystart=newtopmargin+frame.height-(int)((ytemp-logymin)*logyscale);
 				int yend=newtopmargin+frame.height;
-				int xstart=(int)((float)i*binwidth+(float)frame.x);
-				int xend=(int)((float)i*binwidth+binwidth+(float)frame.x);
+				int xstart=(int)(i*binwidth+frame.x);
+				int xend=(int)(i*binwidth+binwidth+frame.x);
 				// first fill the rectangle
 				pr.setColor(fillcolor);
 				pr.fillRect(xstart,ystart,xend-xstart,yend-ystart);
@@ -499,16 +561,16 @@ public class PlotHist{
 		float[] yticklabels=new float[4];
 		for(int i=0;i<4;i++){
 			if(logx){
-				float tempx=logxmin+((float)i/3.0f)*(logxmax-logxmin);
-				xticklabels[i]=(float)Math.exp((double)tempx);
+				float tempx=logxmin+(i/3.0f)*(logxmax-logxmin);
+				xticklabels[i]=(float)Math.exp(tempx);
 			}else{
-				xticklabels[i]=xMin+((float)i/3.0f)*(xMax-xMin);
+				xticklabels[i]=xMin+(i/3.0f)*(xMax-xMin);
 			}
 			if(logy){
-				float tempy=logymin+((float)i/3.0f)*(logymax-logymin);
-				yticklabels[i]=(float)Math.exp((double)tempy);
+				float tempy=logymin+(i/3.0f)*(logymax-logymin);
+				yticklabels[i]=(float)Math.exp(tempy);
 			}else{
-				yticklabels[i]=yMin+((float)i/3.0f)*(yMax-yMin);
+				yticklabels[i]=yMin+(i/3.0f)*(yMax-yMin);
 			}
 		}
 
@@ -520,45 +582,45 @@ public class PlotHist{
 
 		// draw the y axis labels
 
-		String s=jutils.formatted_string((double)yticklabels[0]);
+		String s=jutils.formatted_string(yticklabels[0]);
 		pr.drawString(s,newleftmargin-pr.getStringWidth(s)-newticklength-2,newtopmargin+newheight+fm.getDescent());
-		s=jutils.formatted_string((double)yticklabels[1]);
-		pr.drawString(s,newleftmargin-pr.getStringWidth(s)-newticklength-2,newtopmargin+(int)((2*newheight)/3)+fontheight/2);
-		s=jutils.formatted_string((double)yticklabels[2]);
-		pr.drawString(s,newleftmargin-pr.getStringWidth(s)-newticklength-2,newtopmargin+(int)(newheight/3)+fontheight/2);
-		s=jutils.formatted_string((double)yticklabels[3]);
+		s=jutils.formatted_string(yticklabels[1]);
+		pr.drawString(s,newleftmargin-pr.getStringWidth(s)-newticklength-2,newtopmargin+(2*newheight)/3+fontheight/2);
+		s=jutils.formatted_string(yticklabels[2]);
+		pr.drawString(s,newleftmargin-pr.getStringWidth(s)-newticklength-2,newtopmargin+newheight/3+fontheight/2);
+		s=jutils.formatted_string(yticklabels[3]);
 		pr.drawString(s,newleftmargin-pr.getStringWidth(s)-newticklength-2,newtopmargin+fontheight/2);
 
 		// draw the x axis labels
 		int y=newtopmargin+newheight+fontheight+newticklength+4;
-		s=jutils.formatted_string((double)xticklabels[0]);
+		s=jutils.formatted_string(xticklabels[0]);
 		pr.drawString(s,newleftmargin-8,y);
-		s=jutils.formatted_string((double)xticklabels[1]);
-		pr.drawString(s,newleftmargin+(int)(newwidth/3-pr.getStringWidth(s)/2),y);
-		s=jutils.formatted_string((double)xticklabels[2]);
-		pr.drawString(s,newleftmargin+(int)((2*newwidth)/3-pr.getStringWidth(s)/2),y);
-		s=jutils.formatted_string((double)xticklabels[3]);
+		s=jutils.formatted_string(xticklabels[1]);
+		pr.drawString(s,newleftmargin+newwidth/3-pr.getStringWidth(s)/2,y);
+		s=jutils.formatted_string(xticklabels[2]);
+		pr.drawString(s,newleftmargin+(2*newwidth)/3-pr.getStringWidth(s)/2,y);
+		s=jutils.formatted_string(xticklabels[3]);
 		pr.drawString(s,newleftmargin+newwidth-pr.getStringWidth(s)+8,y);
 
 		// now draw the axis labels
 		pr.drawString(xLabel,newleftmargin+(newwidth-pr.getStringWidth(xLabel))/2,newtopmargin+newheight+fm.getAscent()+newbottommargin/2);
-		pr.drawVerticalString(yLabel,newleftmargin-(4*newleftmargin/5),newtopmargin+(int)(newheight/2));
+		pr.drawVerticalString(yLabel,newleftmargin-(4*newleftmargin/5),newtopmargin+newheight/2);
 		// now draw the tick marks and grid lines
 		pr.drawRect(newleftmargin,newtopmargin,newwidth,newheight);
 		pr.setColor(gridColor);
-		pr.drawLine(newleftmargin+(int)(newwidth/3),newtopmargin,newleftmargin+(int)(newwidth/3),newtopmargin+newheight);
-		pr.drawLine(newleftmargin+(int)((2*newwidth)/3),newtopmargin,newleftmargin+(int)((2*newwidth)/3),newtopmargin+newheight);
-		pr.drawLine(newleftmargin,newtopmargin+(int)(newheight/3),newleftmargin+newwidth,newtopmargin+(int)(newheight/3));
-		pr.drawLine(newleftmargin,newtopmargin+(int)((2*newheight)/3),newleftmargin+newwidth,newtopmargin+(int)((2*newheight)/3));
+		pr.drawLine(newleftmargin+newwidth/3,newtopmargin,newleftmargin+newwidth/3,newtopmargin+newheight);
+		pr.drawLine(newleftmargin+(2*newwidth)/3,newtopmargin,newleftmargin+(2*newwidth)/3,newtopmargin+newheight);
+		pr.drawLine(newleftmargin,newtopmargin+newheight/3,newleftmargin+newwidth,newtopmargin+newheight/3);
+		pr.drawLine(newleftmargin,newtopmargin+(2*newheight)/3,newleftmargin+newwidth,newtopmargin+(2*newheight)/3);
 		pr.setColor(Color.black);
 		pr.drawLine(newleftmargin,newtopmargin,newleftmargin-newticklength,newtopmargin);
-		pr.drawLine(newleftmargin,newtopmargin+(int)(newheight/3),newleftmargin-newticklength,newtopmargin+(int)(newheight/3));
-		pr.drawLine(newleftmargin,newtopmargin+(int)((2*newheight)/3),newleftmargin-newticklength,newtopmargin+(int)((2*newheight)/3));
+		pr.drawLine(newleftmargin,newtopmargin+newheight/3,newleftmargin-newticklength,newtopmargin+newheight/3);
+		pr.drawLine(newleftmargin,newtopmargin+(2*newheight)/3,newleftmargin-newticklength,newtopmargin+(2*newheight)/3);
 		pr.drawLine(newleftmargin,newtopmargin+newheight,newleftmargin-newticklength,newtopmargin+newheight);
 
 		pr.drawLine(newleftmargin,newtopmargin+newheight,newleftmargin,newtopmargin+newheight+newticklength);
-		pr.drawLine(newleftmargin+(int)(newwidth/3),newtopmargin+newheight,newleftmargin+(int)(newwidth/3),newtopmargin+newheight+newticklength);
-		pr.drawLine(newleftmargin+(int)((2*newwidth)/3),newtopmargin+newheight,newleftmargin+(int)((2*newwidth)/3),newtopmargin+newheight+newticklength);
+		pr.drawLine(newleftmargin+newwidth/3,newtopmargin+newheight,newleftmargin+newwidth/3,newtopmargin+newheight+newticklength);
+		pr.drawLine(newleftmargin+(2*newwidth)/3,newtopmargin+newheight,newleftmargin+(2*newwidth)/3,newtopmargin+newheight+newticklength);
 		pr.drawLine(newleftmargin+newwidth,newtopmargin+newheight,newleftmargin+newwidth,newtopmargin+newheight+newticklength);
 	}
 
@@ -625,13 +687,13 @@ public class PlotHist{
 		float tbinsize=(binSize/histSize)*(xMax-xMin);
 		if(!logx){
 			for(int i=0;i<histogram.length;i++){
-				temp[0][i]=xMin+tbinsize*(float)i;
+				temp[0][i]=xMin+tbinsize*i;
 				temp[1][i]=histogram[i];
 			}
 		}else{
 			for(int i=0;i<histogram.length;i++){
 				temp[0][i]=logxmin+((float)i/(float)(histogram.length-1))*(logxmax-logxmin);
-				temp[0][i]=(float)Math.exp((double)temp[0][i]);
+				temp[0][i]=(float)Math.exp(temp[0][i]);
 				temp[1][i]=histogram[i];
 			}
 		}
@@ -645,6 +707,11 @@ public class PlotHist{
 	
 	public void saveAsPS(String path){
 		Plotter pr=new PSPlotter(getWidth(),getHeight(),path);
+		drawPlot(pr);
+	}
+	
+	public void saveAsPDF(String path){
+		Plotter pr=new PDFPlotter(getWidth(),getHeight(),path);
 		drawPlot(pr);
 	}
 

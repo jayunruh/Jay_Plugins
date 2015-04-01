@@ -52,7 +52,7 @@ public class autocorr{
 		}
 		fft.realfft(real,im,true);
 		for(int j=0;j<length;j++){
-			real[j]/=(float)(avg*avg)*(float)length;
+			real[j]/=(float)(avg*avg)*length;
 			real[j]-=1.0f;
 		}
 		return real;
@@ -75,7 +75,7 @@ public class autocorr{
 		}
 		fft.realfft(real,im,true);
 		for(int j=0;j<length;j++){
-			real[j]/=(float)(avg*avg)*(float)length;
+			real[j]/=(float)(avg*avg)*length;
 			real[j]-=1.0f;
 			if(dobrightcorr){
 				real[j]*=(float)avg;
@@ -111,7 +111,7 @@ public class autocorr{
 		}
 		fft.realfft(real,im,true);
 		for(int j=0;j<length;j++){
-			real[j]/=(float)(avg*avg)*(float)length;
+			real[j]/=(float)(avg*avg)*length;
 			real[j]-=1.0f;
 			real[j]*=(float)length/(float)data.length;
 			if(dobrightcorr){
@@ -137,10 +137,10 @@ public class autocorr{
 					temp2-=length;
 				temp3+=(double)data1[j]*(double)data1[temp2];
 			}
-			temp[i]=(float)(temp3/(double)length);
-			avg1+=(double)data1[i];
+			temp[i]=(float)(temp3/length);
+			avg1+=data1[i];
 		}
-		avg1/=(double)length;
+		avg1/=length;
 		for(int i=0;i<length;i++){
 			temp[i]/=(float)(avg1*avg1);
 			temp[i]-=1.0f;

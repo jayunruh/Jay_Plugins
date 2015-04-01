@@ -66,7 +66,9 @@ public class create_hs_profile_jru_v1 implements PlugIn {
 		if(zprof){
 			for(int i=0;i<channels;i++){
 				for(int j=0;j<slices;j++){
-					float[] proj=jutils.get3DProjTStat(stack,j,i,frames,slices,channels,projstat);
+					Object proj=null;
+					if(frames==1) proj=jutils.get3DSlice(stack,0,j,i,frames,slices,channels);
+					else proj=jutils.get3DProjTStat(stack,j,i,frames,slices,channels,projstat);
 					if(mask==null) spectral_data[i][j]=js.getstatistic(statistic,proj,width,height,r,null);
 					else spectral_data[i][j]=js.getstatistic(statistic,proj,width,height,mask,null);
 				}
@@ -74,13 +76,15 @@ public class create_hs_profile_jru_v1 implements PlugIn {
 		} else {
 			for(int i=0;i<channels;i++){
 				for(int j=0;j<frames;j++){
-					float[] proj=jutils.get3DProjZStat(stack,j,i,frames,slices,channels,projstat);
+					Object proj=null;
+					if(slices==1) proj=jutils.get3DSlice(stack,j,0,i,frames,slices,channels);
+					else proj=jutils.get3DProjZStat(stack,j,i,frames,slices,channels,projstat);
 					if(mask==null) spectral_data[i][j]=js.getstatistic(statistic,proj,width,height,r,null);
 					else spectral_data[i][j]=js.getstatistic(statistic,proj,width,height,mask,null);
 				}
 			}
 		}
-		if(slices==1){
+		if(slices==1 && zprof){
 			StringBuffer sb=new StringBuffer();
 			sb.append(statistic+" ");
 			sb.append("ch1="+spectral_data[0][0]);

@@ -9,7 +9,8 @@
 package jguis;
 
 import ij.gui.Roi;
-import ij.process.*;
+import ij.process.Blitter;
+import ij.process.ColorProcessor;
 
 import java.awt.Color;
 import java.awt.Font;
@@ -81,8 +82,8 @@ public class CPPlotter extends Plotter{
 		cp2.drawString(string,0,ascent);
 		ColorProcessor cp3=(ColorProcessor)cp2.rotateLeft();
 		mask=(int[])cp3.getPixels();
-		int newx=x-(int)(height/2);
-		int newy=y-(int)(width/2);
+		int newx=x-height/2;
+		int newy=y-width/2;
 		int[] pixels=(int[])cp.getPixels();
 		int owidth=cp.getWidth();
 		int oheight=cp.getHeight();

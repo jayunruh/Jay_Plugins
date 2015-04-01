@@ -8,7 +8,7 @@
 
 package jalgs;
 
-import java.awt.*;
+import java.awt.Polygon;
 
 public class profiler{
 	// here we have static methods to generate line and polyline thick profiles
@@ -64,13 +64,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=(float)j-((float)linewidth)/2.0f;
+					distance=j-(linewidth)/2.0f;
 					distance*=tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=(float)(tempoutsign*j);
+						distance=tempoutsign*j;
 					}else{
-						distance=(float)(-tempoutsign*j);
+						distance=-tempoutsign*j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -92,13 +92,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=(float)j-((float)linewidth)/2.0f;
+					distance=j-(linewidth)/2.0f;
 					distance*=tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=(float)(tempoutsign*j);
+						distance=tempoutsign*j;
 					}else{
-						distance=(float)(-tempoutsign*j);
+						distance=-tempoutsign*j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -127,13 +127,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=(float)j-((float)linewidth)/2.0f;
+					distance=j-(linewidth)/2.0f;
 					distance*=tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=(float)(tempoutsign*j);
+						distance=tempoutsign*j;
 					}else{
-						distance=(float)(-tempoutsign*j);
+						distance=-tempoutsign*j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -157,13 +157,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=(float)j-((float)linewidth)/2.0f;
+					distance=j-(linewidth)/2.0f;
 					distance*=tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=(float)(tempoutsign*j);
+						distance=tempoutsign*j;
 					}else{
-						distance=(float)(-tempoutsign*j);
+						distance=-tempoutsign*j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -192,13 +192,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=(float)j-((float)linewidth)/2.0f;
+					distance=j-(linewidth)/2.0f;
 					distance*=tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=(float)(tempoutsign*j);
+						distance=tempoutsign*j;
 					}else{
-						distance=(float)(-tempoutsign*j);
+						distance=-tempoutsign*j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -206,10 +206,10 @@ public class profiler{
 				templength=tempfloat.length;
 				if(templength==1) templength=2;
 				for(int k=0;k<templength-1;k++){
-					profile[counter+k]+=tempfloat[k]/(float)linewidth;
+					profile[counter+k]+=tempfloat[k]/linewidth;
 				}
 				if(i==(nlines-1)&&!connected && tempfloat.length>1){
-					profile[counter+templength-1]+=tempfloat[templength-1]/(float)linewidth;
+					profile[counter+templength-1]+=tempfloat[templength-1]/linewidth;
 				}
 			}
 			counter+=(templength-1);
@@ -221,20 +221,20 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=(float)j-((float)linewidth)/2.0f;
+					distance=j-(linewidth)/2.0f;
 					distance*=tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=(float)(tempoutsign*j);
+						distance=tempoutsign*j;
 					}else{
-						distance=(float)(-tempoutsign*j);
+						distance=-tempoutsign*j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
 				float[] tempfloat=getLineProfile(newcoords,pixels,width,height);
 				templength=tempfloat.length;
 				for(int k=0;k<templength-1;k++){
-					profile[counter+k]+=tempfloat[k]/(float)linewidth;
+					profile[counter+k]+=tempfloat[k]/linewidth;
 				}
 			}
 		}
@@ -253,13 +253,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=(float)j-((float)linewidth)/2.0f;
+					distance=j-(linewidth)/2.0f;
 					distance*=tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=(float)(tempoutsign*j);
+						distance=tempoutsign*j;
 					}else{
-						distance=(float)(-tempoutsign*j);
+						distance=-tempoutsign*j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -268,10 +268,10 @@ public class profiler{
 				templength=tempfloat.length;
 				if(templength==1) templength=2;
 				for(int k=0;k<templength-1;k++){
-					profile[counter+k]+=tempfloat[k]/(float)linewidth;
+					profile[counter+k]+=tempfloat[k]/linewidth;
 				}
 				if(i==(nlines-1)&&!connected && tempfloat.length>1){
-					profile[counter+templength-1]+=tempfloat[templength-1]/(float)linewidth;
+					profile[counter+templength-1]+=tempfloat[templength-1]/linewidth;
 				}
 			}
 			counter+=(templength-1);
@@ -283,13 +283,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=(float)j-((float)linewidth)/2.0f;
+					distance=j-(linewidth)/2.0f;
 					distance*=tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=(float)(tempoutsign*j);
+						distance=tempoutsign*j;
 					}else{
-						distance=(float)(-tempoutsign*j);
+						distance=-tempoutsign*j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -297,7 +297,7 @@ public class profiler{
 				float[] tempfloat=get3DLineProfile(newcoords3D,image,width,height,zratio);
 				templength=tempfloat.length;
 				for(int k=0;k<templength-1;k++){
-					profile[counter+k]+=tempfloat[k]/(float)linewidth;
+					profile[counter+k]+=tempfloat[k]/linewidth;
 				}
 			}
 		}
@@ -305,7 +305,7 @@ public class profiler{
 	}
 	
 	public static float[] get3DThickProfile(Object[] image,int width,int height,float[] xvals,float[] yvals,float[] zvals,boolean connected,int linewidth,int or_index,float zratio){
-		float zoff=0.5f*(float)linewidth;
+		float zoff=0.5f*linewidth;
 		float[] tempzvals=new float[zvals.length];
 		for(int i=0;i<zvals.length;i++) tempzvals[i]=zvals[i]-zoff;
 		float[] profile=get3DProfile(image,width,height,xvals,yvals,tempzvals,connected,linewidth,or_index,zratio);
@@ -314,12 +314,12 @@ public class profiler{
 			float[] tempprofile=get3DProfile(image,width,height,xvals,yvals,tempzvals,connected,linewidth,or_index,zratio);
 			for(int j=0;j<profile.length;j++) profile[j]+=tempprofile[j];
 		}
-		for(int i=0;i<profile.length;i++) profile[i]/=(float)linewidth;
+		for(int i=0;i<profile.length;i++) profile[i]/=linewidth;
 		return profile;
 	}
 	
 	public static float[][] get3DThickStraightened(Object[] image,int width,int height,float[] xvals,float[] yvals,float[] zvals,boolean connected,int linewidth,int or_index,float zratio){
-		float zoff=0.5f*(float)linewidth;
+		float zoff=0.5f*linewidth;
 		float[] tempzvals=new float[zvals.length];
 		for(int i=0;i<zvals.length;i++) tempzvals[i]=zvals[i]-zoff;
 		float[][] profile=new float[linewidth][];
@@ -330,6 +330,32 @@ public class profiler{
 		}
 		return profile;
 	}
+	
+	public static float[] get2DLineProfile(float[] coords,Object image,int outsign,int or_index,int linewidth,int width,int height){
+		float[] profile=null;
+		for(int j=0;j<linewidth;j++){
+			float distance=0.0f;
+			if(or_index==0){
+				distance=j-(linewidth)/2.0f;
+				distance*=outsign;
+			}else{
+				if(or_index==1){
+					distance=outsign*j;
+				}else{
+					distance=-outsign*j;
+				}
+			}
+			float[] newcoords=getParallelLine(coords,distance);
+			float[] tempfloat=getLineProfile(newcoords,image,width,height);
+			if(profile==null) profile=new float[tempfloat.length];
+			int profsize=tempfloat.length;
+			if(tempfloat.length>profile.length) profsize=profile.length; //this should never happen
+			for(int k=0;k<profsize;k++){
+				profile[k]+=tempfloat[k]/linewidth;
+			}
+		}
+		return profile;
+	}
 
 	public static float[] getLineProfile(float[] coords,Object image,int width,int height){
 		int length=(int)get2DLength(coords);
@@ -337,7 +363,7 @@ public class profiler{
 		float xinc,yinc;
 		if(coords[2]!=coords[0]&&coords[3]!=coords[1]){
 			float slope=(coords[3]-coords[1])/(coords[2]-coords[0]);
-			xinc=(float)Math.sqrt(1.0/(1.0+(double)(slope*slope)));
+			xinc=(float)Math.sqrt(1.0/(1.0+slope*slope));
 			if(coords[2]<coords[0]&&xinc>0.0f){
 				xinc=-xinc;
 			}
@@ -372,9 +398,9 @@ public class profiler{
 		float flength=get3DLength(coords);
 		int length=(int)flength;
 		float[] line=new float[length];
-		float xinc=(coords[3]-coords[0])/(float)length;
-		float yinc=(coords[4]-coords[1])/(float)length;
-		float zinc=(coords[5]-coords[2])/(float)length;
+		float xinc=(coords[3]-coords[0])/length;
+		float yinc=(coords[4]-coords[1])/length;
+		float zinc=(coords[5]-coords[2])/length;
 		zinc/=zratio;
 		float x=coords[0];
 		float y=coords[1];
@@ -403,7 +429,7 @@ public class profiler{
 			float[] tempcoords={coords[0],coords[1],0.5f*(coords[0]+coords[2]),0.5f*(coords[1]+coords[3])};
 			// want to find the outsign in the middle of the line
 			float[] pluscoords=getParallelLine(tempcoords,1.0f);
-			if(polyroi.contains((double)pluscoords[2],(double)pluscoords[3])){
+			if(polyroi.contains(pluscoords[2],pluscoords[3])){
 				return -1;
 			}
 		}
@@ -463,7 +489,7 @@ public class profiler{
 		if(coords[2]!=coords[0]&&coords[3]!=coords[1]){
 			float slope=(coords[3]-coords[1])/(coords[2]-coords[0]);
 			float newslope=-1.0f/slope;
-			xinc=(float)Math.sqrt(1.0/(1.0+(double)(newslope*newslope)));
+			xinc=(float)Math.sqrt(1.0/(1.0+newslope*newslope));
 			yinc=newslope*xinc;
 		}else{
 			if(coords[2]==coords[0]){

@@ -8,16 +8,32 @@
 
 package jguis;
 
-import java.awt.*;
-import java.awt.event.*;
-import java.io.*;
-import java.awt.datatransfer.*;
-import ij.*;
-import ij.gui.*;
-import ij.process.*;
+import ij.IJ;
+import ij.ImagePlus;
+import ij.gui.GenericDialog;
+import ij.gui.ImageWindow;
+import ij.measure.Calibration;
+import ij.process.ColorProcessor;
 import ij.text.TextWindow;
 import ij.util.Tools;
-import ij.measure.*;
+
+import java.awt.Button;
+import java.awt.FileDialog;
+import java.awt.FlowLayout;
+import java.awt.Panel;
+import java.awt.Rectangle;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.ClipboardOwner;
+import java.awt.datatransfer.StringSelection;
+import java.awt.datatransfer.Transferable;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
 
 /**
  * This class is an extended ImageWindow that displays line graphs. This class
@@ -336,12 +352,14 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 		int tempnseries=p3.getNSeries();
 		float[][] tempxvals=p3.getXValues();
 		float[][] tempyvals=p3.getYValues();
+		String delim="\t";
+		if(fname.endsWith(".csv")) delim=",";
 		for(int i=0;i<p3.getmaxpts();i++){
 			StringBuffer sb=new StringBuffer();
 			for(int j=0;j<tempnseries;j++){
-				sb.append(""+tempxvals[j][i]+"\t"+tempyvals[j][i]);
+				sb.append(""+tempxvals[j][i]+delim+tempyvals[j][i]);
 				if(j<(tempnseries-1)){
-					sb.append("\t");
+					sb.append(delim);
 				}
 			}
 			pw.println(sb.toString());
@@ -415,6 +433,10 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 		fd.dispose();
 		if(name==null||name==""||directory==null||directory=="")
 			return;
+		if(!name.endsWith(".pw2")){
+			if(name.endsWith(".pw")) name+="2";
+			else name+=".pw2";
+		}
 		imp.setTitle(name);
 		saveAsObject(directory+File.separator+name);
 	}

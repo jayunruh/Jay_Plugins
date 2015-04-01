@@ -93,7 +93,17 @@ public class float_3D_project_jru_v1 implements PlugIn {
 				cal2.pixelWidth=cal2.pixelHeight;
 				cal2.pixelHeight=1.0;
 			}
-			imp2.show();
+			if(imp2.getNChannels()>1){
+				CompositeImage ci=new CompositeImage(imp2);
+				if(imp.isComposite()){
+					LUT[] lut=((CompositeImage)imp).getLuts();
+					ci.setLuts(lut);
+					ci.resetDisplayRanges();
+					ci.show();
+				}
+			} else {
+				imp2.show();
+			}
 		}
 		else{
 			float xmin=(float)(-cal.xOrigin*cal.pixelWidth);

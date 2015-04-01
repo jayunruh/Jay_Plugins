@@ -50,7 +50,7 @@ public class fit_custom_function_jru_v1 implements PlugIn, NLLSfitinterface_v2, 
 		iterations=0;
 		checkc2=false;
 
-		double[] stats=new double[2];
+		double[] stats=new double[3];
 		tempx=new float[length]; tempdata=new float[length];
 		System.arraycopy(xvals[0],0,tempx,0,length);
 		System.arraycopy(yvals[0],0,tempdata,0,length);
@@ -79,6 +79,7 @@ public class fit_custom_function_jru_v1 implements PlugIn, NLLSfitinterface_v2, 
 		for(int i=0;i<10;i++){
 			IJ.log("P"+(i+1)+" = "+(float)params[i]+" fixed = "+fixes[i]);
 		}
+		IJ.log("AIC = "+(float)stats[2]);
 		//IJ.log("hits = "+hitcounter);
 		set_options(params,fixes);
 	}

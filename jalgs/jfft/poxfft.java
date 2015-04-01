@@ -102,7 +102,7 @@ public class poxfft extends po4fft{
 		rt=new float[kernelsize];
 		imt=new float[kernelsize];
 		// do the initial five point transforms
-		int k2size=(int)(0.5*(double)kernelsize);
+		int k2size=(int)(0.5*kernelsize);
 		if(!inverse){
 			for(int i=0;i<length;i+=kernelsize){
 				for(int j=0;j<kernelsize;j++){
@@ -249,8 +249,8 @@ public class poxfft extends po4fft{
 		c=new float[kernelsize];
 		s=new float[kernelsize];
 		for(int i=0;i<kernelsize;i++){
-			c[i]=(float)Math.cos(2.0*Math.PI*(double)i/(double)kernelsize);
-			s[i]=(float)Math.sin(2.0*Math.PI*(double)i/(double)kernelsize);
+			c[i]=(float)Math.cos(2.0*Math.PI*i/kernelsize);
+			s[i]=(float)Math.sin(2.0*Math.PI*i/kernelsize);
 		}
 	}
 

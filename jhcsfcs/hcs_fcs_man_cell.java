@@ -8,7 +8,7 @@
 
 package jhcsfcs;
 
-import jalgs.*;
+import jalgs.jsort;
 
 public class hcs_fcs_man_cell extends hcs_fcs_cell{
 
@@ -18,7 +18,7 @@ public class hcs_fcs_man_cell extends hcs_fcs_cell{
 		float[] runnumber=new float[ncurves];
 		// first sort by run number
 		for(int i=0;i<ncurves;i++){
-			runnumber[i]=(float)((new parse_filenames()).get_raw_fcs_run(curvenames1[i]));
+			runnumber[i]=((new parse_filenames()).get_raw_fcs_run(curvenames1[i]));
 		}
 		(new jsort()).sort_string_by(curvenames1,runnumber);
 		// find out how many runs there are

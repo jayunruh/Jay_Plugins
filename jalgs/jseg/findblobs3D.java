@@ -8,11 +8,10 @@
 
 package jalgs.jseg;
 
-import jalgs.*;
+import jalgs.algutils;
+import jalgs.jstatistics;
 
-import java.util.*;
 import java.awt.Polygon;
-import java.awt.Rectangle;
 
 public class findblobs3D{
 	// this class finds contiguous blobs using a flood fill mechanism
@@ -31,6 +30,10 @@ public class findblobs3D{
 		depth=depth1;
 		fb=new findblobs3(width,height);
 		nobjects=0;
+	}
+	
+	public void set_objects(float[][] objects){
+		nobjects=(int)maxarray(objects);
 	}
 
 	public float[][] dofindblobs(byte[][] data1){
@@ -80,9 +83,14 @@ public class findblobs3D{
 		nobjects=id;
 		return objects;
 	}
+	
+	public byte[][] tobinary(float[][] objects){
+		return tobinary(objects,false);
+	}
 
 	public byte[][] tobinary(float[][] objects,boolean separate){
 		byte[][] out=new byte[depth][width*height];
+		if(separate) separateobjects(objects);
 		for(int i=0;i<depth;i++){
 			for(int j=0;j<width*height;j++)
 				if(objects[i][j]>0.0f)
@@ -123,8 +131,33 @@ public class findblobs3D{
 		if(renumber) renumber_objects(objects);
 	}
 	
+	public void separateobjects(float[][] objects){
+		//here non-zero pixels neighboring another object are turned black
+		float[][] cloned=algutils.clone_multidim_array(objects);
+		for(int i=1;i<(depth-1);i++){
+			for(int j=1;j<(height-1);j++){
+				for(int k=1;k<(width-1);k++){
+					float val=cloned[i][k+j*width];
+					if(val>0.0f){
+						float[] neighbors=getNeighbors(cloned,k,j,i);
+						for(int l=0;l<neighbors.length;l++){
+							if(neighbors[l]>0.0f && neighbors[l]!=val){
+								objects[i][j*width+k]=0.0f;
+								break;
+							}
+						}
+					}
+				}
+			}
+		}
+		/*byte[][] temp=tobinary(objects,false);
+		float[][] temp2=dofindblobs(temp);
+		copy_objects(temp2,objects);*/
+	}
+	
 	public void erodeobjects(float[][] objects,int threshold){
 		//pixels neighbored in 3D by space or another object are deleted
+		//objects are allowed to separate (become multiple new objects)
 		float[][] cloned=algutils.clone_multidim_array(objects);
 		for(int i=1;i<(depth-1);i++){
 			for(int j=1;j<(height-1);j++){
@@ -134,6 +167,83 @@ public class findblobs3D{
 					int count=0;
 					for(int l=0;l<neighbors.length;l++) if(neighbors[l]!=val) count++;
 					if(count>threshold) objects[i][j*width+k]=0.0f;
+				}
+			}
+		}
+		byte[][] temp=tobinary(objects,false);
+		float[][] temp2=dofindblobs(temp);
+		copy_objects(temp2,objects);
+	}
+	
+	public void erodeobjects2(float[][] objects,int threshold){
+		//pixels neighbored in 3D by space or another object are deleted
+		//objects are not allowed to separate
+		//they are not renumbered either
+		float[][] cloned=algutils.clone_multidim_array(objects);
+		for(int i=1;i<(depth-1);i++){
+			for(int j=1;j<(height-1);j++){
+				for(int k=1;k<(width-1);k++){
+					float val=cloned[i][k+j*width];
+					float[] neighbors=getNeighbors(cloned,k,j,i);
+					int count=0;
+					for(int l=0;l<neighbors.length;l++) if(neighbors[l]!=val) count++;
+					if(count>threshold) objects[i][j*width+k]=0.0f;
+				}
+			}
+		}
+		//byte[][] temp=tobinary(objects,false);
+		//float[][] temp2=dofindblobs(temp);
+		//copy_objects(temp2,objects);
+	}
+	
+	public void dilateobjects(float[][] objects){
+		//pixels neighbored in 3D by one object are added to that object
+		//objects are not allowed to merge;
+		float[][] cloned=algutils.clone_multidim_array(objects);
+		for(int i=1;i<(depth-1);i++){
+			for(int j=1;j<(height-1);j++){
+				for(int k=1;k<(width-1);k++){
+					if(cloned[i][k+j*width]==0.0f){
+    					float[] neighbors=getNeighbors(cloned,k,j,i);
+    					float val=0.0f; boolean found=false; boolean found2=false;
+    					for(int l=0;l<neighbors.length;l++){
+    						if(neighbors[l]>0.0f){
+    							if(!found){
+    								found=true;
+    								val=neighbors[l];
+    							} else {
+    								if(neighbors[l]!=val){
+    									found2=true; break;
+    								}
+    							}
+    						}
+    					}
+    					if(found && !found2) objects[i][j*width+k]=val;
+					}
+				}
+			}
+		}
+		byte[][] temp=tobinary(objects);
+		float[][] temp2=dofindblobs(temp);
+		copy_objects(temp2,objects);
+	}
+	
+	public void dilateobjects2(float[][] objects){
+		//pixels neighbored in 3D by one object are added to that object
+		//here objects are allowed to merge
+		float[][] cloned=algutils.clone_multidim_array(objects);
+		for(int i=1;i<(depth-1);i++){
+			for(int j=1;j<(height-1);j++){
+				for(int k=1;k<(width-1);k++){
+					if(cloned[i][k+j*width]==0.0f){
+    					float[] neighbors=getNeighbors(cloned,k,j,i);
+    					for(int l=0;l<neighbors.length;l++){
+    						if(neighbors[l]>0.0f){
+    							objects[i][j*width+k]=1.0f;
+    							break;
+    						}
+    					}
+					}
 				}
 			}
 		}
@@ -200,7 +310,7 @@ public class findblobs3D{
 		for(int i=1;i<=maxid;i++){
 			if(occupancy[i]){
 				counter++;
-				newids[i]=(float)counter;
+				newids[i]=counter;
 			}
 		}
 		nobjects=counter;
@@ -372,7 +482,7 @@ public class findblobs3D{
 				boolean[] prevselected=new boolean[sliceblobs[z-1]];
 				for(int i=lims2d[2];i<=lims2d[3];i++){ // find unique scan-regions above this one
 					for(int j=lims2d[0];j<=lims2d[1];j++){
-						if(counter[z][j+i*width]==(float)id){
+						if(counter[z][j+i*width]==id){
 							int tempid=(int)data[z-1][j+i*width];
 							if(tempid>0 && !prevselected[tempid-1]){
 								prevselected[tempid-1]=true;
@@ -386,7 +496,7 @@ public class findblobs3D{
 				boolean[] prevselected=new boolean[sliceblobs[z+1]];
 				for(int i=lims2d[2];i<=lims2d[3];i++){ // find unique scan-regions below this one
 					for(int j=lims2d[0];j<=lims2d[1];j++){
-						if(counter[z][j+i*width]==(float)id){
+						if(counter[z][j+i*width]==id){
 							int tempid=(int)data[z+1][j+i*width];
 							if(tempid>0&&!prevselected[tempid-1]){
 								prevselected[tempid-1]=true;
@@ -431,7 +541,111 @@ public class findblobs3D{
 		}
 	}
 	
+	public int[][] getallfilllimits(float[][] objects){
+		//int nobjects=(int)maxarray(objects);
+		//the limits are lowerx,upperx,lowery,uppery,lowerz,upperz
+		int[][] lims=new int[nobjects][6];
+		for(int i=0;i<nobjects;i++){
+			lims[i][0]=width-1; lims[i][1]=0;
+			lims[i][2]=height-1; lims[i][3]=0;
+			lims[i][4]=depth-1; lims[i][5]=0;
+		}
+		for(int k=0;k<depth;k++){
+    		for(int i=0;i<height;i++){
+    			for(int j=0;j<width;j++){
+    				if(objects[k][j+i*width]>0.0f){
+    					int id=(int)objects[k][j+i*width]-1;
+    					if(j<lims[id][0]) lims[id][0]=j;
+    					if(j>lims[id][1]) lims[id][1]=j;
+    					if(i<lims[id][2]) lims[id][2]=i;
+    					if(i>lims[id][3]) lims[id][3]=i;
+    					if(k<lims[id][4]) lims[id][4]=k;
+    					if(k>lims[id][5]) lims[id][5]=k;
+    				}
+    			}
+    		}
+		}
+		for(int i=0;i<nobjects;i++){
+			if(lims[i][1]<lims[i][0]){
+				//here we never found an object, so reset full limits
+				lims[i][0]=0; lims[i][1]=width-1;
+				lims[i][2]=0; lims[i][3]=height-1;
+				lims[i][4]=depth-1; lims[i][5]=0;
+			}
+		}
+		return lims;
+	}
+	
+	/********************************************************
+	 * gets all of of the object stats
+	 * @param objects
+	 * @param measurement: the intensity image to measure
+	 * @param lims
+	 * @param stat
+	 * @return
+	 */
+	public float[] get_all_object_stats(float[][] objects,Object[] measurement,int[][] lims,String stat){
+		float[] stats=new float[nobjects];
+		int[] areas=get_areas(objects);
+		for(int i=0;i<nobjects;i++){
+			float[] temp=new float[areas[i]];
+			int counter=0;
+			if(measurement[0] instanceof float[]){
+    			for(int j=lims[i][4];j<=lims[i][5];j++){
+    				for(int k=lims[i][2];k<=lims[i][3];k++){
+    					for(int l=lims[i][0];l<=lims[i][1];l++){
+    						int xyindex=l+k*width;
+    						if((int)objects[j][xyindex]==(i+1)){
+    							temp[counter]=((float[])measurement[j])[xyindex];
+    							counter++;
+    						}
+    					}
+    				}
+    			}
+			} else if(measurement[0] instanceof short[]){
+				for(int j=lims[i][4];j<=lims[i][5];j++){
+    				for(int k=lims[i][2];k<=lims[i][3];k++){
+    					for(int l=lims[i][0];l<=lims[i][1];l++){
+    						int xyindex=l+k*width;
+    						if((int)objects[j][xyindex]==(i+1)){
+    							temp[counter]=((short[])measurement[j])[xyindex]&0xffff;
+    							counter++;
+    						}
+    					}
+    				}
+    			}
+			} else if(measurement[0] instanceof byte[]){
+				for(int j=lims[i][4];j<=lims[i][5];j++){
+    				for(int k=lims[i][2];k<=lims[i][3];k++){
+    					for(int l=lims[i][0];l<=lims[i][1];l++){
+    						int xyindex=l+k*width;
+    						if((int)objects[j][xyindex]==(i+1)){
+    							temp[counter]=((byte[])measurement[j])[xyindex]&0xff;
+    							counter++;
+    						}
+    					}
+    				}
+    			}
+			}
+			stats[i]=jstatistics.getstatistic(stat,temp,null);
+		}
+		return stats;
+	}
+	
 	public int[] get_areas(float[][] objects){
+		int nblobs=get_nblobs(objects);
+		int[] hist=new int[nblobs];
+		for(int j=0;j<depth;j++){
+    		for(int i=0;i<width*height;i++){
+    			if(objects[j][i]>0.0f){
+    				hist[(int)objects[j][i]-1]++;
+    			}
+    		}
+		}
+		return hist;
+	}
+	
+	public int[] get_areas(float[][] objects,float[][] lims){
 		int nblobs=get_nblobs(objects);
 		int[] hist=new int[nblobs];
 		for(int j=0;j<depth;j++){
@@ -448,11 +662,35 @@ public class findblobs3D{
 		int[] hist=get_areas(objects);
 		for(int i=0;i<hist.length;i++){
 			if(hist[i]<arealims[0]||hist[i]>arealims[1]){
-				delete_object(objects,(float)(i+1));
+				delete_object(objects,i+1);
 			}
 		}
 		if(renumber)
 			renumber_objects(objects);
+	}
+	
+	public float[][] getCentroidsAreas(float[][] objects){
+		int nblobs=get_nblobs(objects);
+		float[][] centroids=new float[nblobs][4];
+		for(int i=0;i<objects.length;i++){
+			for(int j=0;j<height;j++){
+				for(int k=0;k<width;k++){
+					int index=(int)objects[i][k+j*width];
+					if(index>0){
+						centroids[index-1][0]+=k;
+						centroids[index-1][1]+=j;
+						centroids[index-1][2]+=i;
+						centroids[index-1][3]+=1.0f;
+					}
+				}
+			}
+		}
+		for(int i=0;i<nblobs;i++){
+			centroids[i][0]/=centroids[i][3];
+			centroids[i][1]/=centroids[i][3];
+			centroids[i][2]/=centroids[i][3];
+		}
+		return centroids;
 	}
 	
 	public Object[] get_object_outline(float[][] objects,int id){

@@ -27,9 +27,15 @@ public class sort_table_jru_v1 implements PlugIn {
 		}
 		GenericDialog gd=new GenericDialog("Windows");
 		gd.addChoice("Windows",titles,titles[0]);
+		gd.addCheckbox("Sort_Numeric",false);
+		gd.addCheckbox("Reverse",false);
+		gd.addCheckbox("Replace Original Table",true);
 		gd.showDialog();
 		if(gd.wasCanceled()){return;}
 		int index=gd.getNextChoiceIndex();
+		boolean sortnum=gd.getNextBoolean();
+		boolean rev=gd.getNextBoolean();
+		boolean replace=gd.getNextBoolean();
 		if(niframes[index] instanceof TextWindow){
 			TextWindow tw=(TextWindow)niframes[index];
 			TextPanel tp=tw.getTextPanel();
@@ -39,8 +45,10 @@ public class sort_table_jru_v1 implements PlugIn {
 			gd2.showDialog(); if(gd2.wasCanceled()){return;}
 			int colindex=gd2.getNextChoiceIndex();
 			List<List<String>> list=table_tools.table2listtable(tp);
-			table_tools.sort_listtable(list,colindex);
-			TextWindow tw2=new TextWindow("Sorted Table",tp.getColumnHeadings(),table_tools.print_listtable(list),400,200);
+			table_tools.sort_listtable(list,colindex,sortnum);
+			if(rev) table_tools.reverse_listtable(list);
+			if(!replace) new TextWindow("Sorted Table",tp.getColumnHeadings(),table_tools.print_listtable(list),400,200);
+			else table_tools.replace_table(tp,list,tp.getColumnHeadings());
 		} else {
 			IJ.showMessage("wrong window type");
 		}

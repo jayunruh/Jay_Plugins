@@ -70,8 +70,8 @@ public class tricrosscorr2{
 			// correlate shifted versions of the 23 cross corr with 1
 			// shifting in fourier space is equivalent to phase rotation
 			for(int j=0;j<length;j++){
-				float cosval=(float)Math.cos((double)j*2.0*Math.PI/(double)length);
-				float sinval=(float)Math.sin((double)j*2.0*Math.PI/(double)length);
+				float cosval=(float)Math.cos(j*2.0*Math.PI/length);
+				float sinval=(float)Math.sin(j*2.0*Math.PI/length);
 				float c=cosval*real2[j]-sinval*im2[j];
 				float d=cosval*real2[j]+sinval*im2[j];
 				real3[j]=a*c+b*d;
@@ -79,7 +79,7 @@ public class tricrosscorr2{
 			}
 			fft.realfft(real3,im3,true);
 			for(int j=0;j<length;j++){
-				real3[j]/=avg*avg2*avg3*(float)length;
+				real3[j]/=avg*avg2*avg3*length;
 			}
 			retarray[i]=bml.dobinmultilog(real3,length/2);
 			gi.showProgress(i,length);

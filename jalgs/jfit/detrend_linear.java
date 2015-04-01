@@ -18,12 +18,12 @@ public class detrend_linear{
 	public detrend_linear(int length1,int segments1){
 		length=length1;
 		segments=segments1;
-		seglength=(int)length/segments;
+		seglength=length/segments;
 		lengthleft=length-segments*seglength;
 		float[][] indvars=new float[2][seglength];
 		for(int i=0;i<seglength;i++){
 			indvars[0][i]=1.0f;
-			indvars[1][i]=(float)i;
+			indvars[1][i]=i;
 		}
 		lls=new linleastsquares(indvars);
 	}
@@ -56,7 +56,7 @@ public class detrend_linear{
 			System.arraycopy(array,i*seglength,subarray,0,seglength);
 			double[] coef=lls.fitdata(subarray,null);
 			for(int j=0;j<seglength;j++){
-				outdata[j+i*seglength]=(float)coef[0]+(float)j*(float)coef[1];
+				outdata[j+i*seglength]=(float)coef[0]+j*(float)coef[1];
 			}
 		}
 		float subval=outdata[(segments-1)*seglength+seglength-1];
@@ -70,7 +70,7 @@ public class detrend_linear{
 		double[] coef=lls.fitdata(subarray,null);
 		float[] newdata=new float[seglength];
 		for(int i=0;i<seglength;i++){
-			newdata[i]=subarray[i]-(float)coef[0]-(float)i*(float)coef[1];
+			newdata[i]=subarray[i]-(float)coef[0]-i*(float)coef[1];
 		}
 		float[][] newdata2=new float[2][];
 		newdata2[0]=newdata;

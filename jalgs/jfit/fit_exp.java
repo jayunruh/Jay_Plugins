@@ -21,7 +21,7 @@ public class fit_exp{
 	public double[] fitdata(float[] data){
 		float[] xvals=new float[data.length];
 		for(int i=0;i<data.length;i++){
-			xvals[i]=(float)i;
+			xvals[i]=i;
 		}
 		return fitdata(data,xvals);
 	}
@@ -59,7 +59,7 @@ public class fit_exp{
 	public double[] fitdata2exp(float[] ac){
 		float[] xvals=new float[ac.length];
 		for(int i=0;i<ac.length;i++){
-			xvals[i]=(float)i;
+			xvals[i]=i;
 		}
 		return fitdata2exp(ac,xvals);
 	}
@@ -98,7 +98,7 @@ public class fit_exp{
 	public double[] fitdata3exp(float[] ac){
 		float[] xvals=new float[ac.length];
 		for(int i=0;i<ac.length;i++){
-			xvals[i]=(float)i;
+			xvals[i]=i;
 		}
 		return fitdata3exp(ac,xvals);
 	}
@@ -146,12 +146,12 @@ public class fit_exp{
 			double fval=corfunc(tempparams,i,xvals);
 			sumx2+=fval*fval;
 			sumx+=fval;
-			sumy+=(double)data[i];
-			sumxy+=(double)data[i]*fval;
+			sumy+=data[i];
+			sumxy+=data[i]*fval;
 		}
-		double divider=(double)length*sumx2-sumx*sumx;
+		double divider=length*sumx2-sumx*sumx;
 		double baseline=(sumx2*sumy-sumx*sumxy)/divider;
-		double amp=((double)length*sumxy-sumx*sumy)/divider;
+		double amp=(length*sumxy-sumx*sumy)/divider;
 		double[] fitparams={baseline,amp};
 		return fitparams;
 	}
@@ -211,7 +211,7 @@ public class fit_exp{
 	public double c2(double[] params,float[] data,float[] xvals){
 		double tempc2=0.0;
 		for(int i=0;i<data.length;i++){
-			double resid=corfunc(params,i,xvals)-(double)data[i];
+			double resid=corfunc(params,i,xvals)-data[i];
 			tempc2+=resid*resid;
 		}
 		return tempc2;
@@ -222,7 +222,7 @@ public class fit_exp{
 		double[] params1={0.0,params[1],params[2]};
 		double[] params2={0.0,params[3],params[4]};
 		for(int i=0;i<data.length;i++){
-			double resid=corfunc(params1,i,xvals)+corfunc(params2,i,xvals)+params[0]-(double)data[i];
+			double resid=corfunc(params1,i,xvals)+corfunc(params2,i,xvals)+params[0]-data[i];
 			tempc2+=resid*resid;
 		}
 		return tempc2;
@@ -234,7 +234,7 @@ public class fit_exp{
 		double[] params2={0.0,params[3],params[4]};
 		double[] params3={0.0,params[5],params[6]};
 		for(int i=0;i<data.length;i++){
-			double resid=corfunc(params1,i,xvals)+corfunc(params2,i,xvals)+corfunc(params3,i,xvals)+params[0]-(double)data[i];
+			double resid=corfunc(params1,i,xvals)+corfunc(params2,i,xvals)+corfunc(params3,i,xvals)+params[0]-data[i];
 			tempc2+=resid*resid;
 		}
 		return tempc2;

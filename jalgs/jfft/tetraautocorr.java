@@ -41,7 +41,7 @@ public class tetraautocorr{
 			real[j]=data[j];
 			real2[j]=data[j]*data[j];
 			avg+=(double)data[j]/(double)length;
-			avgsq+=((double)data[j]*(double)data[j])/(double)length;
+			avgsq+=((double)data[j]*(double)data[j])/length;
 		}
 		fft.realfft(real,im,false);
 		fft.realfft(real2,im2,false);
@@ -65,11 +65,11 @@ public class tetraautocorr{
 		fft.realfft(real4,im4,true);
 		float var=(float)(avgsq-avg*avg);
 		for(int j=0;j<length;j++){
-			float u22=real4[j]/(float)length-(2.0f*real[j]*(float)avg)/(float)length-(2.0f*real2[j]*(float)avg)/(float)length+2.0f*(float)(avgsq*avg*avg)+(4.0f*real3[j]*(float)(avg*avg))
-					/(float)length-3.0f*(float)(avg*avg*avg*avg);
-			float u21=real2[j]/(float)length-(2.0f*real3[j]*(float)avg)/(float)length-(float)(avgsq*avg)+2.0f*(float)(avg*avg*avg);
-			float u12=real[j]/(float)length-(2.0f*real3[j]*(float)avg)/(float)length-(float)(avgsq*avg)+2.0f*(float)(avg*avg*avg);
-			float u11=real3[j]/(float)length-(float)(avg*avg);
+			float u22=real4[j]/length-(2.0f*real[j]*(float)avg)/length-(2.0f*real2[j]*(float)avg)/length+2.0f*(float)(avgsq*avg*avg)+(4.0f*real3[j]*(float)(avg*avg))
+					/length-3.0f*(float)(avg*avg*avg*avg);
+			float u21=real2[j]/length-(2.0f*real3[j]*(float)avg)/length-(float)(avgsq*avg)+2.0f*(float)(avg*avg*avg);
+			float u12=real[j]/length-(2.0f*real3[j]*(float)avg)/length-(float)(avgsq*avg)+2.0f*(float)(avg*avg*avg);
+			float u11=real3[j]/length-(float)(avg*avg);
 			real[j]=(u22-var*var-2.0f*u11*u11-u21-u12+u11)/(float)(avg*avg*avg*avg);
 		}
 		return real;
@@ -90,7 +90,7 @@ public class tetraautocorr{
 			real[j]=data[j];
 			real2[j]=data[j]*data[j];
 			avg+=(double)data[j]/(double)length;
-			avgsq+=((double)data[j]*(double)data[j])/(double)length;
+			avgsq+=((double)data[j]*(double)data[j])/length;
 		}
 		fft.realfft(real,im,false);
 		fft.realfft(real2,im2,false);
@@ -114,11 +114,11 @@ public class tetraautocorr{
 		fft.realfft(real4,im4,true);
 		float var=(float)(avgsq-avg*avg);
 		for(int j=0;j<length;j++){
-			float u22=real4[j]/(float)length-(2.0f*real[j]*(float)avg)/(float)length-(2.0f*real2[j]*(float)avg)/(float)length+2.0f*(float)(avgsq*avg*avg)+(4.0f*real3[j]*(float)(avg*avg))
-					/(float)length-3.0f*(float)(avg*avg*avg*avg);
-			float u21=real2[j]/(float)length-(2.0f*real3[j]*(float)avg)/(float)length-(float)(avgsq*avg)+2.0f*(float)(avg*avg*avg);
-			float u12=real[j]/(float)length-(2.0f*real3[j]*(float)avg)/(float)length-(float)(avgsq*avg)+2.0f*(float)(avg*avg*avg);
-			float u11=real3[j]/(float)length-(float)(avg*avg);
+			float u22=real4[j]/length-(2.0f*real[j]*(float)avg)/length-(2.0f*real2[j]*(float)avg)/length+2.0f*(float)(avgsq*avg*avg)+(4.0f*real3[j]*(float)(avg*avg))
+					/length-3.0f*(float)(avg*avg*avg*avg);
+			float u21=real2[j]/length-(2.0f*real3[j]*(float)avg)/length-(float)(avgsq*avg)+2.0f*(float)(avg*avg*avg);
+			float u12=real[j]/length-(2.0f*real3[j]*(float)avg)/length-(float)(avgsq*avg)+2.0f*(float)(avg*avg*avg);
+			float u11=real3[j]/length-(float)(avg*avg);
 			real[j]=(u22-var*var-2.0f*u11*u11-u21-u12+u11)/(float)(avg*avg*avg*avg);
 			if(dobrightcorr){
 				real[j]*=(float)(avg*avg*avg);

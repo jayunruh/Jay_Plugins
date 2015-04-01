@@ -8,12 +8,25 @@
 
 package jguis;
 
-import jalgs.*;
-
-import java.awt.*;
-import java.awt.event.*;
-import ij.gui.*;
+import ij.gui.GenericDialog;
 import ij.plugin.frame.Editor;
+import jalgs.delimit_string;
+
+import java.awt.Button;
+import java.awt.Dimension;
+import java.awt.FontMetrics;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Insets;
+import java.awt.Panel;
+import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class Layout_Generator extends Panel implements MouseListener,MouseMotionListener,ActionListener{
 	private Rectangle[] rects;
@@ -305,8 +318,8 @@ public class Layout_Generator extends Panel implements MouseListener,MouseMotion
 				// here we are dragging an edge of the rectangle
 				int oldxcorn=oldrect.x;
 				int oldycorn=oldrect.y;
-				int newwidth=(int)Math.abs(xpos-oldxcorn);
-				int newheight=(int)Math.abs(ypos-oldycorn);
+				int newwidth=Math.abs(xpos-oldxcorn);
+				int newheight=Math.abs(ypos-oldycorn);
 				if(xpos<oldxcorn){
 					oldxcorn=xpos;
 				}

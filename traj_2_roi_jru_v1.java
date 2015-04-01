@@ -11,35 +11,118 @@ import ij.gui.*;
 import java.awt.*;
 import ij.plugin.*;
 import jguis.*;
+import ij.plugin.frame.RoiManager;
 
 public class traj_2_roi_jru_v1 implements PlugIn {
 
 	public void run(String arg) {
 		//here we create a segmented line roi from a plot
-		ImageWindow iw=WindowManager.getCurrentWindow();
-		float[] xvals=((float[][])jutils.runPW4VoidMethod(iw,"getXValues"))[0];
-		float[] yvals=((float[][])jutils.runPW4VoidMethod(iw,"getYValues"))[0];
-		int[] intxvals=new int[xvals.length];
-		int[] intyvals=new int[yvals.length];
-		for(int i=0;i<xvals.length;i++){
-			intxvals[i]=(int)xvals[i];
-			intyvals[i]=(int)yvals[i];
+		ImagePlus[] imps=jutils.selectImages(false,2,new String[]{"Image","Trajectory"});
+		if(imps==null) return;
+		GenericDialog gd=new GenericDialog("Options");
+		gd.addChoice("Roi Options",new String[]{"Roi_Manager","Overlay","Trails","Squares","Circles"},"Roi_Manager");
+		gd.addCheckbox("Trails Persist",false);
+		gd.addNumericField("Square Size",10,0);
+		gd.showDialog(); if(gd.wasCanceled()){return;}
+		int optindex=gd.getNextChoiceIndex();
+		boolean persist=gd.getNextBoolean();
+		int swidth=(int)gd.getNextNumber();
+		//ImageWindow iw=WindowManager.getCurrentWindow();
+		ImageWindow iw=imps[1].getWindow();
+		float[][] xvals=(float[][])jutils.runPW4VoidMethod(iw,"getXValues");
+		float[][] yvals=(float[][])jutils.runPW4VoidMethod(iw,"getYValues");
+		int[] npts=(int[])jutils.runPW4VoidMethod(iw,"getNpts");
+		int[] colors=(int[])jutils.runPW4VoidMethod(iw,"getColors");
+		String[] starts=(String[])jutils.runPW4VoidMethod(iw,"getAnnotations");
+		Color[] jcolors=new Color[Plot4.java_colors.length];
+		for(int i=0;i<jcolors.length;i++) jcolors[i]=Plot4.java_colors[i];
+		jcolors[0]=Color.white;
+		if(optindex==0){
+			RoiManager rman=RoiManager.getInstance();
+			if(rman==null) rman=new RoiManager();
+			for(int i=0;i<xvals.length;i++){
+				rman.addRoi(traj2roi(xvals[i],yvals[i],npts[i]));
+			}
+		} else if(optindex==1){
+			Overlay overlay=new Overlay();
+			for(int i=0;i<xvals.length;i++){
+				Roi roi=traj2roi(xvals[i],yvals[i],npts[i]);
+				roi.setColor(jcolors[colors[i]%8]);
+				overlay.add(roi);
+			}
+			imps[0].setOverlay(overlay);
+			imps[0].updateAndDraw();
+		} else if(optindex==2) {
+			ImageStack stack=imps[0].getStack();
+			int width=imps[0].getWidth(); int height=imps[0].getHeight();
+			ImageStack overstack=new ImageStack(width,height);
+			int frames=imps[0].getNFrames();
+			if(frames==1) frames=imps[0].getNSlices();
+			for(int i=0;i<frames;i++) overstack.addSlice("",new int[width*height]);
+			int channels=imps[0].getNChannels();
+			//IJ.log(""+npts.length);
+			for(int i=0;i<npts.length;i++){
+				int start=0;
+				if(starts!=null){
+					start=(int)Float.parseFloat(starts[i]);
+				}
+				Color color=jcolors[colors[i]%8];
+				//Color color=Color.white;
+				int[][] coords=traj2int(xvals[i],yvals[i],npts[i]);
+				for(int j=(start+1);j<(start+npts[i]);j++){
+					ImageProcessor frame=overstack.getProcessor(j+1);
+					frame.setColor(color);
+					for(int k=0;k<(j-start);k++){
+						frame.drawLine(coords[0][k],coords[1][k],coords[0][k+1],coords[1][k+1]);
+					}
+				}
+				if(persist){
+					for(int j=(start+npts[i]);j<frames;j++){
+						ImageProcessor frame=overstack.getProcessor(j+1);
+						frame.setColor(color);
+						for(int k=0;k<(npts[i]-1);k++){
+							frame.drawLine(coords[0][k],coords[1][k],coords[0][k+1],coords[1][k+1]);
+						}
+					}
+				}
+			}
+			/*for(int i=0;i<frames;i++){
+				ImageRoi roi=new ImageRoi(0,0,overstack.getProcessor(i+1));
+				roi.setZeroTransparent(true);
+				roi.setPosition(i*channels+1);
+				imps[0].setOverlay(new Overlay(roi));
+			}
+			imps[0].updateAndDraw();*/
+			new ImagePlus("Traj Trails",overstack).show();
+		} else {
+			RoiManager rman=RoiManager.getInstance();
+			if(rman==null) rman=new RoiManager();
+			int halfwidth=(int)(0.5f*(float)swidth);
+			for(int i=0;i<xvals.length;i++){
+				if(optindex==3) rman.addRoi(new Roi((int)xvals[i][0]-halfwidth,(int)yvals[i][0]-halfwidth,2*halfwidth,2*halfwidth));
+				else rman.addRoi(new OvalRoi((int)xvals[i][0]-halfwidth,(int)yvals[i][0]-halfwidth,2*halfwidth,2*halfwidth));
+			}
 		}
-		PolygonRoi roi=new PolygonRoi(intxvals,intyvals,xvals.length,Roi.FREELINE);
-		int[] wList = WindowManager.getIDList();
-		String[] titles = new String[wList.length];
-		for(int i=0;i<wList.length;i++){
-			ImagePlus imp = WindowManager.getImage(wList[i]);
-			titles[i]=imp.getTitle();
+	}
+
+	public PolygonRoi traj2roi(float[] xvals,float[] yvals,int npts){
+		int[] xvals2=new int[npts];
+		int[] yvals2=new int[npts];
+		for(int i=0;i<npts;i++){
+			xvals2[i]=(int)xvals[i];
+			yvals2[i]=(int)yvals[i];
 		}
-		GenericDialog gd = new GenericDialog("Options");
-		gd.addChoice("Image",titles,titles[0]);
-		gd.showDialog();
-		if(gd.wasCanceled()){return;}
-		int index1 = gd.getNextChoiceIndex();
-		ImagePlus imp = WindowManager.getImage(wList[index1]);
-		imp.setRoi(roi);
-		imp.updateAndDraw();
+		return new PolygonRoi(xvals2,yvals2,npts,Roi.POLYLINE);
+	}
+
+	public int[][] traj2int(float[] xvals,float[] yvals,int npts){
+		int[] xvals2=new int[npts];
+		int[] yvals2=new int[npts];
+		for(int i=0;i<npts;i++){
+			xvals2[i]=(int)xvals[i];
+			yvals2[i]=(int)yvals[i];
+		}
+		return new int[][]{xvals2,yvals2};
 	}
 
 }

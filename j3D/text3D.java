@@ -8,7 +8,9 @@
 
 package j3D;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.Graphics;
 
 public class text3D extends element3D implements Cloneable{
 	public point3D point;

@@ -8,9 +8,10 @@
 
 package jhcsfcs;
 
-import jalgs.*;
+import jalgs.jsort;
+import jalgs.jstatistics;
 
-import java.io.*;
+import java.io.File;
 
 public class hcs_fcs_well{
 	// this is a container class for each hcs_fcs well
@@ -59,7 +60,7 @@ public class hcs_fcs_well{
 					names2[counter]=names[i].substring(0);
 					// the cell number is the overview number*100 plus the image
 					// number
-					cellnumber[counter]=(float)(rawfileinfo[i][1]*100+rawfileinfo[i][2]);
+					cellnumber[counter]=rawfileinfo[i][1]*100+rawfileinfo[i][2];
 					counter++;
 				}
 			}

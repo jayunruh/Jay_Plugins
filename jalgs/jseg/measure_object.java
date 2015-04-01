@@ -8,9 +8,10 @@
 
 package jalgs.jseg;
 
-import jalgs.*;
+import jalgs.interpolation;
 
-import java.awt.*;
+import java.awt.Polygon;
+import java.awt.Rectangle;
 
 public class measure_object{
 
@@ -20,7 +21,7 @@ public class measure_object{
 		int nobjects=(int)measure_object.maxarray(image);
 		float[][] outvals=new float[nobjects][];
 		for(int i=1;i<=nobjects;i++){
-			outvals[i-1]=measure_object.centroid(image,(float)i,width,height);
+			outvals[i-1]=measure_object.centroid(image,i,width,height);
 		}
 		return outvals;
 	}
@@ -29,7 +30,7 @@ public class measure_object{
 		int nobjects=(int)measure_object.maxarray(image);
 		float[] outvals=new float[nobjects];
 		for(int i=1;i<=nobjects;i++){
-			outvals[i-1]=measure_object.area(image,(float)i,width,height);
+			outvals[i-1]=measure_object.area(image,i,width,height);
 		}
 		return outvals;
 	}
@@ -38,7 +39,7 @@ public class measure_object{
 		int nobjects=(int)measure_object.maxarray(image);
 		float[] outvals=new float[nobjects];
 		for(int i=1;i<=nobjects;i++){
-			outvals[i-1]=measure_object.objwidth(image,(float)i,width,height);
+			outvals[i-1]=measure_object.objwidth(image,i,width,height);
 		}
 		return outvals;
 	}
@@ -70,8 +71,8 @@ public class measure_object{
 		}
 		float[][] outvals=new float[nobjects][2];
 		for(int i=0;i<nobjects;i++){
-			outvals[i][0]=(float)(wends[i]-wstarts[i]);
-			outvals[i][1]=(float)(hends[i]-hstarts[i]);
+			outvals[i][0]=wends[i]-wstarts[i];
+			outvals[i][1]=hends[i]-hstarts[i];
 		}
 		return outvals;
 	}
@@ -97,9 +98,9 @@ public class measure_object{
 			if(image[i]>0.0f){
 				int id=(int)image[i]-1;
 				if(isbyte)
-					outvals[id]+=(float)(((byte[])measurement)[i]&0xff);
+					outvals[id]+=((byte[])measurement)[i]&0xff;
 				else if(isshort)
-					outvals[id]+=(float)(((short[])measurement)[i]&0xffff);
+					outvals[id]+=((short[])measurement)[i]&0xffff;
 				else
 					outvals[id]+=((float[])measurement)[i];
 			}
@@ -117,9 +118,9 @@ public class measure_object{
 				int id=(int)image[i]-1;
 				for(int j=0;j<measurement.length;j++){
 					if(isbyte)
-						outvals[id][j]+=(float)(((byte[])measurement[j])[i]&0xff);
+						outvals[id][j]+=((byte[])measurement[j])[i]&0xff;
 					else if(isshort)
-						outvals[id][j]+=(float)(((short[])measurement[j])[i]&0xffff);
+						outvals[id][j]+=((short[])measurement[j])[i]&0xffff;
 					else
 						outvals[id][j]+=((float[])measurement[j])[i];
 				}
@@ -132,7 +133,7 @@ public class measure_object{
 		int nobjects=(int)measure_object.maxarray(image);
 		float[] outvals=new float[nobjects];
 		for(int i=1;i<=nobjects;i++){
-			outvals[i-1]=measure_object.objheight(image,(float)i,width,height);
+			outvals[i-1]=measure_object.objheight(image,i,width,height);
 		}
 		return outvals;
 	}
@@ -172,7 +173,7 @@ public class measure_object{
 				}
 			}
 		}
-		return (float)(maxpos-minpos);
+		return maxpos-minpos;
 	}
 
 	public static float objheight(float[] image,float id,int width,int height){
@@ -188,7 +189,7 @@ public class measure_object{
 				}
 			}
 		}
-		return (float)(maxpos-minpos);
+		return maxpos-minpos;
 	}
 
 	public static float area(Polygon poly){
@@ -353,14 +354,14 @@ public class measure_object{
 		if((height-3-(int)ycenter)<maxrad){
 			maxrad=(height-3-(int)ycenter);
 		}
-		float dtheta=2.0f*(float)Math.PI/(float)nangles;
+		float dtheta=2.0f*(float)Math.PI/nangles;
 		float[] distances=new float[nangles];
 		float[] sel_image=select_object(image,id);
 		for(int i=0;i<nangles;i++){
-			float theta=(float)i*dtheta;
+			float theta=i*dtheta;
 			float[] vec=get_unit_vector(theta);
 			for(int j=0;j<maxrad;j++){
-				float temp=interpolate(sel_image,width,height,xcenter+vec[0]*(float)j,ycenter-vec[1]*(float)j);
+				float temp=interpolate(sel_image,width,height,xcenter+vec[0]*j,ycenter-vec[1]*j);
 				if(temp>0.5f){
 					distances[i]=j;
 				}
@@ -385,14 +386,14 @@ public class measure_object{
 		if((height-3-(int)ycenter)<maxrad){
 			maxrad=(height-3-(int)ycenter);
 		}
-		float dtheta=2.0f*(float)Math.PI/(float)nangles;
+		float dtheta=2.0f*(float)Math.PI/nangles;
 		float[] distances=new float[nangles];
 		float[] sel_image=select_object(image);
 		for(int i=0;i<nangles;i++){
-			float theta=(float)i*dtheta;
+			float theta=i*dtheta;
 			float[] vec=get_unit_vector(theta);
 			for(int j=0;j<maxrad;j++){
-				float temp=interpolate(sel_image,width,height,xcenter+vec[0]*(float)j,ycenter-vec[1]*(float)j);
+				float temp=interpolate(sel_image,width,height,xcenter+vec[0]*j,ycenter-vec[1]*j);
 				if(temp>0.5f){
 					distances[i]=j;
 				}
@@ -405,10 +406,10 @@ public class measure_object{
 		float[] distances=new float[nangles];
 		float[] sel_image=select_object(image);
 		for(int i=0;i<nangles;i++){
-			float theta=(float)i*dtheta+startangle;
+			float theta=i*dtheta+startangle;
 			float[] vec=get_unit_vector(theta);
 			for(int j=0;j<maxrad;j++){
-				float temp=interpolate(sel_image,width,height,xcenter+vec[0]*(float)j,ycenter-vec[1]*(float)j);
+				float temp=interpolate(sel_image,width,height,xcenter+vec[0]*j,ycenter-vec[1]*j);
 				if(temp>0.5f){
 					distances[i]=j;
 				}
@@ -433,14 +434,14 @@ public class measure_object{
 		if((height-3-(int)ycenter)>maxrad){
 			maxrad=(height-3-(int)ycenter);
 		}
-		float dtheta=2.0f*(float)Math.PI/(float)nangles;
+		float dtheta=2.0f*(float)Math.PI/nangles;
 		float[] thickness=new float[nangles];
 		float[] sel_image=select_object(image);
 		for(int i=0;i<nangles;i++){
-			float theta=(float)i*dtheta;
+			float theta=i*dtheta;
 			float[] vec=get_unit_vector(theta);
 			for(int j=0;j<maxrad;j++){
-				float temp=interpolate(sel_image,width,height,xcenter+vec[0]*(float)j,ycenter-vec[1]*(float)j);
+				float temp=interpolate(sel_image,width,height,xcenter+vec[0]*j,ycenter-vec[1]*j);
 				if(temp>0.5f){
 					thickness[i]+=1.0;
 				}
@@ -465,13 +466,13 @@ public class measure_object{
 		if((height-3-(int)ycenter)>maxrad){
 			maxrad=(height-3-(int)ycenter);
 		}
-		float dtheta=2.0f*(float)Math.PI/(float)nangles;
+		float dtheta=2.0f*(float)Math.PI/nangles;
 		float[] sum=new float[nangles];
 		for(int i=0;i<nangles;i++){
-			float theta=(float)i*dtheta;
+			float theta=i*dtheta;
 			float[] vec=get_unit_vector(theta);
 			for(int j=0;j<maxrad;j++){
-				float temp=interpolation.interp2D(image,width,height,xcenter+vec[0]*(float)j,ycenter-vec[1]*(float)j);
+				float temp=interpolation.interp2D(image,width,height,xcenter+vec[0]*j,ycenter-vec[1]*j);
 				sum[i]+=temp;
 			}
 		}
@@ -494,13 +495,13 @@ public class measure_object{
 		if((height-3-(int)ycenter)>maxrad){
 			maxrad=(height-3-(int)ycenter);
 		}
-		float dtheta=2.0f*(float)Math.PI/(float)nangles;
+		float dtheta=2.0f*(float)Math.PI/nangles;
 		float[] max=new float[nangles];
 		for(int i=0;i<nangles;i++){
-			float theta=(float)i*dtheta;
+			float theta=i*dtheta;
 			float[] vec=get_unit_vector(theta);
 			for(int j=0;j<maxrad;j++){
-				float temp=interpolation.interp2D(image,width,height,xcenter+vec[0]*(float)j,ycenter-vec[1]*(float)j);
+				float temp=interpolation.interp2D(image,width,height,xcenter+vec[0]*j,ycenter-vec[1]*j);
 				if(temp>max[i]){
 					max[i]=temp;
 				}
@@ -510,13 +511,13 @@ public class measure_object{
 	}
 
 	public static float[][] radial_straight_profile(float[] image,float xcenter,float ycenter,int width,int height,int nangles,int maxrad){
-		float dtheta=2.0f*(float)Math.PI/(float)nangles;
+		float dtheta=2.0f*(float)Math.PI/nangles;
 		float[][] profiles=new float[nangles][maxrad];
 		for(int i=0;i<nangles;i++){
-			float theta=(float)i*dtheta;
+			float theta=i*dtheta;
 			float[] vec=get_unit_vector(theta);
 			for(int j=0;j<maxrad;j++){
-				profiles[i][j]=interpolation.interp2D(image,width,height,xcenter+vec[0]*(float)j,ycenter-vec[1]*(float)j);
+				profiles[i][j]=interpolation.interp2D(image,width,height,xcenter+vec[0]*j,ycenter-vec[1]*j);
 			}
 		}
 		return profiles;
@@ -565,8 +566,8 @@ public class measure_object{
 			return vector;
 		}
 		float slope=(float)Math.tan(theta);
-		float xinc=(float)Math.abs(1.0/Math.sqrt(1.0+(double)(slope*slope)));
-		float yinc=(float)Math.abs((double)slope/Math.sqrt(1.0+(double)(slope*slope)));
+		float xinc=(float)Math.abs(1.0/Math.sqrt(1.0+slope*slope));
+		float yinc=(float)Math.abs(slope/Math.sqrt(1.0+slope*slope));
 		if(theta>(float)Math.PI){
 			yinc=-yinc;
 		}
@@ -596,9 +597,9 @@ public class measure_object{
 	}
 
 	public static float[] rotate_vector3D(float[] input,float[] rotation){
-		double tempx=(double)input[0];
-		double tempy=(double)input[1];
-		double tempz=(double)input[2];
+		double tempx=input[0];
+		double tempy=input[1];
+		double tempz=input[2];
 		if(rotation[0]!=0.0){ // rotation about the z axis
 			double sinval=Math.sin(rotation[0]);
 			double cosval=Math.cos(rotation[0]);
@@ -687,16 +688,16 @@ public class measure_object{
 		if(y<0.0f){
 			return 0.0f;
 		}
-		if(x>(float)(width-2)){
+		if(x>width-2){
 			return 0.0f;
 		}
-		if(y>(float)(height-2)){
+		if(y>height-2){
 			return 0.0f;
 		}
 		int xprev=(int)x;
 		int yprev=(int)y;
-		float xrem=x-(float)xprev;
-		float yrem=y-(float)yprev;
+		float xrem=x-xprev;
+		float yrem=y-yprev;
 		float int1=yrem*(image[xprev+1+width*yprev]-image[xprev+width*yprev])+image[xprev+width*yprev];
 		float int2=yrem*(image[xprev+1+width*(yprev+1)]-image[xprev+width*(yprev+1)])+image[xprev+width*(yprev+1)];
 		return int1+xrem*(int2-int1);
@@ -856,7 +857,7 @@ public class measure_object{
 				}
 			}
 		}
-		return new float[]{max,(float)maxx,(float)maxy};
+		return new float[]{max,maxx,maxy};
 	}
 
 }

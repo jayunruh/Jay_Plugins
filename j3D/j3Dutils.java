@@ -22,10 +22,10 @@ public class j3Dutils{
 
 	public static void drawThickLine(Graphics g,int x1,int y1,int x2,int y2){
 		float length=(float)Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
-		float dx=(float)(x2-x1)/length;
-		float dy=(float)(y2-y1)/length;
-		float xpos=(float)x1;
-		float ypos=(float)y1;
+		float dx=(x2-x1)/length;
+		float dy=(y2-y1)/length;
+		float xpos=x1;
+		float ypos=y1;
 		for(int i=0;i<(int)length;i++){
 			drawDot(g,(int)xpos,(int)ypos);
 			xpos+=dx;

@@ -37,19 +37,19 @@ public class stack_subtract_moving_average_jru_v2 implements PlugIn {
 		int period = (int)gd.getNextNumber();
 		boolean outsub=gd.getNextBoolean();
 		ImagePlus imp = WindowManager.getCurrentImage();
+		Object[] outputs=exec(imp,outmovavg,isstatic,addspatialconst,addtemporalconst,period,outsub);
+		for(int i=0;i<outputs.length;i++){
+			((ImagePlus)outputs[i]).show();
+		}
+	}
+
+	public Object[] exec(ImagePlus imp,boolean outmovavg,boolean isstatic,boolean addspatialconst,boolean addtemporalconst,int period,boolean outsub){
 		int width = imp.getWidth();
 		int height = imp.getHeight();
 		channels=imp.getNChannels();
 		stack = imp.getStack();
 		slices=stack.getSize();
 		slices/=channels;
-		//below is inefficient for virtual stacks
-		/*Object[][] chstack=new Object[channels][slices];
-		for(i=0;i<slices;i++){
-			for(j=0;j<channels;j++){
-				chstack[j][i]=stack.getPixels(j+i*channels+1);
-			}
-		}*/
 		boolean isfloat=(getpix(0,0) instanceof float[]);
 		ImageStack result_stack = new ImageStack(width,height);
 		ImageStack movavg_stack = new ImageStack(width,height);
@@ -144,6 +144,9 @@ public class stack_subtract_moving_average_jru_v2 implements PlugIn {
 			}
 			IJ.showProgress(i-startslice,endslice-startslice);
 		}
+		int nouts=1; if(outsub && outmovavg) nouts=2;
+		Object[] output=new Object[nouts];
+		int outcounter=0;
 		if(outsub){
 			int outslices=result_stack.getSize();
 			outslices/=channels;
@@ -163,9 +166,9 @@ public class stack_subtract_moving_average_jru_v2 implements PlugIn {
 			imp2.setOpenAsHyperStack(true);
 			imp2.setDimensions(channels,1,outslices);
 			if(channels>1){
-				new CompositeImage(imp2,CompositeImage.COMPOSITE).show();
+				output[outcounter]=new CompositeImage(imp2,CompositeImage.COMPOSITE); outcounter++;
 			} else {
-				imp2.show();
+				output[outcounter]=imp2; outcounter++;
 			}
 		}
 		if(outmovavg){
@@ -176,11 +179,12 @@ public class stack_subtract_moving_average_jru_v2 implements PlugIn {
 			imp3.setOpenAsHyperStack(true);
 			imp3.setDimensions(channels,1,outslices);
 			if(channels>1){
-				new CompositeImage(imp3,CompositeImage.COMPOSITE).show();
+				output[outcounter]=new CompositeImage(imp3,CompositeImage.COMPOSITE);
 			} else {
-				imp3.show();
+				output[outcounter]=imp3;
 			}
 		}
+		return output;
 	}
 
 	public Object getpix(int channel,int slice){

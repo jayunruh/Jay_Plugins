@@ -18,9 +18,11 @@ public class combine_all_trajectories_jru_v1 implements PlugIn {
 		GenericDialog gd=new GenericDialog("Options");
 		gd.addCheckbox("Combine_all_series",true);
 		gd.addNumericField("Series_to_combine",0,0);
+		gd.addCheckbox("Delete_Originals",false);
 		gd.showDialog(); if(gd.wasCanceled()){return;}
 		boolean combineall=gd.getNextBoolean();
 		int combseries=(int)gd.getNextNumber();
+		boolean delor=gd.getNextBoolean();
 		int[] wList = WindowManager.getIDList();
 		ImageWindow[] windows=new ImageWindow[wList.length];
 		int nplots=0;
@@ -65,6 +67,11 @@ public class combine_all_trajectories_jru_v1 implements PlugIn {
 					float[][][] errs=(float[][][])jutils.runPW4VoidMethod(windows[j],"getErrors");
 					if(errs!=null) pw.addSeriesErrors(pw.getNSeries()-1,new float[][]{errs[0][combseries],errs[1][combseries]});
 				}
+			}
+		}
+		if(delor){
+			for(int i=0;i<nplots;i++){
+				windows[i].close();
 			}
 		}
 	}

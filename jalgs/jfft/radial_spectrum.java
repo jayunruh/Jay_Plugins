@@ -32,7 +32,7 @@ public class radial_spectrum{
 		for(double r=minr;r<maxr;r+=dr){
 			for(int i=0;i<size;i++){
 				for(int j=0;j<size;j++){
-					double k=2.0*Math.PI*Math.sqrt(j*j+i*i)/(double)size;
+					double k=2.0*Math.PI*Math.sqrt(j*j+i*i)/size;
 					int t=j+i*size;
 					// spectrum[counter]+=(rimage[t]*rimage[t]+iimage[t]*iimage[t])*(float)(r*b.besselval(k*r,0));
 					if(k>0.0){
@@ -49,7 +49,7 @@ public class radial_spectrum{
 	}
 
 	public float[] get_spectrum(float[] image){
-		return get_spectrum(image,0.0f,(float)(size/2),1.0f);
+		return get_spectrum(image,0.0f,size/2,1.0f);
 	}
 
 }

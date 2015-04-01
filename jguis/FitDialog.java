@@ -8,14 +8,18 @@
 
 package jguis;
 
-import jalgs.*;
-import jalgs.jfit.*;
-
-import java.awt.*;
-
-import ij.gui.*;
+import ij.IJ;
+import ij.gui.DialogListener;
+import ij.gui.GenericDialog;
 import ij.text.TextWindow;
-import ij.*;
+import jalgs.jdist;
+import jalgs.jstatistics;
+import jalgs.jfit.NLLSfit_v2;
+import jalgs.jfit.NLLSfitinterface_v2;
+import jalgs.jfit.monte_carlo_errors_v2;
+import jalgs.jfit.support_plane_errors_v2;
+
+import java.awt.AWTEvent;
 
 public class FitDialog implements DialogListener,NLLSfitinterface_v2{
 	public PlotWindow4 pw;
@@ -33,7 +37,12 @@ public class FitDialog implements DialogListener,NLLSfitinterface_v2{
 	private TextWindow tw;
 	private boolean redirect;
 
-	// this class handles the procedures associated with fitting
+	/******************************
+	 * this class handles the procedures associated with fitting a plot
+	 * @param pw
+	 * @param callclass
+	 * @param labels
+	 */
 	public FitDialog(PlotWindow4 pw,NLLSfitinterface_v2 callclass,String[] labels){
 		this.pw=pw;
 		this.callclass=callclass;
@@ -191,7 +200,7 @@ public class FitDialog implements DialogListener,NLLSfitinterface_v2{
 			int npts=yvals.length;
 			int dofnum=npts-(nfit-1)-1;
 			int dofden=npts-nfit-1;
-			double flim=(new jdist()).FLimit(dofnum,dofden,(double)conf);
+			double flim=(new jdist()).FLimit(dofnum,dofden,conf);
 			IJ.log("FLimit = "+(float)flim);
 			if(flim==Double.NaN&&flim<1.0){
 				IJ.showMessage("Invalid Limiting F Value");

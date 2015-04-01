@@ -88,7 +88,7 @@ public class finite_differences{
 	public float[][] handle_2D_diffusion(float[][] profile){
 		float[][] temp=algutils.clone_multidim_array(profile);
 		for(int i=0;i<dsteps;i++){
-			diff2D(temp,1.0f/(float)dsteps);
+			diff2D(temp,1.0f/dsteps);
 		}
 		return temp;
 	}
@@ -96,7 +96,7 @@ public class finite_differences{
 	public float[] handle_2D_diffusion(float[] profile){
 		float[] temp=profile.clone();
 		for(int i=0;i<dsteps;i++){
-			diff2D(temp,1.0f/(float)dsteps);
+			diff2D(temp,1.0f/dsteps);
 		}
 		return temp;
 	}
@@ -400,7 +400,7 @@ public class finite_differences{
 	public float[] handle_1D_diffusion(float[] profile){
 		float[] temp=profile.clone();
 		for(int i=0;i<dsteps;i++){
-			diff1D(temp,1.0f/(float)dsteps);
+			diff1D(temp,1.0f/dsteps);
 		}
 		return temp;
 	}

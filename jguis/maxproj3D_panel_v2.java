@@ -8,25 +8,51 @@
 
 package jguis;
 
-import j3D.*;
-import jalgs.jstatistics;
+import ij.CompositeImage;
+import ij.IJ;
+import ij.ImageListener;
+import ij.ImagePlus;
+import ij.ImageStack;
+import ij.gui.GenericDialog;
+import ij.gui.ImageRoi;
+import ij.gui.ImageWindow;
+import ij.gui.Overlay;
+import ij.gui.PointRoi;
+import ij.gui.Roi;
+import ij.plugin.frame.RoiManager;
+import ij.process.ColorProcessor;
+import j3D.element3D;
+import j3D.j3Dutils;
+import j3D.line3D;
+import j3D.point3D;
+import j3D.rect3D;
+import j3D.renderer;
+import j3D.spot3D;
 import jalgs.matrixsolve;
 import jalgs.profiler;
-import jalgs.jsim.*;
+import jalgs.jsim.rngs;
 
-import java.awt.*;
-import java.awt.event.*;
-
-import javax.swing.*;
-
-import ij.*;
-import ij.gui.*;
-import ij.plugin.frame.RoiManager;
-import ij.process.*;
-
+import java.awt.Choice;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.Label;
+import java.awt.Rectangle;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import javax.swing.JButton;
+import javax.swing.JPanel;
 
 public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemListener,ImageListener{
 	//in this version the data cube is static while the viewer rotates
@@ -247,12 +273,12 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 		this.thresh=new float[channels];
 		for(int i=0;i<channels;i++)
 			this.thresh[i]=thresh;
-		newzslices=(int)(zratio*(float)slices);
+		newzslices=(int)(zratio*slices);
 		maxsize=(int)Math.sqrt(width*width+height*height+newzslices*newzslices);
 		xrem=(maxsize-width)/2;
 		yrem=(maxsize-height)/2;
 		zrem=(maxsize-newzslices)/2;
-		zremcorr=(int)((float)zrem/zratio);
+		zremcorr=(int)(zrem/zratio);
 		lines=new line3D[maxsize*maxsize];
 		elements=new element3D[maxsize*maxsize];
 		for(int i=0;i<maxsize;i++){
@@ -306,7 +332,7 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 			imagetype=2;
 		r.setrotation((int)xrot,(int)yrot,(int)zrot);
 		r2.setrotation((int)xrot,(int)yrot,(int)zrot);
-		topindex=(int)(0.5f*(float)maxsize);
+		topindex=(int)(0.5f*maxsize);
 		centerindex=topindex*maxsize+topindex;
 		ImagePlus.addImageListener(this);
 		update_image();
@@ -364,7 +390,7 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 			float[][] profile=new float[channels][];
 			float[][][] straightened=new float[channels][][];
 			for(int j=0;j<channels;j++){
-				Object[] stack2=jutils.get3DZSeries(stack,currchan,j,frames,slices,channels);
+				Object[] stack2=jutils.get3DZSeries(stack,j,currframe,frames,slices,channels);
 				profile[j]=profiler.get3DThickProfile(stack2,width,height,coords[0],coords[1],coords[2],false,linethickness,0,zratio);
 				straightened[j]=profiler.get3DThickStraightened(stack2,width,height,coords[0],coords[1],coords[2],false,linethickness,0,zratio);
 			}
@@ -418,11 +444,20 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 			ImageWindow[] iw=jutils.selectPlotFamily(true,1);
 			if(iw==null) return;
 			if(iw[0]!=null){
+				GenericDialog gd=new GenericDialog("Options");
+				gd.addCheckbox("Scale Profile",true);
+				gd.showDialog(); if(gd.wasCanceled()){return;}
+				boolean scaleprof=gd.getNextBoolean();
+				float psize=(float)jutils.get_psize(srcimp);
 				float[][] xvals=(float[][])jutils.runPW4VoidMethod(iw[0],"getXValues");
 				float[][] yvals=(float[][])jutils.runPW4VoidMethod(iw[0],"getYValues");
 				float[][][] zvals=(float[][][])jutils.runPW4VoidMethod(iw[0],"getZValues");
     			for(int i=0;i<xvals[0].length;i++){
-    				spot3D spot=new spot3D((int)xvals[0][i]+xrem,(int)yvals[0][i]+yrem,(int)zvals[0][0][i]+zrem,0,Color.white);
+    				float x=xvals[0][i];
+    				float y=yvals[0][i];
+    				float z=zvals[0][0][i];
+    				if(scaleprof){x/=psize; y/=psize; z/=psize;}
+    				spot3D spot=new spot3D((int)x+xrem,(int)y+yrem,(int)z+zrem,0,Color.white);
     				r2.addelement(spot);
     				roichoice.add(""+(r2.elements.length-1));
     			}
@@ -434,7 +469,7 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
     				int x=rois[i].getBounds().x;
     				int y=rois[i].getBounds().y;
     				int z=rois[i].getPosition();
-    				z=(int)((float)z*zratio);
+    				z=(int)(z*zratio);
     				spot3D spot=new spot3D(x+xrem,y+yrem,z+zrem,0,Color.white);
     				r2.addelement(spot);
     				roichoice.add(""+(r2.elements.length-1));
@@ -481,7 +516,7 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 			} else {
     			IJ.showStatus("deleting"+selroi);
     			r2.removeelement(selroi-1);
-    			roichoice.remove(selroi-1);
+    			roichoice.remove(selroi);
     			roichoice.select(0);
 			}
 		}
@@ -609,7 +644,7 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 	public float get_3D_nearest_value(float x,float y,float z,int channel){
 		int x2=Math.round(x)-xrem;
 		int y2=Math.round(y)-yrem;
-		float scaledz=z-(float)zremcorr;
+		float scaledz=z-zremcorr;
 		int z2=Math.round(scaledz);
 		if(x2<0) return 0.0f;
 		if(y2<0) return 0.0f;
@@ -628,11 +663,11 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 
 	public float interpolatez(int index,float scaledz,int channel){
 		int zprev=(int)scaledz;
-		if(scaledz==(float)zprev) return get_value(index,zprev,channel);
+		if(scaledz==zprev) return get_value(index,zprev,channel);
 		if(zprev<0) return 0.0f;
 		int znext=zprev+1;
 		if(znext>=slices) return 0.0f;
-		float zrem2=scaledz-(float)zprev;
+		float zrem2=scaledz-zprev;
 		float z1=get_value(index,zprev,channel);
 		float z2=get_value(index,znext,channel);
 		return z1+zrem2*(z2-z1);
@@ -641,9 +676,9 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 	public float randinterpz(int index,float scaledz,int channel){
 		int zprev=(int)scaledz;
 		if(zprev<0) return 0.0f;
-		if(scaledz==(float)zprev) return get_value(index,zprev,channel);
+		if(scaledz==zprev) return get_value(index,zprev,channel);
 		if(zprev>=(slices-1)) return 0.0f;
-		float zrem2=scaledz-(float)zprev;
+		float zrem2=scaledz-zprev;
 		if((float)random.unidev(1.0,0.0)<zrem2) return get_value(index,zprev,channel);
 		else return get_value(index,zprev+1,channel);
 	}
@@ -725,13 +760,13 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 		float[] temp2=get_closest_dist(lines[maxsize-1],pt);
 		float d1=temp1[0];
 		float d2=temp2[0];
-		float d3=(float)maxsize;
+		float d3=maxsize;
 		//now triangulate
 		double costheta1=(d1*d1-d2*d2+d3*d3)/(2.0*d1*d3);
 		double costheta2=(d2*d2-d1*d1+d3*d3)/(2.0*d2*d3);
 		double sintheta1=Math.sqrt(1.0-costheta1*costheta1);
-		double x2=d3-(double)d2*costheta2;
-		double y2=(double)d1*sintheta1;
+		double x2=d3-d2*costheta2;
+		double y2=d1*sintheta1;
 		//IJ.log("distances: "+d1+" , "+d2);
 		return new double[]{x2,y2,0.5*(temp1[1]+temp2[1])};
 	}
@@ -765,10 +800,10 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 
 	public float get_value(int index,int index2){
 		if(imagetype==0){
-			return (float)(((byte[])stack.getPixels(index2+1))[index]&0xff);
+			return ((byte[])stack.getPixels(index2+1))[index]&0xff;
 		}else{
 			if(imagetype==1){
-				return (float)(((short[])stack.getPixels(index2+1))[index]&0xffff);
+				return ((short[])stack.getPixels(index2+1))[index]&0xffff;
 			}else{
 				return ((float[])stack.getPixels(index2+1))[index];
 			}
@@ -786,12 +821,12 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 			x+=xinc;
 			y+=yinc;
 			z+=scaledzinc;
-			if(x<(float)(xrem+xstart1)) continue;
-			if(y<(float)(yrem+ystart1)) continue;
-			if(z<(float)(zremcorr+zstart1)) continue;
-			if(x>=(float)(xrem+xend1)) continue;
-			if(y>=(float)(yrem+yend1)) continue;
-			if(z>=(float)(zremcorr+zend1)) continue;
+			if(x<xrem+xstart1) continue;
+			if(y<yrem+ystart1) continue;
+			if(z<zremcorr+zstart1) continue;
+			if(x>=xrem+xend1) continue;
+			if(y>=yrem+yend1) continue;
+			if(z>=zremcorr+zend1) continue;
 			float temp=get_3D_nearest_value(x,y,z,channel);
 			if(temp<thresh[channel]) temp=0.0f;
 			if(projmeth==0){
@@ -803,7 +838,7 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 				max+=temp;
 			}
 		}
-		if(projmeth==2) max/=(float)length;
+		if(projmeth==2) max/=length;
 		return max;
 	}
 	
@@ -829,32 +864,32 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 			x+=xinc;
 			y+=yinc;
 			z+=scaledzinc;
-			if(x<(float)(xrem+xstart1)) continue;
-			if(y<(float)(yrem+ystart1)) continue;
-			if(z<(float)(zremcorr+zstart1)) continue;
-			if(x>=(float)(xrem+xend1)) continue;
-			if(y>=(float)(yrem+yend1)) continue;
-			if(z>=(float)(zremcorr+zend1)) continue;
+			if(x<xrem+xstart1) continue;
+			if(y<yrem+ystart1) continue;
+			if(z<zremcorr+zstart1) continue;
+			if(x>=xrem+xend1) continue;
+			if(y>=yrem+yend1) continue;
+			if(z>=zremcorr+zend1) continue;
 			float temp=get_3D_nearest_value(x,y,z,channel);
 			if(temp<thresh[channel]) temp=0.0f;
 			if(projmeth==0){
-				if(temp>max){max=temp; maxk=(float)k; maxx=x; maxy=y; maxz=z*zratio;}
+				if(temp>max){max=temp; maxk=k; maxx=x; maxy=y; maxz=z*zratio;}
 			} else if(projmeth==1){
 				max=temp;
-				if(temp>0.0f) return new float[]{max,(float)k, maxx=x, maxy=y, maxz=z*zratio};
+				if(temp>0.0f) return new float[]{max,k, maxx=x, maxy=y, maxz=z*zratio};
 			} else {
 				max+=temp;
-				maxk+=temp*(float)k;
+				maxk+=temp*k;
 			}
 		}
 		if(projmeth==2){
 			maxk/=max;
-			max/=(float)maxsize;
+			max/=maxsize;
 			maxx=xstart+xinc*maxk;
 			maxy=ystart+yinc*maxk;
 			maxz=zstart+zinc*maxk;
 		}
-		return new float[]{max,(float)maxk,maxx,maxy,maxz};
+		return new float[]{max,maxk,maxx,maxy,maxz};
 	}
 
 	public void make_movie(){
@@ -1046,7 +1081,7 @@ class interp_line_v2 implements Runnable{
 	public float get_3D_nearest_value2(float x,float y,float z,int channel){
 		int x2=Math.round(x)-intparams[5];
 		int y2=Math.round(y)-intparams[6];
-		float scaledz=z-(float)intparams[7];
+		float scaledz=z-intparams[7];
 		int z2=Math.round(scaledz);
 		if(x2<0) return 0.0f;
 		if(y2<0) return 0.0f;
@@ -1066,11 +1101,11 @@ class interp_line_v2 implements Runnable{
 	//these are 0maxsize,1channels,2slices,3frames,4xystep,5xrem,6yrem,7zremcorr,8method,9currframe,10imagetype,11projmeth
 	public float interpolatez2(int index,float scaledz,int channel){
 		int zprev=(int)scaledz;
-		if(scaledz==(float)zprev) return get_value2(index,zprev,channel);
+		if(scaledz==zprev) return get_value2(index,zprev,channel);
 		if(zprev<0) return 0.0f;
 		int znext=zprev+1;
 		if(znext>=intparams[2]) return 0.0f;
-		float zrem2=scaledz-(float)zprev;
+		float zrem2=scaledz-zprev;
 		float z1=get_value2(index,zprev,channel);
 		float z2=get_value2(index,znext,channel);
 		return z1+zrem2*(z2-z1);
@@ -1079,9 +1114,9 @@ class interp_line_v2 implements Runnable{
 	public float randinterpz2(int index,float scaledz,int channel){
 		int zprev=(int)scaledz;
 		if(zprev<0) return 0.0f;
-		if(scaledz==(float)zprev) return get_value2(index,zprev,channel);
+		if(scaledz==zprev) return get_value2(index,zprev,channel);
 		if(zprev>=(intparams[2]-1)) return 0.0f;
-		float zrem2=scaledz-(float)zprev;
+		float zrem2=scaledz-zprev;
 		if((float)random.unidev(1.0,0.0)<zrem2) return get_value2(index,zprev,channel);
 		else return get_value2(index,zprev+1,channel);
 	}
@@ -1095,11 +1130,11 @@ class interp_line_v2 implements Runnable{
 	public float get_value2(int index,int index2){
 		if(intparams[10]==0){
 			//return (float)(((byte[])stack.getPixels(index2+1))[index]&0xff);
-			return (float)(((byte[])stack[index2])[index]&0xff);
+			return ((byte[])stack[index2])[index]&0xff;
 		}else{
 			if(intparams[10]==1){
 				//return (float)(((short[])stack.getPixels(index2+1))[index]&0xffff);
-				return (float)(((short[])stack[index2])[index]&0xffff);
+				return ((short[])stack[index2])[index]&0xffff;
 			}else{
 				return ((float[])stack[index2])[index];
 				//return ((float[])stack.getPixels(index2+1))[index];
@@ -1118,12 +1153,12 @@ class interp_line_v2 implements Runnable{
 			x+=xinc;
 			y+=yinc;
 			z+=scaledzinc;
-			if(x<(float)(intparams[5]+intparams[12])) continue;
-			if(y<(float)(intparams[6]+intparams[14])) continue;
-			if(z<(float)(intparams[7]+intparams[16])) continue;
-			if(x>=(float)(intparams[5]+intparams[13])) continue;
-			if(y>=(float)(intparams[6]+intparams[15])) continue;
-			if(z>=(float)(intparams[7]+intparams[17])) continue;
+			if(x<intparams[5]+intparams[12]) continue;
+			if(y<intparams[6]+intparams[14]) continue;
+			if(z<intparams[7]+intparams[16]) continue;
+			if(x>=intparams[5]+intparams[13]) continue;
+			if(y>=intparams[6]+intparams[15]) continue;
+			if(z>=intparams[7]+intparams[17]) continue;
 			float temp=get_3D_nearest_value2(x,y,z,channel);
 			if(temp<fltparams[7]) temp=0.0f;
 			if(intparams[8]==0){
@@ -1135,7 +1170,7 @@ class interp_line_v2 implements Runnable{
 				max+=temp;
 			}
 		}
-		if(intparams[8]==2) max/=(float)length;
+		if(intparams[8]==2) max/=length;
 		return max;
 	}
 	

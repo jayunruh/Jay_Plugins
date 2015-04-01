@@ -30,10 +30,10 @@ public class arrow3D extends line3D{
 		if(length==0.0f){
 			return;
 		}
-		float xinc=(float)(x2-x1)/length;
-		float yinc=(float)(y2-y1)/length;
-		float crossx=(float)x2-xinc*5.0f;
-		float crossy=(float)y2-yinc*5.0f;
+		float xinc=(x2-x1)/length;
+		float yinc=(y2-y1)/length;
+		float crossx=x2-xinc*5.0f;
+		float crossy=y2-yinc*5.0f;
 		float x3=crossx-yinc*3.5f;
 		float x4=crossx+yinc*3.5f;
 		float y3=crossy+xinc*3.5f;

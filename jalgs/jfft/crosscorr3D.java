@@ -77,8 +77,8 @@ public class crosscorr3D{
 				im2[i]=new float[width*height];
 			}
 		}
-		avg1/=((double)width*(double)height*(double)slices);
-		avg2/=((double)width*(double)height*(double)slices);
+		avg1/=((double)width*(double)height*slices);
+		avg2/=((double)width*(double)height*slices);
 		fft.dorealfft3D(real1,im1,false);
 		fft.dorealfft3D(real2,im2,false);
 		for(int i=0;i<slices;i++){
@@ -92,14 +92,14 @@ public class crosscorr3D{
 			}
 		}
 		fft.dorealfft3D(real1,im1,true);
-		float tempfloat=(float)width*(float)height*(float)slices*(float)(avg1*avg2);
+		float tempfloat=(float)width*(float)height*slices*(float)(avg1*avg2);
 		for(int i=0;i<slices;i++){
 			for(int j=0;j<width*height;j++){
 				((float[])real1[i])[j]/=tempfloat;
 				((float[])real1[i])[j]-=1.0f;
 			}
 			if(doshiftxycenter){
-				real1[i]=(Object)shiftxycenter((float[])real1[i]);
+				real1[i]=shiftxycenter((float[])real1[i]);
 			}
 		}
 		return real1;

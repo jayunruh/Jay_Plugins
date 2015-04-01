@@ -8,16 +8,31 @@
 
 package jguis;
 
-import jalgs.*;
-import jalgs.jfit.*;
+import ij.IJ;
+import ij.gui.GenericDialog;
+import jalgs.jdist;
+import jalgs.jfit.NLLSfit;
+import jalgs.jfit.NLLSfitinterface;
+import jalgs.jfit.NLLSglobalfit;
+import jalgs.jfit.support_plane_errors;
 
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.Button;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Insets;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
-import javax.swing.event.*;
-
-import ij.*;
-import ij.gui.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
 
 public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfitinterface,ListSelectionListener,TableModelListener{
 
@@ -26,6 +41,7 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 	public Dimension totalSize=new Dimension();
 
 	private Button fitavgbutton,fitglobalbutton,clearparamsbutton,undobutton,geterrorsbutton;
+	private Button editconsbutton;
 	private PlotWindow4 pwavg,pwfit,pwavgtraj,pwfittraj;
 	private int ncurves,nparams,npts,dispcurve,psfflag;
 	private int[] nmeas,indices;
@@ -85,7 +101,7 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 		avgs=avg1;
 		vars=var1;
 		brightcorr=brightcorr1;
-		khz=(double)khz1;
+		khz=khz1;
 		trajectories=trajectories1;
 		ncurves=corr.length;
 		nparams=11;
@@ -193,6 +209,11 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 		undobutton.setBounds(buttonsx,starty-25+50+50+50+30+30+50,100,40);
 		undobutton.addActionListener(this);
 		add(undobutton);
+		
+		editconsbutton=new Button("Edit Constraints");
+		editconsbutton.setBounds(buttonsx,starty-25+50+50+50+30+30+50+50+50,100,40);
+		editconsbutton.addActionListener(this);
+		add(editconsbutton);
 
 		geterrorsbutton=new Button("Get Errors");
 		geterrorsbutton.setBounds(buttonsx,starty-25+50+50+50+30+30+50+50+50+50,100,40);
@@ -309,6 +330,9 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 		}
 		if(e.getSource()==geterrorsbutton){
 			geterrors();
+		}
+		if(e.getSource()==editconsbutton){
+			showconstraintsdialog();
 		}
 	}
 
@@ -719,6 +743,30 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 			updatebeta();
 		}
 	}
+	
+	private boolean showconstraintsdialog(){
+		int nparams=avgparams.length;
+		Object[][] tabledata=new Object[nparams][3];
+		String[] columnlabels={"Parameters","Lower Limit","Upper Limit"};
+		for(int i=0;i<nparams;i++){
+			tabledata[i][0]=paramsnames[i];
+			tabledata[i][1]=avgconstraints[0][i];
+			tabledata[i][2]=avgconstraints[1][i];
+		}
+		Object[][] retvals=jguis.TableDialog2.showDialog(null,null,"Avg Constraints",columnlabels,tabledata,null);
+		if(retvals==null){
+			return false;
+		}
+		for(int i=0;i<nparams;i++){
+			avgconstraints[0][i]=((Double)retvals[i][1]).doubleValue();
+			avgconstraints[1][i]=((Double)retvals[i][2]).doubleValue();
+			for(int j=0;j<ncurves;j++){
+				globalconstraints[0][j][i]=avgconstraints[0][i];
+				globalconstraints[1][j][i]=avgconstraints[1][i];
+			}
+		}
+		return true;
+	}
 
 	private boolean showfitdialog(){
 		int nparams=avgparams.length;
@@ -919,7 +967,7 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 			return;
 		}
 		conf=0.01f*(float)gd.getNextNumber();
-		int paramindex=(int)gd.getNextChoiceIndex();
+		int paramindex=gd.getNextChoiceIndex();
 		spacing=0.01*gd.getNextNumber();
 		globalerror=gd.getNextBoolean();
 		dataset=(int)gd.getNextNumber();
@@ -967,7 +1015,7 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 			int dofnum=3*npts*nsel-(nfit-1)-1;
 			int dofden=3*npts*nsel-nfit-1;
 			// double flim=FLimit(dofnum,dofden,(double)conf);
-			double flim=(new jdist()).FLimit(dofnum,dofden,(double)conf);
+			double flim=(new jdist()).FLimit(dofnum,dofden,conf);
 			IJ.log("FLimit = "+(float)flim);
 			if(flim==Double.NaN&&flim<1.0){
 				IJ.showMessage("Invalid Limiting F Value");
@@ -1002,7 +1050,7 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 			}
 			int dofnum=3*npts-(nfit-1)-1;
 			int dofden=3*npts-nfit-1;
-			double flim=(new jdist()).FLimit(dofnum,dofden,(double)conf);
+			double flim=(new jdist()).FLimit(dofnum,dofden,conf);
 			IJ.log("FLimit = "+(float)flim);
 			if(flim==Double.NaN&&flim<1.0){
 				IJ.showMessage("Invalid Limiting F Value");
@@ -1023,17 +1071,17 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 
 	private void getintbright(){
 		for(int i=0;i<ncurves;i++){
-			intensity1[i]=khz*(double)avgs[0][i];
-			intensity2[i]=khz*(double)avgs[1][i];
-			g01[i]=(double)((vars[0][i]-avgs[0][i])/(avgs[0][i]*avgs[0][i]));
-			g02[i]=(double)((vars[1][i]-avgs[1][i])/(avgs[1][i]*avgs[1][i]));
-			g0cc[i]=(double)((vars[2][i])/(avgs[0][i]*avgs[1][i]));
-			g0mincc[i]=(double)((g01[i]*beta*intensity1[i])/intensity2[i]);
+			intensity1[i]=khz*avgs[0][i];
+			intensity2[i]=khz*avgs[1][i];
+			g01[i]=(vars[0][i]-avgs[0][i])/(avgs[0][i]*avgs[0][i]);
+			g02[i]=(vars[1][i]-avgs[1][i])/(avgs[1][i]*avgs[1][i]);
+			g0cc[i]=(vars[2][i])/(avgs[0][i]*avgs[1][i]);
+			g0mincc[i]=(g01[i]*beta*intensity1[i])/intensity2[i];
 			if(brightcorr){
 				g01[i]*=khz*avgs[0][i];
 				g02[i]*=khz*avgs[1][i];
 				g0cc[i]*=khz*Math.sqrt(avgs[0][i]*avgs[1][i]);
-				g0mincc[i]=(double)(g01[i]*beta)*Math.sqrt(intensity1[i]/intensity2[i]);
+				g0mincc[i]=g01[i]*beta*Math.sqrt(intensity1[i]/intensity2[i]);
 			}
 		}
 	}
@@ -1073,21 +1121,21 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 		}
 		for(int j=0;j<3;j++){
 			for(int k=0;k<npts;k++){
-				avg[j][k]/=(float)ninclude;
+				avg[j][k]/=ninclude;
 			}
 		}
 		if(trajectories!=null){
 			for(int j=0;j<2;j++){
 				for(int k=0;k<trajectories[0][0].length;k++){
-					avgtraj[j][k]/=(float)ninclude;
+					avgtraj[j][k]/=ninclude;
 				}
 			}
 		}
-		tempavg/=(double)ninclude;
-		tempavg2/=(double)ninclude;
-		tempvar/=(double)ninclude;
-		tempvar2/=(double)ninclude;
-		tempvar3/=(double)ninclude;
+		tempavg/=ninclude;
+		tempavg2/=ninclude;
+		tempvar/=ninclude;
+		tempvar2/=ninclude;
+		tempvar3/=ninclude;
 		intensity1[ncurves]=khz*tempavg;
 		intensity2[ncurves]=khz*tempavg2;
 		g01[ncurves]=(tempvar-tempavg)/(tempavg*tempavg);
@@ -1098,7 +1146,7 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 			g01[ncurves]*=khz*tempavg;
 			g02[ncurves]*=khz*tempavg2;
 			g0cc[ncurves]*=khz*Math.sqrt(tempavg*tempavg2);
-			g0mincc[ncurves]=(double)(g01[ncurves]*beta)*Math.sqrt(intensity1[ncurves]/intensity2[ncurves]);
+			g0mincc[ncurves]=g01[ncurves]*beta*Math.sqrt(intensity1[ncurves]/intensity2[ncurves]);
 		}
 	}
 
@@ -1142,8 +1190,8 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 		int remvar=indvar-curveindex*3*npts;
 		int acindex=(int)((double)remvar/(double)(npts));
 		remvar-=npts*acindex;
-		double t_td1=(double)xvals[0][0][remvar]/(params[acindex*7+3]/1000.0);
-		double t_td2=(double)xvals[0][0][remvar]/(params[acindex*7+5]/1000.0);
+		double t_td1=xvals[0][0][remvar]/(params[acindex*7+3]/1000.0);
+		double t_td2=xvals[0][0][remvar]/(params[acindex*7+5]/1000.0);
 		double factor=1.0/(params[0]*params[0]);
 		double temp1=1.0/(1.0+t_td1);
 		if(psfflag==2)

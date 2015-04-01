@@ -8,10 +8,21 @@
 
 package jguis;
 
-import ij.text.*;
-import jalgs.*;
+import ij.IJ;
+import ij.text.TextPanel;
+import ij.text.TextWindow;
+import jalgs.jstatistics;
 
-import java.util.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
 public class table_tools{
 	// here we have static utility methods for working with ImageJ table panels
@@ -28,6 +39,22 @@ public class table_tools{
 			temp=line.substring(0);
 		}
 		return temp.split(delim);
+	}
+	
+	public static String[] split(String line,String delim,boolean noconsec){
+		String temp;
+		if(line.endsWith(delim)){
+			temp=line.substring(0,line.length()-delim.length());
+		}else{
+			temp=line.substring(0);
+		}
+		String[] temp2=temp.split(delim);
+		if(!noconsec) return temp2;
+		List<String> nonnulls=new ArrayList<String>();
+		for(int i=0;i<temp2.length;i++){
+			if(temp2[i].length()>0) nonnulls.add(temp2[i]);
+		}
+		return list2stringarray(nonnulls);
 	}
 
 	public static boolean is_number(String snumber){
@@ -98,16 +125,29 @@ public class table_tools{
 			new_labels[i]=new_labels[i].replace('-','_');
 			new_labels[i]=new_labels[i].replace('/','_');
 			new_labels[i]=new_labels[i].replace('#','_');
+			new_labels[i]=new_labels[i].replace('[','_');
+			new_labels[i]=new_labels[i].replace(']','_');
+			new_labels[i]=new_labels[i].replace('\"','_');
 			//IJ.log(new_col_labels[i]);
 		}
 		return new_labels;
 	}
 
 	public static String createcollabels(int ncols,String prefix){
+		return createcollabels(ncols,prefix,0);
+	}
+	
+	public static String createcollabels(int ncols,String prefix,int delim){
 		StringBuffer sb=new StringBuffer();
 		sb.append(prefix+"1");
+		String sep="\t";
+		if(delim==1)
+			sep=",";
+		if(delim==2)
+			sep=" ";
+		if(delim==3) sep="\n";
 		for(int i=1;i<ncols;i++){
-			sb.append("\t"+prefix+(i+1));
+			sb.append(sep+prefix+(i+1));
 		}
 		return sb.toString();
 	}
@@ -130,6 +170,46 @@ public class table_tools{
 			retarray[i]=split_string_tab(line);
 		}
 		return retarray;
+	}
+	
+	public static List<List<String>> getTableFromFile(File infile,String delim,boolean noconsec){
+		try{
+			BufferedReader b=new BufferedReader(new FileReader(infile));
+			List<String> lines=new ArrayList<String>();
+			String temp=b.readLine();
+			while(temp!=null && temp.length()>1){
+				lines.add(temp);
+				temp=b.readLine();
+			}
+			List<List<String>> listtable=table_tools.table2listtable(lines,delim,noconsec);
+			lines=null;
+			b.close();
+			return listtable;
+		}
+		catch(IOException e){
+			IJ.error("File Reader",e.getMessage());
+			return null;
+		}
+	}
+	
+	public static boolean writeTableToFile(String path,String[] collabels,List<List<String>> listtable,int delim){
+		String temp=null;
+		if(collabels!=null) temp=print_string_array(collabels,delim);
+		if(temp==null) temp=createcollabels(listtable.get(0).size(),"Col",delim);
+		return writeTableToFile(path,temp,print_listtable(listtable,delim));
+	}
+	
+	public static boolean writeTableToFile(String path,String collabels,String listtable){
+		try{
+			BufferedWriter b=new BufferedWriter(new FileWriter(new File(path)));
+			if(collabels!=null) b.write(collabels+"\n");
+			b.write(listtable);
+			b.close();
+			return true;
+		} catch(IOException e){
+			IJ.error("error writing file",e.getMessage());
+			return false;
+		}
 	}
 
 	public static List<List<String>> table2listtable(TextPanel tp){
@@ -159,9 +239,7 @@ public class table_tools{
 	public static List<List<String>> table2listtable(String[] lines,String delim){
 		int nlines=lines.length;
 		// eliminate empty lines at the end
-		while(lines[nlines-1]==null||lines[nlines-1].equals("")){
-			nlines--;
-		}
+		while(lines[nlines-1]==null||lines[nlines-1].equals("")){nlines--;}
 		return table2listtable(lines,delim,nlines);
 	}
 
@@ -182,13 +260,36 @@ public class table_tools{
 		}
 		return retvals;
 	}
+	
+	public static List<List<String>> table2listtable(String[] lines,String delim,boolean noconsec){
+		int nlines=lines.length;
+		// eliminate empty lines at the end
+		while(lines[nlines-1]==null||lines[nlines-1].equals("")){nlines--;}
+		return table2listtable(lines,delim,nlines,noconsec);
+	}
+	
+	public static List<List<String>> table2listtable(String[] lines,String delim,int nlines,boolean noconsec){
+		List<List<String>> retvals=new ArrayList<List<String>>();
+		int longest=0;
+		for(int i=0;i<nlines;i++){
+			String line=lines[i];
+			String[] temp2=split(line,delim,noconsec);
+			List<String> temp=stringarray2list(temp2);
+			if(i==0){
+				longest=temp.size();
+			}
+			for(int j=temp.size();j<longest;j++){
+				temp.add("");
+			}
+			retvals.add(temp);
+		}
+		return retvals;
+	}
 
 	public static List<List<String>> table2listtable(List<String> lines,String delim){
 		int nlines=lines.size();
 		// eliminate empty lines at the end
-		while(lines.get(nlines-1)==null||lines.get(nlines-1).equals("")){
-			nlines--;
-		}
+		while(lines.get(nlines-1)==null||lines.get(nlines-1).equals("")){nlines--;}
 		return table2listtable(lines,delim,nlines);
 	}
 
@@ -198,6 +299,31 @@ public class table_tools{
 		for(int i=0;i<nlines;i++){
 			String line=lines.get(i);
 			String[] temp2=split(line,delim);
+			List<String> temp=stringarray2list(temp2);
+			if(i==0){
+				longest=temp.size();
+			}
+			for(int j=temp.size();j<longest;j++){
+				temp.add("");
+			}
+			retvals.add(temp);
+		}
+		return retvals;
+	}
+	
+	public static List<List<String>> table2listtable(List<String> lines,String delim,boolean noconsec){
+		int nlines=lines.size();
+		// eliminate empty lines at the end
+		while(lines.get(nlines-1)==null||lines.get(nlines-1).equals("")){nlines--;}
+		return table2listtable(lines,delim,nlines,noconsec);
+	}
+
+	public static List<List<String>> table2listtable(List<String> lines,String delim,int nlines,boolean noconsec){
+		List<List<String>> retvals=new ArrayList<List<String>>();
+		int longest=0;
+		for(int i=0;i<nlines;i++){
+			String line=lines.get(i);
+			String[] temp2=split(line,delim,noconsec);
 			List<String> temp=stringarray2list(temp2);
 			if(i==0){
 				longest=temp.size();
@@ -236,14 +362,41 @@ public class table_tools{
 		}
 		return temp;
 	}
+	
+	public static String[] list2stringarray(List<String> arr){
+		String[] temp=new String[arr.size()];
+		for(int i=0;i<arr.size();i++){
+			temp[i]=arr.get(i);
+		}
+		return temp;
+	}
 
 	public static void sort_listtable(List<List<String>> list,int sortcolumn){
 		final int tempcolumn=sortcolumn;
 		Collections.sort(list,new Comparator<List<String>>(){
 			public int compare(List<String> o1,List<String> o2){
 				return o1.get(tempcolumn).compareTo(o2.get(tempcolumn));
+				//String temp1=o1.get(tempcolumn).trim().toUpperCase();
+				//String temp2=o2.get(tempcolumn).trim().toUpperCase();
+				//return temp1.compareTo(temp2);
 			}
 		});
+	}
+	
+	public static void sort_listtable(List<List<String>> list,int sortcolumn,boolean numeric){
+		if(!numeric){sort_listtable(list,sortcolumn); return;}
+		final int tempcolumn=sortcolumn;
+		Collections.sort(list,new Comparator<List<String>>(){
+			public int compare(List<String> o1,List<String> o2){
+				float temp1=Float.parseFloat(o1.get(tempcolumn));
+				float temp2=Float.parseFloat(o2.get(tempcolumn));
+				return Float.compare(temp1,temp2);
+			}
+		});
+	}
+	
+	public static void reverse_listtable(List<List<String>> list){
+		Collections.reverse(list);
 	}
 
 	public static boolean filter_listtable(List<List<String>> list,float[][] filters){
@@ -310,10 +463,14 @@ public class table_tools{
 	}
 
 	public static List<List<String>> get_cell_stat_list(List<List<String>> list,int cellcolumn,String stat){
+		return get_cell_stat_list(list,cellcolumn,stat,false);
+	}
+	
+	public static List<List<String>> get_cell_stat_list(List<List<String>> list,int cellcolumn,String stat,boolean addct){
 		List<String> celllist=get_cell_list(list,cellcolumn);
 		List<List<String>> rettable=new ArrayList<List<String>>();
 		for(int i=0;i<celllist.size();i++){
-			List<String> cellstat=get_cell_stat(list,cellcolumn,celllist.get(i),stat);
+			List<String> cellstat=get_cell_stat(list,cellcolumn,celllist.get(i),stat,addct);
 			rettable.add(cellstat);
 		}
 		return rettable;
@@ -408,10 +565,28 @@ public class table_tools{
 		}
 		return table2;
 	}
+	
+	public static List<List<String>> cells2listtable(List<List<List<String>>> cellstable){
+		List<List<String>> temptable=new ArrayList<List<String>>();
+		for(int i=0;i<cellstable.size();i++){
+			List<List<String>> celltable=cellstable.get(i);
+			for(int j=0;j<celltable.size();j++){
+				temptable.add(celltable.get(j));
+			}
+		}
+		return temptable;
+	}
 
 	public static List<String> get_cell_stat(List<List<String>> list,int cellcolumn,String cellid,String stat){
+		return get_cell_stat(list,cellcolumn,cellid,stat,false);
+	}
+	
+	public static List<String> get_cell_stat(List<List<String>> list,int cellcolumn,String cellid,String stat,boolean addct){
 		List<List<String>> celltable=get_cell_listtable(list,cellcolumn,cellid);
-		return table_tools.get_table_stat(celltable,stat);
+		List<String> stats=table_tools.get_table_stat(celltable,stat);
+		stats.set(cellcolumn,cellid);
+		if(addct) stats.add(""+celltable.size());
+		return stats;
 	}
 
 	public static List<String> get_table_stat(List<List<String>> list,String stat){
@@ -515,6 +690,12 @@ public class table_tools{
 		return sb.substring(0,sb.length()-1);
 	}
 
+	/*****************
+	 * prints a 2D arraylist with tab, comma, or space delimiting
+	 * @param list
+	 * @param delim: 0=tab,1=comma, 2=space
+	 * @return
+	 */
 	public static String print_listtable(List<List<String>> list,int delim){
 		// delims are tab,comma,space
 		StringBuffer retvals=new StringBuffer();
@@ -564,6 +745,15 @@ public class table_tools{
 		}
 		new TextWindow(title2,print_string_array(labels),print_listtable(list),400,200);
 	}
+	
+	public static void create_table(String title,List<List<String>> list){
+		//here the column labels are in the first row
+		//warning: the first row is removed by this subroutine
+		String[] collabels=list2stringarray(list.get(0));
+		list.remove(0);
+		create_table(title,list,collabels);
+		int ncolumns=list.get(0).size();
+	}
 
 	public static void create_table(String title,float[][] list,String[] collabels){
 		int ncolumns=list[0].length;
@@ -598,6 +788,12 @@ public class table_tools{
 		return retvals.toString();
 	}
 
+	/*****************
+	 * prints a 1D arraylist with tab, comma, or space delimiting
+	 * @param data
+	 * @param delim: 0=tab,1=comma, 2=space
+	 * @return
+	 */
 	public static String print_string_array(List<String> data,int delim){
 		// delims are tab,comma,space
 		StringBuffer retvals=new StringBuffer();
@@ -613,6 +809,12 @@ public class table_tools{
 		return retvals.toString();
 	}
 
+	/*****************
+	 * prints a 1D arraylist with tab, comma, or space delimiting
+	 * @param data
+	 * @param delim: 0=tab,1=comma, 2=space
+	 * @return
+	 */
 	public static String print_string_array(String[] data,int delim){
 		// delims are tab,comma,space
 		StringBuffer retvals=new StringBuffer();
@@ -717,9 +919,10 @@ public class table_tools{
 		final int tempcolumn=column;
 		int index=Collections.binarySearch(list,key,new Comparator<List<String>>(){
 			public int compare(List<String> o1,List<String> o2){
-				String temp1=o1.get(tempcolumn).trim().toUpperCase();
-				String temp2=o2.get(tempcolumn).trim().toUpperCase();
-				return temp1.compareTo(temp2);
+				return o1.get(tempcolumn).compareTo(o2.get(tempcolumn));
+				//String temp1=o1.get(tempcolumn).trim().toUpperCase();
+				//String temp2=o2.get(tempcolumn).trim().toUpperCase();
+				//return temp1.compareTo(temp2);
 			}
 		});
 		return index;

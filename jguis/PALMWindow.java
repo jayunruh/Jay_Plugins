@@ -8,15 +8,35 @@
 
 package jguis;
 
-import java.awt.*;
-import java.awt.event.*;
-
-import ij.*;
-import ij.process.*;
+import ij.ImagePlus;
 import ij.gui.GenericDialog;
+import ij.process.ColorProcessor;
+import ij.process.FloatProcessor;
+import jalgs.jstatistics;
+import jalgs.jfit.PALMutils;
 
-import jalgs.jfit.*;
-import jalgs.*;
+import java.awt.Button;
+import java.awt.Checkbox;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Label;
+import java.awt.Panel;
+import java.awt.TextField;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.AdjustmentEvent;
+import java.awt.event.AdjustmentListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 public class PALMWindow extends Panel implements ActionListener,AdjustmentListener,MouseListener,MouseMotionListener,ItemListener{
 
@@ -83,10 +103,10 @@ public class PALMWindow extends Panel implements ActionListener,AdjustmentListen
 
 		// initialize all of the variables
 		xmin=0.0f;
-		xmax=(float)(width-1);
+		xmax=width-1;
 		ymin=0.0f;
-		ymax=(float)(height-1);
-		scaling=512.0f/(float)width;
+		ymax=height-1;
+		scaling=512.0f/width;
 
 		c2min=jstatistics.getstatistic("Min",molecules[3],null);
 		c2max=jstatistics.getstatistic("Max",molecules[3],null);
@@ -338,9 +358,9 @@ public class PALMWindow extends Panel implements ActionListener,AdjustmentListen
 		}
 		if(e.getSource()==rescalezoombutton){
 			xmin=0.0f;
-			xmax=(float)(width-1);
+			xmax=width-1;
 			ymin=0.0f;
-			ymax=(float)(height-1);
+			ymax=height-1;
 			xminval.setText(""+xmin);
 			xmaxval.setText(""+xmax);
 			yminval.setText(""+ymin);
@@ -479,8 +499,8 @@ public class PALMWindow extends Panel implements ActionListener,AdjustmentListen
 	public void mouseReleased(MouseEvent e){
 		if(inroi){
 			inroi=false;
-			float xinc=(((float)startx-10.0f)/512.0f)*(xmax-xmin);
-			float yinc=(((float)starty-10.0f)/512.0f)*(ymax-ymin);
+			float xinc=((startx-10.0f)/512.0f)*(xmax-xmin);
+			float yinc=((starty-10.0f)/512.0f)*(ymax-ymin);
 			float xinc2=(((float)startx+(float)roiwidth-10.0f)/512.0f)*(xmax-xmin);
 			float newwidth=xinc2-xinc;
 			xmin+=xinc;
