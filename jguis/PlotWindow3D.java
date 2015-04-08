@@ -574,6 +574,10 @@ public class PlotWindow3D extends ImageWindow implements ActionListener,Clipboar
 		p3.selectSeries(series);
 		updatePlot();
 	}
+	
+	public int getSelected(){
+		return p3.getSelected();
+	}
 
 	public float[][] getXValues(){
 		return p3.getXValues();

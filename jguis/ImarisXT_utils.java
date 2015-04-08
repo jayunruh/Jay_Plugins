@@ -2,6 +2,7 @@ package jguis;
 import jalgs.jdataio;
 import ij.IJ;
 import Imaris.Error;
+import Imaris.IDataContainerPrx;
 import Imaris.IDataSetPrx;
 import Imaris.ISpotsPrx;
 import Imaris.tType;
@@ -11,7 +12,6 @@ import com.bitplane.xt.*;
 public class ImarisXT_utils{
 	
 	public static float[][] getSpotsTraj(boolean pixunits){
-		//ImarisLib vImarisLib=new ImarisLib();
 		BPImarisLib lib=new BPImarisLib();
 		Imaris.IApplicationPrx app=lib.GetApplication(0);
 		if(app==null){IJ.log("Imaris is not open"); return null;}
@@ -81,10 +81,13 @@ public class ImarisXT_utils{
     				coords2[i][2]=coords[2][i]+zoff;
 				}
 				radii[i]=2.0f;
-				indices[i]=i;
+				//indices[i]=i;
+				indices[i]=0; //I think these are the time indices
 			}
 			ISpotsPrx spots=app.GetFactory().CreateSpots();
 			spots.Set(coords2,indices,radii);
+			IDataContainerPrx surpass=app.GetSurpassScene();
+			surpass.AddChild(spots,-1);
 			return true;
 		}catch(Error e){
 			IJ.log((new jdataio()).getExceptionTrace(e));
