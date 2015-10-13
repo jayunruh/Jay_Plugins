@@ -26,6 +26,9 @@ public class fit_roi_gaussian_gridsearch_jru_v1 implements PlugIn, NLLSfitinterf
 		int height=imp.getHeight();
 		int nchannels=imp.getNChannels();
 		Rectangle r=imp.getRoi().getBounds();
+		Color tempc=imp.getRoi().getStrokeColor();
+		String rcolor="yellow";
+		if(tempc!=null) rcolor=jutils.get_closest_color_name(tempc);
 		float[][] charrays=new float[2][];
 		xpts=r.width; ypts=r.height;
 		int centerx=r.x+r.width/2;
@@ -43,11 +46,13 @@ public class fit_roi_gaussian_gridsearch_jru_v1 implements PlugIn, NLLSfitinterf
 		gd2.addNumericField("X_Size (pixels)",xpts,0);
 		gd2.addNumericField("Y_Size (pixels)",ypts,0);
 		gd2.addCheckbox("Single_Channel",true);
+		gd2.addCheckbox("Output_Roi_Color",false);
 		gd2.showDialog(); if(gd2.wasCanceled()){return;}
 		findmax=gd2.getNextBoolean();
 		int xpts=(int)gd2.getNextNumber(); r.width=xpts;
 		int ypts=(int)gd2.getNextNumber(); r.height=ypts;
 		boolean singchan=gd2.getNextBoolean();
+		boolean outcolor=gd2.getNextBoolean();
 		r.x=centerx-xpts/2;
 		r.y=centery-ypts/2;
 		int currz=imp.getSlice();
@@ -161,16 +166,29 @@ public class fit_roi_gaussian_gridsearch_jru_v1 implements PlugIn, NLLSfitinterf
 		if(tableout){
 			TextWindow tw=jutils.selectTable("Gaussian_Output");
 			if(nchannels>1 && !singchan){
-				if(tw==null){
-					tw=new TextWindow("Gaussian_Output","baseline\tamplitude\tstdev\txc\tyc\tzslice\tb1\ta1\tb2\ta2","",400,200);
+				if(outcolor){
+					if(tw==null){
+						tw=new TextWindow("Gaussian_Output","baseline\tamplitude\tstdev\txc\tyc\tzslice\tb1\ta1\tb2\ta2\troicolor","",400,200);
+					}
+					tw.append(""+(float)ampoffset[1]+"\t"+(float)ampoffset[0]+"\t"+(float)params[0]+"\t"+((float)params[1]+xoff)+"\t"+((float)params[2]+yoff)+"\t"+(float)(maxslice+1)+"\t"+(float)champoffset[0][1]+"\t"+(float)champoffset[0][0]+"\t"+(float)champoffset[1][1]+"\t"+(float)champoffset[1][0]+"\t"+rcolor+"\n");
+				} else {
+					if(tw==null){
+						tw=new TextWindow("Gaussian_Output","baseline\tamplitude\tstdev\txc\tyc\tzslice\tb1\ta1\tb2\ta2","",400,200);
+					}
+					tw.append(""+(float)ampoffset[1]+"\t"+(float)ampoffset[0]+"\t"+(float)params[0]+"\t"+((float)params[1]+xoff)+"\t"+((float)params[2]+yoff)+"\t"+(float)(maxslice+1)+"\t"+(float)champoffset[0][1]+"\t"+(float)champoffset[0][0]+"\t"+(float)champoffset[1][1]+"\t"+(float)champoffset[1][0]+"\n");
 				}
-				tw.append(""+(float)ampoffset[1]+"\t"+(float)ampoffset[0]+"\t"+(float)params[0]+"\t"+((float)params[1]+xoff)+"\t"+((float)params[2]+yoff)+"\t"+(float)(maxslice+1)+"\t"+
-				(float)champoffset[0][1]+"\t"+(float)champoffset[0][0]+"\t"+(float)champoffset[1][1]+"\t"+(float)champoffset[1][0]+"\n");
 			} else {
-				if(tw==null){
-					tw=new TextWindow("Gaussian_Output","baseline\tamplitude\tstdev\txc\tyc\tzslice","",400,200);
+				if(outcolor){
+					if(tw==null){
+						tw=new TextWindow("Gaussian_Output","baseline\tamplitude\tstdev\txc\tyc\tzslice\troicolor","",400,200);
+					}
+					tw.append(""+(float)ampoffset[1]+"\t"+(float)ampoffset[0]+"\t"+(float)params[0]+"\t"+((float)params[1]+xoff)+"\t"+((float)params[2]+yoff)+"\t"+(float)(maxslice+1)+"\t"+rcolor+"\n");
+				} else {
+					if(tw==null){
+						tw=new TextWindow("Gaussian_Output","baseline\tamplitude\tstdev\txc\tyc\tzslice","",400,200);
+					}
+					tw.append(""+(float)ampoffset[1]+"\t"+(float)ampoffset[0]+"\t"+(float)params[0]+"\t"+((float)params[1]+xoff)+"\t"+((float)params[2]+yoff)+"\t"+(float)(maxslice+1)+"\n");
 				}
-				tw.append(""+(float)ampoffset[1]+"\t"+(float)ampoffset[0]+"\t"+(float)params[0]+"\t"+((float)params[1]+xoff)+"\t"+((float)params[2]+yoff)+"\t"+(float)(maxslice+1)+"\n");
 			}
 		} else {
 			IJ.log("baseline = "+(float)ampoffset[1]);

@@ -483,6 +483,25 @@ public class jdataio{
 		}
 		return true;
 	}
+	
+	public boolean readintelintfile(InputStream instream,long[] data){
+		int dumint;
+		int length=data.length;
+		byte[] framebytes=new byte[length*4];
+		try{
+			dumint=instream.read(framebytes);
+		}catch(IOException e){
+			return false;
+		}
+		if(dumint<0){
+			return false;
+		}
+		for(int i=0;i<length;i++){
+			int temp=((framebytes[4*i+3]&0xff)<<24)|((framebytes[4*i+2]&0xff)<<16)|((framebytes[4*i+1]&0xff)<<8)|(framebytes[4*i]&0xff);
+			data[i]=temp;
+		}
+		return true;
+	}
 
 	public boolean readintelintfile(InputStream instream,int[] data){
 		return readintelintfile(instream,data.length,data);
@@ -1002,6 +1021,26 @@ public class jdataio{
 	public static String printHexString(String contents){
 		InputStream is = new ByteArrayInputStream(contents.getBytes());
 		return printHexFile(is);
+	}
+	
+	public static byte[] floatsToBytes(float[] data,boolean littleEndian){
+		byte[] byteArray=new byte[data.length*4];
+		for(int i=0;i<data.length;i++){
+			int temp=Float.floatToIntBits(data[i]);
+			int off=i*4;
+			if(littleEndian){
+				byteArray[off]=(byte)temp;
+				byteArray[off+1]=(byte)(temp>>8);
+				byteArray[off+2]=(byte)(temp>>16);
+				byteArray[off+3]=(byte)(temp>>24);
+			} else {
+				byteArray[off+3]=(byte)temp;
+				byteArray[off+2]=(byte)(temp>>8);
+				byteArray[off+1]=(byte)(temp>>16);
+				byteArray[off]=(byte)(temp>>24);
+			}
+		}
+		return byteArray;
 	}
 
 }

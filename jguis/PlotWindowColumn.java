@@ -559,6 +559,10 @@ public class PlotWindowColumn extends ImageWindow implements ActionListener,Clip
 	public boolean[] getLogAxes(){
 		return p3.getLogAxes();
 	}
+	
+	public String[] getAnnotations(){
+		return p3.getAnnotations();
+	}
 
 	public ColorProcessor getProcessor(){
 		return p3.getProcessor();

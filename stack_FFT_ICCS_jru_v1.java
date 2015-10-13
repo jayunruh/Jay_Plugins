@@ -72,6 +72,7 @@ public class stack_FFT_ICCS_jru_v1 implements PlugIn {
 		gd.addCheckbox("Brightcorr?",brightcorr);
 		boolean pearson=false;
 		gd.addCheckbox("Pearson",pearson);
+		gd.addCheckbox("Calc_Autocorr",false);
 		gd.showDialog();
 		if(gd.wasCanceled()){return;}
 		avg_sections = gd.getNextBoolean();
@@ -83,14 +84,24 @@ public class stack_FFT_ICCS_jru_v1 implements PlugIn {
 		size = end-start+1;
 		brightcorr=gd.getNextBoolean();
 		pearson=gd.getNextBoolean();
+		boolean calcauto=gd.getNextBoolean();
 		crosscorr2D cc2D=new crosscorr2D(width,height);
+		autocorr2D ac2D=new autocorr2D(width,height);
 		float[] ac=new float[width*height];
+		float[] ac1=new float[width*height];
+		float[] ac2=new float[width*height];
 		if(isfloat){
 			for(i=start;i<=end;i++){
 				//get the appropriate stack image
 				float[] pixels1=(float[])stack1.getPixels(i);
 				float[] pixels2=(float[])stack2.getPixels(i);
 				float[] tempac=cc2D.docrosscorr2D(pixels1,pixels2,true,true,avg_sections,brightcorr);
+				float[] tempac1=null;
+				float[] tempac2=null;
+				if(calcauto){
+					tempac1=ac2D.doautocorr2D(pixels1,true,true,avg_sections,brightcorr);
+					tempac2=ac2D.doautocorr2D(pixels2,true,true,avg_sections,brightcorr);
+				}
 				if(pearson){
 					float stdev1=jstatistics.getstatistic("StDev",pixels1,null);
 					float stdev2=jstatistics.getstatistic("StDev",pixels2,null);
@@ -100,6 +111,10 @@ public class stack_FFT_ICCS_jru_v1 implements PlugIn {
 				}
 				for(int j=0;j<width*height;j++){
 					ac[j]+=tempac[j]/(float)size;
+					if(calcauto){
+						ac1[j]+=tempac1[j]/(float)size;
+						ac2[j]+=tempac2[j]/(float)size;
+					}
 				}
 				IJ.showProgress(i-start,size);
 			}
@@ -109,6 +124,12 @@ public class stack_FFT_ICCS_jru_v1 implements PlugIn {
 				short[] pixels1=(short[])stack1.getPixels(i);
 				short[] pixels2=(short[])stack2.getPixels(i);
 				float[] tempac=cc2D.docrosscorr2D(pixels1,pixels2,true,true,avg_sections,brightcorr);
+				float[] tempac1=null;
+				float[] tempac2=null;
+				if(calcauto){
+					tempac1=ac2D.doautocorr2D(pixels1,true,true,avg_sections,brightcorr);
+					tempac2=ac2D.doautocorr2D(pixels2,true,true,avg_sections,brightcorr);
+				}
 				if(pearson){
 					float stdev1=jstatistics.getstatistic("StDev",pixels1,null);
 					float stdev2=jstatistics.getstatistic("StDev",pixels2,null);
@@ -118,17 +139,37 @@ public class stack_FFT_ICCS_jru_v1 implements PlugIn {
 				}
 				for(int j=0;j<width*height;j++){
 					ac[j]+=tempac[j]/(float)size;
+					if(calcauto){
+						ac1[j]+=tempac1[j]/(float)size;
+						ac2[j]+=tempac2[j]/(float)size;
+					}
 				}
 				IJ.showProgress(i-start,size);
 			}
 		}
 		if(interpolate){
 			ac[(height/2)*width+width/2]=(ac[(height/2)*width+width/2-1]+ac[(height/2)*width+width/2+1])/2.0f;
+			if(calcauto){
+				ac1[(height/2)*width+width/2]=(ac1[(height/2)*width+width/2-1]+ac1[(height/2)*width+width/2+1])/2.0f;
+				ac2[(height/2)*width+width/2]=(ac2[(height/2)*width+width/2-1]+ac2[(height/2)*width+width/2+1])/2.0f;
+			}
 		}
 		//output the autocorrelated files
-		ImagePlus imp10=new ImagePlus("Cross-correlation",new FloatProcessor(width,height,ac,null));
-		imp10.setCalibration(cal);
-		imp10.show();
+		if(calcauto){
+			ImageStack corrstack=new ImageStack(width,height);
+			corrstack.addSlice("Autocorr1",ac1);
+			corrstack.addSlice("Autocorr2",ac2);
+			corrstack.addSlice("Crosscorr",ac);
+			ImagePlus imp10=new ImagePlus("Cross-correlation",corrstack);
+			imp10.setOpenAsHyperStack(true);
+			imp10.setDimensions(3,1,1);
+			imp10.setCalibration(cal);
+			new CompositeImage(imp10,CompositeImage.COMPOSITE).show();
+		} else {
+			ImagePlus imp10=new ImagePlus("Cross-correlation",new FloatProcessor(width,height,ac,null));
+			imp10.setCalibration(cal);
+			imp10.show();
+		}
 	}
 
 }

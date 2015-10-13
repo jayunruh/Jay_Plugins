@@ -63,13 +63,13 @@ public class FitDialog_v2 implements NLLSfitinterface_v2,TableDialogListener{
 		this.constraints=constraints;
 		this.fixes=fixes;
 		double[] stats=new double[2];
-		while(showoptions(params,fixes)){
+		while(showoptions(this.params,this.fixes)){
 			if(checkc2){
 				fitclass.maxiter=0;
 			}else{
 				fitclass.maxiter=50;
 			}
-			float[] fit=fitclass.fitdata(params,fixes,constraints,yvals,weights,stats,true);
+			float[] fit=fitclass.fitdata(this.params,this.fixes,this.constraints,yvals,weights,stats,true);
 			c2=(float)stats[1];
 			pw.updateSeries(fit,1,true);
 			iterations=(int)stats[0];
@@ -91,13 +91,13 @@ public class FitDialog_v2 implements NLLSfitinterface_v2,TableDialogListener{
 		this.constraints=constraints;
 		this.fixes=fixes;
 		double[] stats=new double[2];
-		while(showoptions(params,fixes)){
+		while(showoptions(this.params,this.fixes)){
 			if(checkc2){
 				fitclass.maxiter=0;
 			}else{
 				fitclass.maxiter=50;
 			}
-			float[] fit=fitclass.fitdata(params,fixes,constraints,yvals,weights,stats,true);
+			float[] fit=fitclass.fitdata(this.params,this.fixes,this.constraints,yvals,weights,stats,true);
 			c2=(float)stats[1];
 			pw.updateSeries(fit,1,true);
 			iterations=(int)stats[0];

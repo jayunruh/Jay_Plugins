@@ -74,11 +74,11 @@ public class LOCI_random_access_file_reader{
 			tsize=1.0f;
 			if(!nometa){
 				if(omexmlMetadata.getPixelsPhysicalSizeX(series)!=null)
-					psize=omexmlMetadata.getPixelsPhysicalSizeX(series).getValue().floatValue();
+					psize=omexmlMetadata.getPixelsPhysicalSizeX(series).value().floatValue();
 				if(omexmlMetadata.getPixelsPhysicalSizeZ(series)!=null)
-					zsize=omexmlMetadata.getPixelsPhysicalSizeZ(series).getValue().floatValue();
+					zsize=omexmlMetadata.getPixelsPhysicalSizeZ(series).value().floatValue();
 				if(omexmlMetadata.getPixelsTimeIncrement(series)!=null)
-					tsize=omexmlMetadata.getPixelsTimeIncrement(series).floatValue();
+					tsize=omexmlMetadata.getPixelsTimeIncrement(series).value().floatValue();
 			}
 		}catch(FormatException e){
 			dispose();

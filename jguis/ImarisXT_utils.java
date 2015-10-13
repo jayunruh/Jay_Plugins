@@ -17,6 +17,7 @@ public class ImarisXT_utils{
 		if(app==null){IJ.log("Imaris is not open"); return null;}
 		try{
 			ISpotsPrx spots=app.GetFactory().ToSpots(app.GetSurpassSelection());
+			if(spots==null) return null;
 			float[][] coords=spots.GetPositionsXYZ(); //units are micron
 			//IJ.log(table_tools.print_float_array(coords));
 
@@ -51,7 +52,67 @@ public class ImarisXT_utils{
 		}
 	}
 	
+	public static boolean setDataSet(Object[] data,float[] dimensions){
+		return setDataSet(data,dimensions,null);
+	}
+	
+	public static String[] colornames={"Red","Green","Blue","Grays","Cyan","Magenta","Yellow"};
+	
+	public static boolean setDataSet(Object[] data,float[] dimensions,int[] colors){
+		int width=(int)dimensions[0];
+		int height=(int)dimensions[1];
+		int chans=(int)dimensions[2];
+		int slices=(int)dimensions[3];
+		int frames=(int)dimensions[4];
+		float psize=dimensions[5];
+		float pdepth=dimensions[6];
+		BPImarisLib lib=new BPImarisLib();
+		Imaris.IApplicationPrx app=lib.GetApplication(0);
+		if(app==null){IJ.log("Imaris is not open"); return false;}
+		try{
+			//IDataSetPrx dataset=app.GetFactory().CreateDataSet();
+			IDataSetPrx dataset=app.GetDataSet().Clone();
+			dataset.Resize(0,width,0,height,0,slices,0,chans,0,frames);
+			int[] colors1={0x000000ff,0x0000ff00,0x00ff0000,0x00ffffff,0x00ffff00,0x00ff00ff,0x0000ffff};
+			for(int i=0;i<chans;i++){
+				dataset.SetChannelName(i,"ch"+(i+1));
+				if(colors!=null) dataset.SetChannelColorRGBA(i,colors1[colors[i]%6]);
+				else dataset.SetChannelColorRGBA(i,colors1[i%6]);
+			}
+			//dataset.SetSizeC(chans);
+			//dataset.SetSizeT(frames);
+			//dataset.SetSizeZ(slices);
+			int dtype=0;
+			if(data[0] instanceof short[]) dtype=1;
+			if(data[0] instanceof float[]) dtype=2;
+			tType[] types={tType.eTypeUInt8,tType.eTypeUInt16,tType.eTypeFloat};
+			dataset.SetType(types[dtype]);
+			int index=0;
+			for(int i=0;i<frames;i++){
+				for(int j=0;j<slices;j++){
+					for(int k=0;k<chans;k++){
+						if(dtype==0) dataset.SetDataSubVolumeAs1DArrayBytes((byte[])data[index],0,0,j,k,i,width,height,1);
+						if(dtype==1) dataset.SetDataSubVolumeAs1DArrayShorts((short[])data[index],0,0,j,k,i,width,height,1);
+						if(dtype==2) dataset.SetDataSubVolumeAs1DArrayFloats((float[])data[index],0,0,j,k,i,width,height,1);
+						index++;
+					}
+				}
+			}
+			app.SetDataSet(dataset);
+			return true;
+		}catch(Error e){
+			IJ.log((new jdataio()).getExceptionTrace(e));
+			//e.printStackTrace();
+			return false;
+		}
+	}
+	
 	public static boolean setSpotsTraj(boolean pixunits,float[][] coords){
+		int[] timeindices=new int[coords[0].length];
+		return setSpotsTraj(pixunits,coords,timeindices,2.0f);
+	}
+	
+	public static boolean setSpotsTraj(boolean pixunits,float[][] coords,int[] timeindices, float radius){
 		//ImarisLib vImarisLib=new ImarisLib();
 		BPImarisLib lib=new BPImarisLib();
 		Imaris.IApplicationPrx app=lib.GetApplication(0);
@@ -69,7 +130,6 @@ public class ImarisXT_utils{
 			//float pdepth=(dataset.GetExtendMaxZ()-zoff)/(float)slices;
 			float[][] coords2=new float[coords[0].length][3];
 			float[] radii=new float[coords[0].length];
-			int[] indices=new int[coords[0].length];
 			for(int i=0;i<coords[0].length;i++){
 				if(pixunits){
     				coords2[i][0]=coords[0][i]*psize+xoff;
@@ -80,14 +140,12 @@ public class ImarisXT_utils{
     				coords2[i][1]=coords[1][i]+yoff;
     				coords2[i][2]=coords[2][i]+zoff;
 				}
-				radii[i]=2.0f;
-				//indices[i]=i;
-				indices[i]=0; //I think these are the time indices
+				radii[i]=radius;
 			}
 			ISpotsPrx spots=app.GetFactory().CreateSpots();
-			spots.Set(coords2,indices,radii);
+			spots.Set(coords2,timeindices,radii);
 			IDataContainerPrx surpass=app.GetSurpassScene();
-			surpass.AddChild(spots,-1);
+			surpass.AddChild(surpass,-1);
 			return true;
 		}catch(Error e){
 			IJ.log((new jdataio()).getExceptionTrace(e));

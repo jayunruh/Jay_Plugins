@@ -10,6 +10,7 @@ package jguis;
 
 import ij.gui.Roi;
 import ij.process.ColorProcessor;
+import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import jalgs.jdataio;
 import jalgs.jsim.rngs;
@@ -726,6 +727,30 @@ public class Plot2DHist{
 		pr.unsetClip();
 		pr.endPlotting();
 		// IJ.showMessage("testdraw3");
+	}
+	
+	public FloatProcessor getHistImage(){
+		int newwidth=(int)(magnification*WIDTH);
+		int newheight=(int)(magnification*HEIGHT);
+		int subsize=(int)magnification*binSize;
+		int newhistsize=histSize/binSize;
+
+		float[] temp2=new float[newwidth*newheight];
+		for(int i=0;i<newhistsize;i++){
+			for(int j=0;j<newhistsize;j++){
+				for(int k=0;k<subsize;k++){
+					int ypos=newheight-i*subsize-k-1;
+					if(ypos>=0){
+						for(int l=0;l<subsize;l++){
+							int xpos=j*subsize+l;
+							if(xpos<newwidth)
+								temp2[xpos+ypos*newwidth]=histogram[j][i];
+						}
+					}
+				}
+			}
+		}
+		return new FloatProcessor(newwidth,newheight,temp2,null);
 	}
 
 	void drawAxisLabels(Plotter pr){

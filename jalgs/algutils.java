@@ -197,12 +197,20 @@ public class algutils{
 			}
 			return newarr;
 		}
+		if(oldarr instanceof long[]){
+			long[] temparr=(long[])oldarr;
+			float[] newarr=new float[temparr.length];
+			for(int i=0;i<temparr.length;i++){
+				newarr[i]=temparr[i];
+			}
+			return newarr;
+		}
 		if(oldarr instanceof byte[]){
 			byte[] temparr=(byte[])oldarr;
 			float[] newarr=new float[temparr.length];
 			for(int i=0;i<temparr.length;i++){
 				int temp=temparr[i]&0xff;
-				newarr[i]=temp;
+				newarr[i]=(float)temp;
 			}
 			return newarr;
 		}
@@ -616,7 +624,8 @@ public class algutils{
 		if(image instanceof float[]){
 			return getNeighbors((float[])image,x,y,width,height);
 		}else{
-			return getNeighbors((short[])image,x,y,width,height);
+			if(image instanceof short[]) return getNeighbors((short[])image,x,y,width,height);
+			else return getNeighbors((int[])image,x,y,width,height);
 		}
 	}
 
@@ -825,6 +834,33 @@ public class algutils{
 			return null;
 		}
 		short[] temp=new short[8];
+		int temp2=x-1+(y-1)*width;
+		temp[0]=objects[temp2];
+		temp2++;
+		temp[1]=objects[temp2];
+		temp2++;
+		temp[2]=objects[temp2];
+		temp2+=(width-2);
+		temp[3]=objects[temp2];
+		temp2+=2;
+		temp[4]=objects[temp2];
+		temp2+=(width-2);
+		temp[5]=objects[temp2];
+		temp2++;
+		temp[6]=objects[temp2];
+		temp2++;
+		temp[7]=objects[temp2];
+		return temp;
+	}
+	
+	public static int[] getNeighbors(int[] objects,int x,int y,int width,int height){
+		if(x<=0||x>=(width-1)){
+			return null;
+		}
+		if(y<=0||y>=(height-1)){
+			return null;
+		}
+		int[] temp=new int[8];
 		int temp2=x-1+(y-1)*width;
 		temp[0]=objects[temp2];
 		temp2++;
@@ -1215,6 +1251,7 @@ public class algutils{
 	}
 
 	public static void copy_subarray(Object source,int soff,Object dest,int doff,int length){
+		//assume that source and dest have same data type
 		if(source instanceof float[]){
 			System.arraycopy(source,soff,dest,doff,length);
 		}else{

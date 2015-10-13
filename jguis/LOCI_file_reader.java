@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 
-import loci.formats.meta.IMetadata;
+import ome.units.quantity.Length;
 //import org.slf4j.LoggerFactory;
 //import ch.qos.logback.classic.Level;
 //import ch.qos.logback.classic.Logger;
@@ -29,6 +29,7 @@ import loci.formats.ChannelSeparator;
 import loci.formats.FormatException;
 import loci.formats.ImageReader;
 import loci.formats.MetadataTools;
+import loci.formats.meta.IMetadata;
 import loci.plugins.util.ImageProcessorReader;
 import loci.plugins.util.LociPrefs;
 
@@ -127,11 +128,11 @@ public class LOCI_file_reader{
 			float tsize=1.0f;
 			if(!nometa){
 				if(omexmlMetadata.getPixelsPhysicalSizeX(series)!=null)
-					psize=omexmlMetadata.getPixelsPhysicalSizeX(series).getValue().floatValue();
+					psize=omexmlMetadata.getPixelsPhysicalSizeX(series).value().floatValue();
 				if(omexmlMetadata.getPixelsPhysicalSizeZ(series)!=null)
-					zsize=omexmlMetadata.getPixelsPhysicalSizeZ(series).getValue().floatValue();
+					zsize=omexmlMetadata.getPixelsPhysicalSizeZ(series).value().floatValue();
 				if(omexmlMetadata.getPixelsTimeIncrement(series)!=null)
-					tsize=omexmlMetadata.getPixelsTimeIncrement(series).floatValue();
+					tsize=omexmlMetadata.getPixelsTimeIncrement(series).value().floatValue();
 			}
 			ImageStack stack=new ImageStack(width,height);
 			if(proj){
@@ -235,11 +236,11 @@ public class LOCI_file_reader{
 			float tsize=1.0f;
 			if(!nometa){
 				if(omexmlMetadata.getPixelsPhysicalSizeX(series)!=null)
-					psize=omexmlMetadata.getPixelsPhysicalSizeX(series).getValue().floatValue();
+					psize=omexmlMetadata.getPixelsPhysicalSizeX(series).value().floatValue();
 				if(omexmlMetadata.getPixelsPhysicalSizeZ(series)!=null)
-					zsize=omexmlMetadata.getPixelsPhysicalSizeZ(series).getValue().floatValue();
+					zsize=omexmlMetadata.getPixelsPhysicalSizeZ(series).value().floatValue();
 				if(omexmlMetadata.getPixelsTimeIncrement(series)!=null)
-					tsize=omexmlMetadata.getPixelsTimeIncrement(series).floatValue();
+					tsize=omexmlMetadata.getPixelsTimeIncrement(series).value().floatValue();
 			}
 			ImageStack stack=new ImageStack(newwidth,newheight);
 			int counter=0;

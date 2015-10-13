@@ -42,9 +42,15 @@ public class traj_crop_jru_v1 implements PlugIn {
 		float[][] newxvals=new float[xvals.length][newlength];
 		float[][] newyvals=new float[xvals.length][newlength];
 		for(int j=0;j<xvals.length;j++){
+			if((counter1+newlength)>npts[j]){
+				newxvals[j]=new float[npts[j]-counter1];
+				newyvals[j]=new float[npts[j]-counter1];
+			}
 			for(int i=0;i<newlength;i++){
-				newxvals[j][i]=xvals[j][counter1+i];
-				newyvals[j][i]=yvals[j][counter1+i];
+				if((counter1+i)<npts[j]){
+					newxvals[j][i]=xvals[j][counter1+i];
+					newyvals[j][i]=yvals[j][counter1+i];
+				}
 			}
 			pw.updateSeries(newxvals[j],newyvals[j],j,true);
 		}

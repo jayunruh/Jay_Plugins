@@ -144,6 +144,52 @@ public class interpolation{
 		}
 		return retimage;
 	}
+	
+	/********
+	 * 
+	 * @param stack
+	 * @param width
+	 * @param height
+	 * @param center: this value is in xy pixel units
+	 * @param axis: 0,1, and 2 are x, y, and z axes
+	 * @param angle
+	 * @param zratio
+	 * @return
+	 */
+	public static float[][] rotate_stack(Object[] stack,int[] dims,float[] center,int axis,float angle,float zratio,int[] newdims){
+		float[][] newstack=new float[newdims[2]][newdims[0]*newdims[1]];
+		if(axis==2){
+			//this isn't quite right (bad centerz), have to change it later
+			for(int i=0;i<stack.length;i++){
+				newstack[i]=interpolation.rotate_image(stack[i],dims[0],dims[1],angle,center[0],center[1],newdims[0],newdims[1]);
+			}
+			return newstack;
+		}
+		int[] newcenter={newdims[0]/2,newdims[1]/2,newdims[2]/2};
+		float costheta=(float)Math.cos(-angle);
+		float sintheta=(float)Math.sin(-angle);
+		for(int i=0;i<newdims[2];i++){
+			float zpos=zratio*(float)i-newcenter[2];
+			for(int j=0;j<newdims[1];j++){
+				float ypos=(float)j-newcenter[1];
+				for(int k=0;k<newdims[0];k++){
+					float xpos=(float)k-newcenter[0];
+					float oldzpos=zpos+center[2];
+					float oldypos=ypos+center[1];
+					float oldxpos=xpos+center[0];
+					if(axis==0){ //rotate about x axis
+						oldzpos=costheta*zpos+sintheta*ypos+center[2];
+						oldypos=costheta*ypos-sintheta*zpos+center[1];
+					} else if(axis==1){ //rotate about y axis
+						oldzpos=costheta*zpos-sintheta*xpos+center[2];
+						oldxpos=costheta*xpos+center[0];
+					}
+					newstack[i][k+j*newdims[0]]=interpolation.interp3D(stack,dims[0],dims[1],oldxpos,oldypos,oldzpos/zratio);
+				}
+			}
+		}
+		return newstack;
+	}
 
 	public static Polygon rotate_polygon(Polygon poly,float angle,float xcenter,float ycenter){
 		float cosval=(float)Math.cos(-angle);
@@ -209,15 +255,15 @@ public class interpolation{
 	
 	public static float interp3D(Object[] stack,int width,int height,float x,float y,float z){
 		if(z<0.0f) return 0.0f;
-		if(z>stack.length-1) return 0.0f;
+		if(z>(stack.length-1)) return 0.0f;
 		if(z==0.0f) return interp2D(stack[0],width,height,x,y);
 		if(z==stack.length-1) return interp2D(stack[stack.length-1],width,height,x,y);
 		int prev=(int)z;
 		int next=prev+1;
 		float prevval=interp2D(stack[prev],width,height,x,y);
 		float nextval=interp2D(stack[next],width,height,x,y);
-		float rem=z-prev;
-		return rem*(prevval-nextval)+prevval;
+		float rem=z-(float)prev;
+		return rem*(nextval-prevval)+prevval;
 	}
 	
 	public static float[] interpz(Object image1,Object image2,int len,float z){

@@ -58,8 +58,8 @@ public class PlotColumn{
 	public static final int RIGHT_MARGIN=18;
 	public static final int TOP_MARGIN=20;
 	public static final int BOTTOM_MARGIN=50;
-	public static final int shapesize=8;
-	public static final int fontsize=14;
+	public int shapesize=8;
+	public int fontsize=14;
 	protected float magnification,magratio;
 	public static final String[] color_names={"black","blue","green","red","magenta","cyan","yellow","orange"};
 	public static final String[] shape_names={"line","square","+","x","triangle"};
@@ -267,6 +267,18 @@ public class PlotColumn{
 		binSize=newbinsize*histSize/(yMax-yMin);
 		updateHistogram();
 		//yautoscale();
+	}
+	
+	public void setFontSize(int fontsize){
+		this.fontsize=fontsize;
+	}
+	
+	public void setShapeSize(int shapesize){
+		this.shapesize=shapesize;
+	}
+	
+	public void setAnnotations(String[] annotations){
+		this.annotations=annotations;
 	}
 
 	private void updateHistogram(){
@@ -675,7 +687,8 @@ public class PlotColumn{
 		// draw the x axis labels
 		int y=newtopmargin+newheight+fontheight+newticklength+4;
 		for(int i=0;i<nseries;i++){
-			s=""+(i+1);
+			if(annotations!=null) s=annotations[i];
+			else s=""+(i+1);
 			pr.drawString(s,newleftmargin+(int)((0.5f+i)*newwidth/nseries-0.5f*pr.getStringWidth(s)),y);
 		}
 
@@ -773,6 +786,10 @@ public class PlotColumn{
 	public boolean[] getLogAxes(){
 		boolean[] temp={logx,logy};
 		return temp;
+	}
+	
+	public String[] getAnnotations(){
+		return annotations;
 	}
 
 	public float[][] getHistogram(){

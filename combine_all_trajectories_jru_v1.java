@@ -19,17 +19,27 @@ public class combine_all_trajectories_jru_v1 implements PlugIn {
 		gd.addCheckbox("Combine_all_series",true);
 		gd.addNumericField("Series_to_combine",0,0);
 		gd.addCheckbox("Delete_Originals",false);
+		gd.addCheckbox("Select_Plots",false);
+		gd.addNumericField("Number_of_Plots (if selecting)",2,0);
 		gd.showDialog(); if(gd.wasCanceled()){return;}
 		boolean combineall=gd.getNextBoolean();
 		int combseries=(int)gd.getNextNumber();
 		boolean delor=gd.getNextBoolean();
-		int[] wList = WindowManager.getIDList();
-		ImageWindow[] windows=new ImageWindow[wList.length];
-		int nplots=0;
-		for(int i=0;i<wList.length;i++){
-			ImagePlus imp = WindowManager.getImage(wList[i]);
-			ImageWindow iw=imp.getWindow();
-			if(iw.getClass().getName().equals("jguis.PlotWindow4") || iw.getClass().getName().equals("ij.gui.PlotWindow")){windows[nplots]=iw; nplots++;}
+		boolean selplots=gd.getNextBoolean();
+		int nplots=(int)gd.getNextNumber();
+		ImageWindow[] windows=null;
+		if(selplots){
+			windows=jutils.selectPlotFamily(false,nplots);
+			if(windows==null) return;
+		} else {
+			int[] wList = WindowManager.getIDList();
+			windows=new ImageWindow[wList.length];
+			nplots=0;
+			for(int i=0;i<wList.length;i++){
+				ImagePlus imp = WindowManager.getImage(wList[i]);
+				ImageWindow iw=imp.getWindow();
+				if(iw.getClass().getName().equals("jguis.PlotWindow4") || iw.getClass().getName().equals("ij.gui.PlotWindow")){windows[nplots]=iw; nplots++;}
+			}
 		}
 		if(combineall){
 			PlotWindow4 pw=jutils.getPW4Copy(windows[0]);

@@ -226,6 +226,12 @@ public class renderer implements Cloneable{
 			elements[i].transform(transmat,centerx,centery,centerz);
 		}
 	}
+	
+	public void translate(int dx,int dy,int dz){
+		for(int i=0;i<elements.length;i++){
+			elements[i].translate(dx,dy,dz);
+		}
+	}
 
 	private void setyorder(){
 		// here we sort the element list in order of decreasing z value

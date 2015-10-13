@@ -17,7 +17,7 @@ public class square3D extends element3D implements Cloneable{
 	public final String[] orientations={"xy","xz","yz"};
 	public int orientation;
 
-	// here we have a 3D square
+	// here we have a 2D square rendered in 3D
 	public square3D(int x,int y,int z,int size1,int orientation1,Color color1){
 		pt=new point3D[4];
 		size=size1;

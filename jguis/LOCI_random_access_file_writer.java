@@ -10,9 +10,11 @@ package jguis;
 
 import ij.ImageJ;
 import ij.ImagePlus;
+import jalgs.jdataio;
 
 import java.io.IOException;
 
+import loci.common.DataTools;
 import loci.common.services.DependencyException;
 import loci.common.services.ServiceException;
 import loci.common.services.ServiceFactory;
@@ -23,7 +25,8 @@ import loci.formats.ImageWriter;
 import loci.formats.MetadataTools;
 import loci.formats.meta.IMetadata;
 import loci.formats.services.OMEXMLService;
-import ome.scifio.common.DataTools;
+import ome.units.quantity.Length;
+import ome.units.quantity.Time;
 import ome.xml.model.enums.DimensionOrder;
 import ome.xml.model.enums.EnumerationException;
 import ome.xml.model.enums.PixelType;
@@ -109,10 +112,10 @@ public class LOCI_random_access_file_writer{
 
        // Calibration cal = imp.getCalibration();
 
-        store.setPixelsPhysicalSizeX(new PositiveFloat(1.0), 0);
-        store.setPixelsPhysicalSizeY(new PositiveFloat(1.0), 0);
-        store.setPixelsPhysicalSizeZ(new PositiveFloat(1.0), 0);
-        store.setPixelsTimeIncrement(new Double(1.0), 0);
+        store.setPixelsPhysicalSizeX(new Length(1.0,null), 0);
+        store.setPixelsPhysicalSizeY(new Length(1.0,null), 0);
+        store.setPixelsPhysicalSizeZ(new Length(1.0,null), 0);
+        store.setPixelsTimeIncrement(new Time(1.0,null), 0);
         
         //Object info = imp.getProperty("Info");
         //if (info != null) {

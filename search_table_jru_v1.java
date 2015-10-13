@@ -41,6 +41,10 @@ public class search_table_jru_v1 implements PlugIn {
 			int colindex=gd2.getNextChoiceIndex();
 			List<List<String>> table=table_tools.table2listtable(tp);
 			String[] list=(new delimit_string(' ')).getrows(input);
+			for(int i=0;i<list.length;i++){
+				list[i]=list[i].trim();
+				//IJ.log(""+list[i]);
+			}
 			table_tools.sort_listtable(table,colindex);
 			List<List<String>> results=new ArrayList<List<String>>();
 			for(int j=0;j<list.length;j++){

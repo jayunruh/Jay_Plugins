@@ -18,6 +18,11 @@ public interface NLLSfitinterface_v3{
 	double[] fitfunc(double[] params);
 	
 	void applyconstraints(double[] params,int[] fixes);
+	
+	//this function should return the derivatives for each parameter (except the fixed ones) at all positions
+	//fit is provided to expediate calculation if possible
+	//the first index is the fit coordinate and the second is the parameter index
+	double[][] derivfunc(double[] params,int[] fixes,double[] fit); 
 
 	void showresults(String results);
 

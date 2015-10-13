@@ -228,16 +228,18 @@ public class jsort{
 	}
 
 	public static int[] get_javasort_order(float[] arr){
-		List<List<Float>> list=new ArrayList<List<Float>>();
+		List<List<Number>> list=new ArrayList<List<Number>>();
 		for(int i=0;i<arr.length;i++){
-			List<Float> temp=new ArrayList<Float>();
+			List<Number> temp=new ArrayList<Number>();
 			temp.add(new Float(arr[i]));
-			temp.add(new Float(i));
+			temp.add(new Integer(i));
 			list.add(temp);
 		}
-		Collections.sort(list,new Comparator<List<Float>>(){
-			public int compare(List<Float> o1,List<Float> o2){
-				return o1.get(0).compareTo(o2.get(0));
+		Collections.sort(list,new Comparator<List<Number>>(){
+			public int compare(List<Number> o1,List<Number> o2){
+				Float temp1=(Float)o1.get(0);
+				Float temp2=(Float)o2.get(0);
+				return temp1.compareTo(temp2);
 			}
 		});
 		int[] order=new int[arr.length];
@@ -252,7 +254,7 @@ public class jsort{
 		for(int i=0;i<arr.length;i++){
 			List<Object> temp=new ArrayList<Object>();
 			temp.add(arr[i]);
-			temp.add(new Float(i));
+			temp.add(new Integer(i));
 			list.add(temp);
 		}
 		Collections.sort(list,new Comparator<List<Object>>(){
@@ -264,7 +266,7 @@ public class jsort{
 		});
 		int[] order=new int[arr.length];
 		for(int i=0;i<arr.length;i++){
-			order[i]=((Float)list.get(i).get(1)).intValue();
+			order[i]=((Integer)list.get(i).get(1)).intValue();
 		}
 		return order;
 	}
@@ -301,16 +303,18 @@ public class jsort{
 	}
 
 	public static int[] javasort_order(float[] arr){
-		List<List<Float>> list=new ArrayList<List<Float>>();
+		List<List<Number>> list=new ArrayList<List<Number>>();
 		for(int i=0;i<arr.length;i++){
-			List<Float> temp=new ArrayList<Float>();
+			List<Number> temp=new ArrayList<Number>();
 			temp.add(new Float(arr[i]));
-			temp.add(new Float(i));
+			temp.add(new Integer(i));
 			list.add(temp);
 		}
-		Collections.sort(list,new Comparator<List<Float>>(){
-			public int compare(List<Float> o1,List<Float> o2){
-				return o1.get(0).compareTo(o2.get(0));
+		Collections.sort(list,new Comparator<List<Number>>(){
+			public int compare(List<Number> o1,List<Number> o2){
+				Float temp1=(Float)o1.get(0);
+				Float temp2=(Float)o2.get(0);
+				return temp1.compareTo(temp2);
 			}
 		});
 		int[] order=new int[arr.length];

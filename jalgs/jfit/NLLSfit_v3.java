@@ -79,6 +79,7 @@ public class NLLSfit_v3{
 	 * @return
 	 */
 	public float[] fitdata(double[] params,int[] fixes1,float[] data,float[] weights1,double[] stats,boolean output){
+		//TODO--need to implement getting derivatives through interface and add a static derivative function to help out
 		// this function fits the array data to an arbitrary function denoted by
 		// the NLLSfitinterface
 		// the returned array is the fit
@@ -122,38 +123,27 @@ public class NLLSfit_v3{
 			}
 			chisquared=calculate_c2_fit(dfit,fitparams,data,weights);
 		}else{
-			Object[] shiftparams=new Object[fitparams+1];
-			Object[] shiftfit=new Object[fitparams+1];
 			double[] dparams=new double[fitparams];
-			shiftparams[0]=params;
-			shiftfit[0]=fitclass.fitfunc((double[])shiftparams[0]);
-			chisquared=calculate_c2_fit((double[])shiftfit[0],fitparams,data,weights);
+			double[] dfit=fitclass.fitfunc(params);
+			chisquared=calculate_c2_fit(dfit,fitparams,data,weights);
 			double tempdouble=0.0;
 			do{
 				c2old=chisquared;
 				int counter=1;
 				//calculate the shifted parameters for the numerical derivatives
-				for(int i=0;i<nparams;i++){
-					if(fixes[i]==0){
-						shiftparams[counter]=new double[nparams];
-						for(int j=0;j<nparams;j++){
-							((double[])shiftparams[counter])[j]=((double[])shiftparams[0])[j];
-						}
-						((double[])shiftparams[counter])[i]+=dx;
-						counter++;
-					}
-				}
-				//now calculate the shifted functions
-				for(int i=1;i<=fitparams;i++){
-					shiftfit[i]=fitclass.fitfunc((double[])shiftparams[i]);
-				}
+				double[][] ders=fitclass.derivfunc(params,fixes,dfit);
 				//here we calculate the jacobian with derivatives
 				double[][] jacobian=new double[fitparams][fitparams];
 				double[] jvector=new double[fitparams];
+				int[] map=new int[fitparams];
+				int counter1=0;
+				for(int i=0;i<nparams;i++){
+					if(fixes[i]==0){map[counter1]=i; counter1++;}
+				}
 				for(int i=0;i<fitparams;i++){
 					for(int j=0;j<=i;j++){
 						for(int k=0;k<npts;k++){
-							jacobian[i][j]+=((((double[])shiftfit[i+1])[k]-((double[])shiftfit[0])[k])/dx)*((((double[])shiftfit[j+1])[k]-((double[])shiftfit[0])[k])/dx)*weights[k];
+							jacobian[i][j]+=ders[k][map[i]]*ders[k][map[j]]*weights[k];
 						}
 						if(i!=j){
 							jacobian[j][i]=jacobian[i][j];
@@ -161,7 +151,7 @@ public class NLLSfit_v3{
 					}
 
 					for(int k=0;k<npts;k++){
-						jvector[i]+=((((double[])shiftfit[i+1])[k]-((double[])shiftfit[0])[k])/dx)*(data[k]-((double[])shiftfit[0])[k])*weights[k];
+						jvector[i]+=ders[k][map[i]]*(data[k]-dfit[k])*weights[k];
 					}
 				}
 				//implement the levenberg marquardt lagrangian multiplier
@@ -175,13 +165,13 @@ public class NLLSfit_v3{
 				counter=0;
 				for(int i=0;i<nparams;i++){
 					if(fixes[i]==0){
-						((double[])shiftparams[0])[i]+=dparams[counter];
+						params[i]+=dparams[counter];
 						counter++;
 					}
 				}
-				fitclass.applyconstraints((double[])shiftparams[0],fixes);
-				shiftfit[0]=fitclass.fitfunc((double[])shiftparams[0]);
-				chisquared=calculate_c2_fit((double[])shiftfit[0],fitparams,data,weights);
+				fitclass.applyconstraints(params,fixes);
+				dfit=fitclass.fitfunc(params);
+				chisquared=calculate_c2_fit(dfit,fitparams,data,weights);
 				iterations++;
 				if(output){
 					fitclass.showresults("iteration "+iterations+" c2 = "+chisquared);
@@ -198,7 +188,7 @@ public class NLLSfit_v3{
 			}while(tempdouble>toler||c2old<chisquared);
 			stats[0]=iterations;
 			for(int i=0;i<npts;i++){
-				fit[i]=(float)((double[])shiftfit[0])[i];
+				fit[i]=(float)dfit[i];
 			}
 		}
 		stats[1]=chisquared;
@@ -207,137 +197,31 @@ public class NLLSfit_v3{
 		}
 		return fit;
 	}
-
-	public float[] fitintensitydata(double[] params,int[] fixes1,float[] data,double[] stats,boolean output,double S,boolean[] fitmask){
-		// this function fits the array data to an arbitrary function denoted by
-		// the NLLSfitinterface
-		// the returned array is the fit
-		// output dictates whether or not a running tally of the iterations and
-		// their chisquareds are desired
-		// stats returns the number of iterations and the chi squared
-		// if fixes[i] is zero, the ith parameter is fit, if not, the ith
-		// parameter is fixed
-		// constraints is a 2 by nparams array containing the upper and lower
-		// bounds for each parameter
-		// this version assumes that var=S*Intensity
-		// fitmask is true for pixels that are not to be counted
-		int nparams=params.length;
-		int npts=data.length;
-		int fitparams=nparams;
-		double currlambda=lambda;
-		int[] fixes=new int[nparams];
-		if(fixes1!=null){
-			for(int i=0;i<nparams;i++){
-				fitparams-=fixes1[i];
-				fixes[i]=fixes1[i];
-			}
-		}
-		double[] weights=new double[npts];
-		for(int i=0;i<npts;i++){
-			if(data[i]>0.0f&&S>0.0f){
-				weights[i]=1.0/(S*data[i]);
-			}else{
-				weights[i]=1.0;
-			}
-		}
-		double chisquared=0.0f;
-		double c2old=0.0f;
-		int iterations=0;
-		float[] fit=new float[npts];
-		if(maxiter==0){
-			double[] dfit=fitclass.fitfunc(params);
-			for(int i=0;i<fit.length;i++){
-				fit[i]=(float)dfit[i];
-			}
-			chisquared=calculate_c2_params(params,fitparams,data,weights,fitmask);
-		}else{
-			Object[] shiftparams=new Object[fitparams+1];
-			Object[] shiftfit=new Object[fitparams+1];
-			double[] dparams=new double[fitparams];
-			shiftparams[0]=params;
-			shiftfit[0]=fitclass.fitfunc((double[])shiftparams[0]);
-			chisquared=calculate_c2_fit((double[])shiftfit[0],fitparams,data,weights,fitmask);
-			double tempdouble=0.0;
-			do{
-				c2old=chisquared;
-				int counter=1;
-				for(int i=0;i<nparams;i++){
-					if(fixes[i]==0){
-						shiftparams[counter]=new double[nparams];
-						for(int j=0;j<nparams;j++){
-							((double[])shiftparams[counter])[j]=((double[])shiftparams[0])[j];
-						}
-						((double[])shiftparams[counter])[i]+=dx;
-						counter++;
-					}
-				}
-				for(int i=1;i<=fitparams;i++){
-					shiftfit[i]=fitclass.fitfunc((double[])shiftparams[i]);
-				}
-				double[][] jacobian=new double[fitparams][fitparams];
-				double[] jvector=new double[fitparams];
-				for(int i=0;i<fitparams;i++){
-					for(int j=0;j<=i;j++){
-						for(int k=0;k<npts;k++){
-							if(!fitmask[k]){
-								jacobian[i][j]+=((((double[])shiftfit[i+1])[k]-((double[])shiftfit[0])[k])/dx)*((((double[])shiftfit[j+1])[k]-((double[])shiftfit[0])[k])/dx)*weights[k];
-							}
-						}
-						if(i!=j){
-							jacobian[j][i]=jacobian[i][j];
-						}
-					}
-
-					for(int k=0;k<npts;k++){
-						if(!fitmask[k]){
-							jvector[i]+=((((double[])shiftfit[i+1])[k]-((double[])shiftfit[0])[k])/dx)*(data[k]-((double[])shiftfit[0])[k])*weights[k];
-						}
-					}
-				}
-				for(int k=0;k<fitparams;k++){
-					jacobian[k][k]*=(1.0+currlambda);
-				}
-				(new matrixsolve()).gjsolve(jacobian,jvector,dparams,fitparams);
-				counter=0;
-				for(int i=0;i<nparams;i++){
-					if(fixes[i]==0){
-						((double[])shiftparams[0])[i]+=dparams[counter];
-						counter++;
-					}
-				}
-				fitclass.applyconstraints((double[])shiftparams[0],fixes);
-				shiftfit[0]=fitclass.fitfunc((double[])shiftparams[0]);
-				chisquared=calculate_c2_fit((double[])shiftfit[0],fitparams,data,weights,fitmask);
-				iterations++;
-				if(output){
-					fitclass.showresults("iteration "+iterations+" c2 = "+chisquared);
-				}
-				if(iterations==maxiter){
-					break;
-				}
-				tempdouble=(c2old-chisquared)/chisquared;
-				if(tempdouble>=0.0&&currlambda>=0.0){
-					currlambda/=10.0;
-				}else{
-					currlambda*=10.0;
-				}
-			}while(tempdouble>toler||c2old<chisquared);
-			stats[0]=iterations;
-			for(int i=0;i<npts;i++){
-				fit[i]=(float)((double[])shiftfit[0])[i];
-			}
-		}
-		stats[1]=chisquared;
-		if(stats.length>2){
-			int npts2=data.length;
-			if(fitmask!=null){
-				for(int i=0;i<fitmask.length;i++) if(fitmask[i]) npts2--;
-			}
-			stats[2]=calculate_aic_c2(chisquared,fitparams,npts2);
-		}
-		return fit;
-	}
 	
+	/************
+	 * this function provides the derivatives by numerical integration
+	 * 
+	 */
+	public static double[][] derivfunc2(double[] params,int[] fixes,double[] fit,NLLSfitinterface_v3 fitclass,double dx){
+		double[][] shiftfit=new double[params.length][];
+		double[][] ders=new double[fit.length][params.length];
+		for(int i=0;i<params.length;i++){
+			if(fixes[i]==0){
+				double[] temp=params.clone();
+				temp[i]+=dx;
+				shiftfit[i]=fitclass.fitfunc(temp);
+			}
+		}
+		for(int i=0;i<fit.length;i++){
+			for(int j=0;j<params.length;j++){
+				if(fixes[j]==0){
+					ders[i][j]=(shiftfit[j][i]-fit[i])/dx;
+				}
+			}
+		}
+		return ders;
+	}
+
 	public double calculate_aic_c2(double c2,int numfit,int size1){
 		double size=size1;
 		double dof=numfit;

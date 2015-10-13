@@ -132,6 +132,11 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 		p3.setLimits(limits);
 		updatePlot();
 	}
+	
+	public void setLogAxes(boolean logx,boolean logy){
+		p3.setLogAxes(logx,logy);
+		updatePlot();
+	}
 
 	public void autoscale(){
 		p3.autoscale();

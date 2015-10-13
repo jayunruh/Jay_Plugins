@@ -8,20 +8,31 @@
 import ij.*;
 import ij.process.*;
 import ij.gui.*;
-import java.awt.*;
+import java.awt.Frame;
+import java.awt.Toolkit;
+import java.util.*;
 import ij.plugin.*;
 import ij.util.*;
 import ij.text.*;
 import java.io.*;
 import java.awt.datatransfer.*;
+import jguis.*;
 
 public class new_clipboard_table_jru_v1 implements PlugIn {
 
 	public void run(String arg) {
 		GenericDialog gd=new GenericDialog("Options");
 		gd.addCheckbox("Contains_Column_Titles?",true);
+		String[] delims={"tab","comma","space"};
+		gd.addChoice("Delimiter",delims,delims[0]);
+		gd.addCheckbox("Treat_Consecutive_Delims_As_One",true);
 		gd.showDialog(); if(gd.wasCanceled()){return;}
 		boolean titles=gd.getNextBoolean();
+		int delimindex=gd.getNextChoiceIndex();
+		boolean noconsec=gd.getNextBoolean();
+		String delim="\t";
+		if(delimindex==1) delim=",";
+		if(delimindex==2) delim=" ";
 		String textdata="";
 		Transferable t=Toolkit.getDefaultToolkit().getSystemClipboard().getContents(null);
 		try {
@@ -37,19 +48,13 @@ public class new_clipboard_table_jru_v1 implements PlugIn {
 		if(textdata.indexOf("\r")>=0){
 			textdata=textdata.replace('\r','\n');
 		}
+		String[] lines=table_tools.split(textdata,"\n");
+		List<List<String>> listtable=table_tools.table2listtable(lines,delim,noconsec);
+		String[] headings=null;
 		if(titles){
-			int first=textdata.indexOf("\n");
-			String headings=textdata.substring(0,first);
-			String rest=textdata.substring(first+1);
-			new TextWindow("Clipboard",headings,rest,400,200);
-		} else {
-			String first=textdata.substring(0,textdata.indexOf("\n"));
-			String[] temp=first.split("\t");
-			StringBuffer sb=new StringBuffer();
-			for(int i=0;i<temp.length;i++){
-				sb.append("Col"+(i+1)+"\t");
-			}
-			new TextWindow("Clipboard",sb.toString(),textdata,400,200);
+			headings=table_tools.list2stringarray(listtable.get(0));
+			listtable.remove(0);
 		}
+		table_tools.create_table("Clipboard",listtable,headings);
 	}
 }

@@ -26,6 +26,7 @@ public class Traj3D extends Plot3D{
 	private float[][] zValues;
 	private int[] npts;
 	public boolean thick=true;
+	public boolean drawIndex;
 
 	public Traj3D(String xLabel1,String yLabel1,String zLabel1,float[][] xValues1,float[][] yValues1,float[][] zValues1,Object npts1){
 		super();
@@ -491,14 +492,20 @@ public class Traj3D extends Plot3D{
 				if(j!=selected){
 					if(shapes[j]==0){
 						drawPolyline(jr,xpoints,ypoints,zpoints,npts[j],tempcolor);
+						if(drawIndex) drawPolyindex(jr,xpoints,ypoints,zpoints,npts[j],tempcolor);
 					}else{
 						drawPolyshape(jr,xpoints,ypoints,zpoints,npts[j],shapes[j],tempcolor);
+						if(drawAnnotations && annotations!=null) drawPolytext(jr,xpoints,ypoints,zpoints,npts[j],annotations[j],tempcolor);
+						if(drawIndex) drawPolyindex(jr,xpoints,ypoints,zpoints,npts[j],tempcolor);
 					}
 				}else{
 					if(shapes[j]==0){
 						drawPolyshape(jr,xpoints,ypoints,zpoints,npts[j],1,tempcolor);
+						if(drawAnnotations && annotations!=null) drawPolytext(jr,xpoints,ypoints,zpoints,npts[j],annotations[j],tempcolor);
+						if(drawIndex) drawPolyindex(jr,xpoints,ypoints,zpoints,npts[j],tempcolor);
 					}else{
 						drawPolyline(jr,xpoints,ypoints,zpoints,npts[j],tempcolor);
+						if(drawIndex) drawPolyindex(jr,xpoints,ypoints,zpoints,npts[j],tempcolor);
 					}
 				}
 			}
@@ -568,14 +575,20 @@ public class Traj3D extends Plot3D{
 				if(j!=selected){
 					if(shapes[j]==0){
 						drawPolyline(jr,xpoints,ypoints,zpoints,npts[j],tempcolor);
+						if(drawIndex) drawPolyindex(jr,xpoints,ypoints,zpoints,npts[j],tempcolor);
 					}else{
 						drawPolyshape(jr,xpoints,ypoints,zpoints,npts[j],shapes[j],tempcolor);
+						if(drawAnnotations && annotations!=null) drawPolytext(jr,xpoints,ypoints,zpoints,npts[j],annotations[j],tempcolor);
+						if(drawIndex) drawPolyindex(jr,xpoints,ypoints,zpoints,npts[j],tempcolor);
 					}
 				}else{
 					if(shapes[j]==0){
 						drawPolyshape(jr,xpoints,ypoints,zpoints,npts[j],1,tempcolor);
+						if(drawIndex) drawPolyindex(jr,xpoints,ypoints,zpoints,npts[j],tempcolor);
 					}else{
 						drawPolyline(jr,xpoints,ypoints,zpoints,npts[j],tempcolor);
+						if(drawAnnotations && annotations!=null) drawPolytext(jr,xpoints,ypoints,zpoints,npts[j],annotations[j],tempcolor);
+						if(drawIndex) drawPolyindex(jr,xpoints,ypoints,zpoints,npts[j],tempcolor);
 					}
 				}
 			}
@@ -689,6 +702,18 @@ public class Traj3D extends Plot3D{
 		}
 	}
 	
+	private void drawPolytext(renderer jr,int[] xpoints,int[] ypoints,int[] zpoints,int npts,String text,Color color){
+		for(int i=0;i<npts;i++){
+				jr.addText3D(text,xpoints[i]+shapesize,ypoints[i],zpoints[i],color);
+		}
+	}
+	
+	private void drawPolyindex(renderer jr,int[] xpoints,int[] ypoints,int[] zpoints,int npts,Color color){
+		for(int i=0;i<npts;i++){
+				jr.addText3D(""+i,xpoints[i]+shapesize,ypoints[i],zpoints[i],color);
+		}
+	}
+	
 	public float[][] getXValues(){
 		return xValues;
 	}
@@ -718,6 +743,8 @@ public class Traj3D extends Plot3D{
 	}
 	
 	public void setThick(boolean thick){this.thick=thick;}
+	
+	public void showIndex(boolean drawIndex){this.drawIndex=drawIndex;}
 	
 	/*public ColorProcessor getProcessor(){
 		return new ColorProcessor(getImage());

@@ -64,6 +64,7 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 	private int[] avgplotcolors;
 	private String[][] globalformulas,undoformulas;
 	private String[] paramsnames;
+	public double w0g,w0r;
 	NLLSglobalfit globalfitclass;
 	NLLSfit fitclass;
 
@@ -1194,6 +1195,8 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 		double t_td2=xvals[0][0][remvar]/(params[acindex*7+5]/1000.0);
 		double factor=1.0/(params[0]*params[0]);
 		double temp1=1.0/(1.0+t_td1);
+		boolean scanning=(psfflag==3);
+		if(scanning) psfflag=0;
 		if(psfflag==2)
 			temp1=Math.sqrt(temp1);
 		double temp2=0.0;
@@ -1208,11 +1211,27 @@ public class CrossCorrFitWindow extends Panel implements ActionListener,NLLSfiti
 				temp2*=1.0/Math.sqrt(1.0+factor*t_td2);
 			}
 		}
+		if(scanning){
+			psfflag=3;
+			float tpix=xvals[0][0][1]-xvals[0][0][0]; //assume the x axis is linear along the time coordinate
+			float x=xvals[0][0][remvar]/tpix;
+			if(w0g==0.0) w0g=5.0; if(w0r==0.0) w0r=w0g*1.16; //this assumes 40 nm pixels and diffraction limited
+			float w0=(float)w0g;
+			if(curveindex==1) w0=(float)w0r;
+			if(curveindex==2) w0=(float)Math.sqrt(w0g*w0g+w0r*w0r);
+			temp1*=sfcs(x,w0,(float)t_td1);
+			temp2*=sfcs(x,w0,(float)t_td2);
+		}
 		double temp3=0.0;
 		if(params[acindex*7+6]!=0.0){
 			temp3=params[acindex*7+6]*Math.exp(-(double)xvals[0][0][remvar]/(params[acindex*7+7]/1000000.0));
 		}
 		return params[acindex*7+1]+(params[acindex*7+2]*temp1+params[acindex*7+4]*temp2)*(1.0+temp3);
+	}
+	
+	public double sfcs(float x,float w0,float t_td){
+		float retval=(float)Math.exp(x*x/(w0*w0+w0*w0*t_td));
+		return retval;
 	}
 
 	public void showresults(String results){

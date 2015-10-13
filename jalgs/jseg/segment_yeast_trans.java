@@ -24,8 +24,29 @@ public class segment_yeast_trans{
 		float thresh=jstatistics.getstatistic("Percentile",smoothed,percent);
 		return segment_sobel(smoothed,width,height,thresh,minarea,maxarea);
 	}
+	
+	public static byte[] segment_image3(float[] image,int width,int height,float sobel_thresh_mult,String stat,int minarea,int maxarea){
+		float[] smoothed=jsmooth.smooth2D(image,width,height);
+		smoothed=((new jsobel(width,height)).do_sobel(smoothed))[0];
+		float thresh=sobel_thresh_mult*jstatistics.getstatistic(stat,smoothed,null);
+		return segment_sobel(smoothed,width,height,thresh,minarea,maxarea);
+	}
+	
+	public static float[] segment_image4(float[] image,int width,int height,float sobel_thresh_mult,String stat,int minarea,int maxarea){
+		//this version outputs the indexed objects
+		float[] smoothed=jsmooth.smooth2D(image,width,height);
+		smoothed=((new jsobel(width,height)).do_sobel(smoothed))[0];
+		float thresh=sobel_thresh_mult*jstatistics.getstatistic(stat,smoothed,null);
+		return segment_sobel2(smoothed,width,height,thresh,minarea,maxarea);
+	}
 
 	public static byte[] segment_sobel(float[] sobel,int width,int height,float thresh,int minarea,int maxarea){
+		float[] skel=segment_sobel2(sobel,width,height,thresh,minarea,maxarea);
+		return (new findblobs3(width,height)).tobinary(skel,true);
+	}
+	
+	public static float[] segment_sobel2(float[] sobel,int width,int height,float thresh,int minarea,int maxarea){
+		//this version outputs an indexed objects image
 		findblobs3 fb=new findblobs3(width,height);
 		binary_processing bp=new binary_processing(width,height);
 		float[] skel=fb.dofindblobs(sobel,thresh);
@@ -46,7 +67,8 @@ public class segment_yeast_trans{
 		int[] arealims={minarea,maxarea};
 		fb.filter_area(skel,arealims);
 		fb.dilateobjects(skel);
-		objects=fb.tobinary(skel,true);
-		return objects;
+		return skel;
+		//objects=fb.tobinary(skel,true);
+		//return objects;
 	}
 }

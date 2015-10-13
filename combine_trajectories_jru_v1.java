@@ -19,8 +19,11 @@ public class combine_trajectories_jru_v1 implements PlugIn {
 		if(iw==null) return;
 		if(iw[0].getClass().getName().equals("jguis.PlotWindow4")){
 			PlotWindow4 pw=jutils.getPW4Copy(iw[0]);
+			int origser=(Integer)jutils.runPW4VoidMethod(iw[0],"getNSeries");
 			float[][] xvals2=(float[][])jutils.runPW4VoidMethod(iw[1],"getXValues");
 			float[][] yvals2=(float[][])jutils.runPW4VoidMethod(iw[1],"getYValues");
+			int[] colors=(int[])jutils.runPW4VoidMethod(iw[1],"getColors");
+			int[] shapes=(int[])jutils.runPW4VoidMethod(iw[1],"getShapes");
 			int[] npts=(int[])jutils.runPW4VoidMethod(iw[1],"getNpts");
 			for(int i=0;i<yvals2.length;i++){
 				float[] newxvals=new float[npts[i]];
@@ -29,6 +32,13 @@ public class combine_trajectories_jru_v1 implements PlugIn {
 				System.arraycopy(yvals2[i],0,newyvals,0,npts[i]);
 				pw.addPoints(newxvals,newyvals,true);
 			}
+			int[] newcolors=pw.getColors();
+			int[] newshapes=pw.getShapes();
+			for(int i=origser;i<newcolors.length;i++){
+				newcolors[i]=colors[i-origser];
+				newshapes[i]=shapes[i-origser];
+			}
+			pw.updatePlot();
 		} else {
 			//assume for now that this is a 3D trajectory (not a 3D mesh)
 			float[][] xvals1=(float[][])jutils.runPW4VoidMethod(iw[0],"getXValues");

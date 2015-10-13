@@ -30,6 +30,7 @@ import j3D.renderer;
 import j3D.spot3D;
 import jalgs.matrixsolve;
 import jalgs.profiler;
+import jalgs.jseg.jsobel;
 import jalgs.jsim.rngs;
 
 import java.awt.Choice;
@@ -167,6 +168,7 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 		projchoice.add("Max");
 		projchoice.add("First");
 		projchoice.add("Avg");
+		projchoice.add("Surface");
 		projchoice.setBounds(280,bheight+20,100,20);
 		projchoice.addItemListener(this);
 		add(projchoice);
@@ -810,13 +812,13 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 		}
 	}
 
-	public float get_line_max(float xstart,float ystart,float zstart,float xinc,float yinc,float zinc,int length,int channel){
+	public float[] get_line_max(float xstart,float ystart,float zstart,float xinc,float yinc,float zinc,int length,int channel){
 		float x=xstart-xinc;
 		float y=ystart-yinc;
 		float scaledzinc=zinc/zratio;
 		float z=zstart/zratio-scaledzinc;
 		// here xinc, yinc, and zinc are the dimensional steps corresponding to a pixel unit
-		float max=0.0f;
+		float max=0.0f; float maxpos=Float.NaN;
 		for(int k=0;k<length;k++){
 			x+=xinc;
 			y+=yinc;
@@ -829,17 +831,17 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 			if(z>=zremcorr+zend1) continue;
 			float temp=get_3D_nearest_value(x,y,z,channel);
 			if(temp<thresh[channel]) temp=0.0f;
-			if(projmeth==0){
-				if(temp>max) max=temp;
+			if(projmeth==0 || projmeth==3){
+				if(temp>max){max=temp; maxpos=(float)k;}
 			} else if(projmeth==1){
 				max=temp;
-				if(temp>0.0f) return max;
+				if(temp>0.0f) return new float[]{max,(float)k};
 			} else {
 				max+=temp;
 			}
 		}
 		if(projmeth==2) max/=length;
-		return max;
+		return new float[]{max,maxpos};
 	}
 	
 	public float[] get_line_max(line3D line,float dist,int channel){
@@ -952,6 +954,42 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 		((CompositeImage)imp).copyLuts(imp3D);
 		imp.show();
 	}
+	
+	private float[] sobel_point(float[] pixels,int x,int y){
+		int offset=x+y*maxsize;
+		float[] output=new float[2];
+		if(x<=0)
+			return output;
+		if(x>=(maxsize-1))
+			return output;
+		if(y<=0)
+			return output;
+		if(y>=(maxsize-1))
+			return output;
+		if(Float.isNaN(pixels[offset])){
+			return output;
+		}
+		float val=pixels[offset];
+		float[][] n=new float[3][3];
+		n[0][0]=pixels[offset-maxsize-1];
+		n[0][1]=pixels[offset-maxsize];
+		n[0][2]=pixels[offset-maxsize+1];
+		n[1][0]=pixels[offset-1];
+		n[1][1]=pixels[offset];
+		n[1][2]=pixels[offset+1];
+		n[2][0]=pixels[offset+maxsize-1];
+		n[2][1]=pixels[offset+maxsize];
+		n[2][2]=pixels[offset+maxsize+1];
+		for(int i=0;i<3;i++){
+			for(int j=0;j<3;j++){
+				if(Float.isNaN(n[i][j]))
+					n[i][j]=val;
+			}
+		}
+		output[0]=n[2][2]+2.0f*n[1][2]+n[0][2]-n[2][0]-2.0f*n[1][0]-n[0][0];
+		output[1]=n[2][0]+2.0f*n[2][1]+n[2][2]-n[0][0]-2.0f*n[0][1]-n[0][2];
+		return output;
+	}
 
 	public float[][] maxprojimage(){
 		float[][] outimage=new float[channels][maxsize*maxsize];
@@ -961,7 +999,9 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 		//Object[] stackarray=stack.getImageArray();
 		Object[] stackarray=jutils.stack2array(stack);
 		//long tstarttime=starttime;
+		//float[][] depth=new float[channels][maxsize*maxsize];
 		for(int ch=0;ch<channels;ch++){
+			float[] depth=new float[maxsize*maxsize];
 			//run a new thread pool for each channel
 			if(nthreads>1) executor=Executors.newFixedThreadPool(nthreads);
 			for(int i=0;i<maxsize;i+=xystep){
@@ -980,11 +1020,12 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 						float xstart=lines[index].pt1.rx;
 						float ystart=lines[index].pt1.ry;
 						float zstart=lines[index].pt1.rz;
-						float putval=get_line_max(xstart,ystart,zstart,xunit2,yunit2,zunit2,maxsize,ch);
+						float[] putval=get_line_max(xstart,ystart,zstart,xunit2,yunit2,zunit2,maxsize,ch);
     					//float putval=jstatistics.getstatistic("Max",line,null);
     					for(int j=i;j<(i+xystep);j++){
     						for(int k=l;k<(l+xystep);k++){
-    							outimage[ch][k+j*maxsize]=putval;
+    							outimage[ch][k+j*maxsize]=putval[0];
+    							if(projmeth==3) depth[k+j*maxsize]=putval[1];
     						}
     					}
 					}
@@ -992,7 +1033,7 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 					if(IJ.escapePressed()) break;
 					float[] fltparams={zratio,thresh[ch]};
 					//int[] intparams,float[] fltparams,ImageStack stack,float[] outimage,int width,int height,int xc,int yc,int ch
-					Runnable worker=new interp_line_v2(intparams,fltparams,lines,distances,stackarray,outimage[ch],width,height,i,ch);
+					Runnable worker=new interp_line_v2(intparams,fltparams,lines,distances,stackarray,outimage[ch],width,height,i,ch,depth);
 					executor.execute(worker);
 				}
 			}
@@ -1005,11 +1046,27 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 					if(!success) IJ.showStatus("3D Rendering Timeout");
 				}catch(InterruptedException e){}
 			}
+			//if we have a surface, apply the normals--use sobel for the derivative
+			if(projmeth==3){
+				for(int i=1;i<(maxsize-1);i++){
+					for(int l=1;l<(maxsize-1);l++){
+						float[] der=sobel_point(depth,l,i);
+						float mag=(float)Math.sqrt(der[0]*der[0]+der[1]*der[1]);
+						//the normal is the cross product of the derivative vectors
+						float[] norm={-der[0]/mag,-der[1]/mag,1.0f/mag};
+						//now the intensity is calculated as the dot product of the norm and the light vector
+						//the light will come in at a 30 deg angle to the y axis
+						float dotprod=(float)Math.abs(norm[0]*0.5f+norm[2]*0.866f);
+						outimage[ch][l+i*maxsize]*=dotprod;
+    				}
+    			}
+			}
 			if(IJ.escapePressed()) return outimage;
 			//long temp=System.currentTimeMillis();
 			//IJ.log("line "+i+" time = "+(temp-tstarttime)/1000.0f);
 			//tstarttime=temp;
 		}
+
 		return outimage;
 	}
 
@@ -1023,6 +1080,7 @@ class interp_line_v2 implements Runnable{
 	//public ImageStack stack;
 	public Object[] stack;
 	private float[] outimage;
+	private float[] depth;
 	public line3D[] lines;
 	public float[] distances;
 	rngs random;
@@ -1040,9 +1098,10 @@ class interp_line_v2 implements Runnable{
 		random=new rngs();
 	}
 	
-	public interp_line_v2(int[] intparams,float[] fltparams2,line3D[] lines,float[] distances,Object[] stack,float[] outimage,int width,int height,int yc,int ch){
+	public interp_line_v2(int[] intparams,float[] fltparams2,line3D[] lines,float[] distances,Object[] stack,float[] outimage,int width,int height,int yc,int ch,float[] depth){
 		this.intparams=intparams;
 		this.outimage=outimage;
+		this.depth=depth;
 		this.width=width;
 		this.height=height;
 		this.stack=stack;
@@ -1069,10 +1128,11 @@ class interp_line_v2 implements Runnable{
 			fltparams[3]=(lines[index].pt2.rx-lines[index].pt1.rx)/distances[index];
 			fltparams[4]=(lines[index].pt2.ry-lines[index].pt1.ry)/distances[index];
 			fltparams[5]=(lines[index].pt2.rz-lines[index].pt1.rz)/distances[index];
-    		float putval=get_line_max2(fltparams[0],fltparams[1],fltparams[2],fltparams[3],fltparams[4],fltparams[5],intparams[0],ch);
+    		float[] putval=get_line_max2(fltparams[0],fltparams[1],fltparams[2],fltparams[3],fltparams[4],fltparams[5],intparams[0],ch);
     		for(int j=yc;j<(yc+intparams[4]);j++){
     			for(int k=xc;k<(xc+intparams[4]);k++){
-    				outimage[k+j*intparams[0]]=putval;
+    				outimage[k+j*intparams[0]]=putval[0];
+    				if(intparams[8]==3) depth[k+j*intparams[0]]=putval[1];
     			}
     		}
 		}
@@ -1142,13 +1202,13 @@ class interp_line_v2 implements Runnable{
 		}
 	}
 	//these are 0maxsize,1channels,2slices,3frames,4xystep,5xrem,6yrem,7zremcorr,8method,9currframe,10imagetype,11projmeth
-	public float get_line_max2(float xstart,float ystart,float zstart,float xinc,float yinc,float zinc,int length,int channel){
+	public float[] get_line_max2(float xstart,float ystart,float zstart,float xinc,float yinc,float zinc,int length,int channel){
 		float x=xstart-xinc;
 		float y=ystart-yinc;
 		float scaledzinc=zinc/fltparams[6];
 		float z=zstart/fltparams[6]-scaledzinc;
 		// here xinc, yinc, and zinc are the dimensional steps corresponding to a pixel unit
-		float max=0.0f;
+		float max=0.0f; float maxpos=Float.NaN;
 		for(int k=0;k<length;k++){
 			x+=xinc;
 			y+=yinc;
@@ -1161,17 +1221,17 @@ class interp_line_v2 implements Runnable{
 			if(z>=intparams[7]+intparams[17]) continue;
 			float temp=get_3D_nearest_value2(x,y,z,channel);
 			if(temp<fltparams[7]) temp=0.0f;
-			if(intparams[8]==0){
-				if(temp>max) max=temp;
-			} else if(intparams[8]==1){
+			if(intparams[8]==0){ //max proj
+				if(temp>max) {max=temp; maxpos=k;}
+			} else if(intparams[8]==1 || intparams[8]==3){ //first proj and surface
 				max=temp;
-				if(temp>0.0f) return max;
-			} else {
+				if(temp>0.0f) return new float[]{max,(float)k};
+			} else { //avg proj
 				max+=temp;
 			}
 		}
 		if(intparams[8]==2) max/=length;
-		return max;
+		return new float[]{max,maxpos};
 	}
 	
 }

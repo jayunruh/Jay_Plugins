@@ -38,6 +38,7 @@ public class Plot3D implements EMFexport_interface{
 	protected String[] annotations;
 	protected String xLabel,yLabel,zLabel;
 	protected boolean logx,logy,logz;
+	public boolean drawAnnotations;
 	public static final int WIDTH=250;
 	public static final int HEIGHT=150;
 	public static final int TICK_LENGTH=3; // length of ticks
@@ -889,10 +890,12 @@ public class Plot3D implements EMFexport_interface{
 						drawPolyline(jr,xpoints,ypoints,zpoints,npts[0][j],npts[1][j],tempcolor);
 					}else{
 						drawPolyshape(jr,xpoints,ypoints,zpoints,npts[0][j],npts[1][j],shapes[j],tempcolor);
+						if(drawAnnotations && annotations!=null) drawPolytext(jr,xpoints,ypoints,zpoints,npts[0][j],npts[1][j],annotations[j],tempcolor);
 					}
 				}else{
 					if(shapes[j]==0){
 						drawPolyshape(jr,xpoints,ypoints,zpoints,npts[0][j],npts[1][j],1,tempcolor);
+						if(drawAnnotations && annotations!=null) drawPolytext(jr,xpoints,ypoints,zpoints,npts[0][j],npts[1][j],annotations[j],tempcolor);
 					}else{
 						drawPolyline(jr,xpoints,ypoints,zpoints,npts[0][j],npts[1][j],tempcolor);
 					}
@@ -968,10 +971,12 @@ public class Plot3D implements EMFexport_interface{
 						drawPolyline(jr,xpoints,ypoints,zpoints,npts[0][j],npts[1][j],tempcolor);
 					}else{
 						drawPolyshape(jr,xpoints,ypoints,zpoints,npts[0][j],npts[1][j],shapes[j],tempcolor);
+						if(drawAnnotations && annotations!=null) drawPolytext(jr,xpoints,ypoints,zpoints,npts[0][j],npts[1][j],annotations[j],tempcolor);
 					}
 				}else{
 					if(shapes[j]==0){
 						drawPolyshape(jr,xpoints,ypoints,zpoints,npts[0][j],npts[1][j],1,tempcolor);
+						if(drawAnnotations && annotations!=null) drawPolytext(jr,xpoints,ypoints,zpoints,npts[0][j],npts[1][j],annotations[j],tempcolor);
 					}else{
 						drawPolyline(jr,xpoints,ypoints,zpoints,npts[0][j],npts[1][j],tempcolor);
 					}
@@ -1089,8 +1094,15 @@ public class Plot3D implements EMFexport_interface{
 	private void drawPolyshape(renderer jr,int[] xpoints,int[] ypoints,int[][] zpoints,int nxpts,int nypts,int shape,Color color){
 		for(int i=0;i<nypts;i++){
 			for(int j=0;j<nxpts;j++){
-				// jr.addPoint3D(xpoints[j],ypoints[i],zpoints[j][i],shapesize,color,Point3D.CIRCLE);
 				jr.addPoint3D(xpoints[j],ypoints[i],zpoints[j][i],shape-1,color);
+			}
+		}
+	}
+	
+	private void drawPolytext(renderer jr,int[] xpoints,int[] ypoints,int[][] zpoints,int nxpts,int nypts,String text,Color color){
+		for(int i=0;i<nypts;i++){
+			for(int j=0;j<nxpts;j++){
+				jr.addText3D(text,xpoints[j]+shapesize,ypoints[j],zpoints[j][i],color);
 			}
 		}
 	}

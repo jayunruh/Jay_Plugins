@@ -17,8 +17,8 @@ import ij.measure.Calibration;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import ome.scifio.common.DataTools;
-import ome.scifio.io.RandomAccessOutputStream;
+import loci.common.DataTools;
+import loci.common.RandomAccessOutputStream;
 
 public class Random_Access_Tiff_Writer{
 	// many parts of this code have been adapted from the ImageJ TiffEncoder

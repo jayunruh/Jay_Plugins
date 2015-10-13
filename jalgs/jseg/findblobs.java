@@ -8,6 +8,8 @@
 
 package jalgs.jseg;
 
+import jalgs.jsort;
+
 public class findblobs{
 	//this is a class that finds objects by a max not mask approach
 	//objects are never allowed to be less than searchd distance apart 
@@ -46,6 +48,7 @@ public class findblobs{
 		int blobcounter=0;
 		int validblobs=0;
 		int searchr=(int)(0.5f*minsep+0.5f);
+		int searchr2=searchr*searchr;
 		do{
 			// start by finding the maximum point
 			ptfound=false;
@@ -94,7 +97,7 @@ public class findblobs{
 					tempstats[blobcounter-1][2]=maxval;
 					for(int i=lowery;i<=uppery;i++){
 						for(int j=lowerx;j<=upperx;j++){
-							if(Math.sqrt((i-maxy)*(i-maxy)+(j-maxx)*(j-maxx))<=searchr){
+							if(((i-maxy)*(i-maxy)+(j-maxx)*(j-maxx))<=searchr2){
 								int index=j+i*width;
 								binmask[index]=true;
 								if(!Float.isNaN(data[index])){
@@ -122,7 +125,143 @@ public class findblobs{
 				}else{
 					for(int i=lowery;i<=uppery;i++){
 						for(int j=lowerx;j<=upperx;j++){
-							if(Math.sqrt((i-maxy)*(i-maxy)+(j-maxx)*(j-maxx))<=searchr){
+							if(((i-maxy)*(i-maxy)+(j-maxx)*(j-maxx))<=searchr2){
+								binmask[j+i*width]=true;
+							}
+						}
+					}
+				}
+			}
+		}while(ptfound&&blobcounter<maxblobs);
+		float[][] stats=new float[validblobs][4];
+		int counter=0;
+		for(int i=0;i<blobcounter;i++){
+			if(tempstats[i][4]==1.0f){
+				stats[counter][0]=tempstats[i][0];
+				stats[counter][1]=tempstats[i][1];
+				stats[counter][2]=tempstats[i][2];
+				stats[counter][3]=tempstats[i][3];
+				for(int j=0;j<width*height;j++){
+					if(mask[j]==i+1){
+						mask[j]=counter+1;
+					}
+				}
+				counter++;
+			}else{
+				for(int j=0;j<width*height;j++){
+					if(mask[j]==i+1){
+						mask[j]=0.0f;
+					}
+				}
+			}
+		}
+		// stats are centerx,centery,integral,area
+		return stats;
+	}
+	
+	public float[][] dofindblobs3(float[] data,float[] mask){
+		//this is just like dofindblobs2 but we sort the intensities and keep the sort index
+		//that speeds up the max search each time dramatically
+		boolean[] binmask=new boolean[width*height];
+		int[] order1=jsort.get_javasort_order(data);
+		int[] order=new int[width*height];
+		int temp=width*height;
+		for(int i=0;i<temp;i++){
+			order[i]=order1[temp-1-i];
+		}
+		order1=null;
+		int maxpt=0;
+		int maxx=0;
+		int maxy=0;
+		float maxval=0.0f;
+		boolean ptfound=false;
+		boolean atedge=false;
+		float[][] tempstats=new float[maxblobs][5];
+		int blobcounter=0;
+		int validblobs=0;
+		int searchr=(int)(0.5f*minsep+0.5f);
+		int searchr2=searchr*searchr;
+		int previndex=0;
+		do{
+			// start by finding the maximum point
+			ptfound=false;
+			int[] temp1=maxnotmask(data,binmask,order,previndex);
+			if(temp1==null) break;
+			maxpt=temp1[0];
+			previndex=temp1[1];
+			maxval=data[maxpt];
+			maxy=maxpt/width;
+			maxx=maxpt-maxy*width;
+			if(maxval>=thresh){
+				ptfound=true;
+				atedge=false;
+				int upperx=(maxx+searchr);
+				if(upperx>=width){
+					upperx=width-1;
+					atedge=true;
+				}
+				int lowerx=(maxx-searchr);
+				if(lowerx<0){
+					lowerx=0;
+					atedge=true;
+				}
+				int uppery=(maxy+searchr);
+				if(uppery>=height){
+					uppery=height-1;
+					atedge=true;
+				}
+				int lowery=(maxy-searchr);
+				if(lowery<0){
+					lowery=0;
+					atedge=true;
+				}
+				if(maxx<edgebuf){
+					atedge=true;
+				}
+				if(maxx>(width-1-edgebuf)){
+					atedge=true;
+				}
+				if(maxy<edgebuf){
+					atedge=true;
+				}
+				if(maxy>(height-1-edgebuf)){
+					atedge=true;
+				}
+				if(!atedge){
+					blobcounter++;
+					float intval=0.0f;
+					tempstats[blobcounter-1][2]=maxval;
+					for(int i=lowery;i<=uppery;i++){
+						for(int j=lowerx;j<=upperx;j++){
+							if(((i-maxy)*(i-maxy)+(j-maxx)*(j-maxx))<=searchr2){
+								int index=j+i*width;
+								binmask[index]=true;
+								if(!Float.isNaN(data[index])){
+    								if(data[index]>=thresh){
+    									mask[index]=blobcounter;
+    									tempstats[blobcounter-1][0]+=data[index]*j;
+    									tempstats[blobcounter-1][1]+=data[index]*i;
+    									intval+=data[index];
+    									tempstats[blobcounter-1][3]+=1.0f;
+    								}
+								}
+							}
+						}
+					}
+					tempstats[blobcounter-1][0]/=intval;
+					tempstats[blobcounter-1][1]/=intval;
+					if(usemaxpt){
+						tempstats[blobcounter-1][0]=maxx;
+						tempstats[blobcounter-1][1]=maxy;
+					}
+					if(tempstats[blobcounter-1][3]>=minarea&&tempstats[blobcounter-1][3]<=maxarea){
+						tempstats[blobcounter-1][4]=1.0f;
+						validblobs++;
+					}
+				}else{
+					for(int i=lowery;i<=uppery;i++){
+						for(int j=lowerx;j<=upperx;j++){
+							if(((i-maxy)*(i-maxy)+(j-maxx)*(j-maxx))<=searchr2){
 								binmask[j+i*width]=true;
 							}
 						}
@@ -199,5 +338,16 @@ public class findblobs{
 			}
 		}
 		return imax;
+	}
+	
+	private int[] maxnotmask(float[] data,boolean[] binmask,int[] order,int start){
+		for(int i=start;i<data.length;i++){
+			int index=order[i];
+			if(Float.isNaN(data[index])) continue;
+			if(!binmask[index]){
+				return new int[]{index,i};
+			}
+		}
+		return null;
 	}
 }

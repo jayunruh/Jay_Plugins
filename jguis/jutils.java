@@ -184,7 +184,7 @@ public class jutils{
 	public static Object runPW4VoidMethod(ImageWindow iw,String method){
 		Class<?> temp=iw.getClass();
 		Object data=null;
-		if(temp.getName().equals("jguis.PlotWindow4")||temp.getName().equals("jguis.PlotWindow3D")||temp.getName().equals("jguis.PlotWindowHist")){
+		if(temp.getName().equals("jguis.PlotWindow4")||temp.getName().equals("jguis.PlotWindow3D")||temp.getName().equals("jguis.PlotWindowHist") || temp.getName().equals("jguis.PlotWindow2DHist")){
 			data=runReflectionMethod(iw,method,null,null);
 		}else if(temp.getName().equals("ij.gui.PlotWindow")){
 			Plot4 plot=plot2Plot4(getPWPlot((PlotWindow)iw)); // first
@@ -233,6 +233,8 @@ public class jutils{
 				float[][][] errors=(float[][][])runPW4VoidMethod(iw,"getErrors");
 				if(errors!=null) pw.addErrors(errors);
 			}
+			String[] annot=(String[])runPW4VoidMethod(iw,"getAnnotations");
+			if(annot!=null) pw.getPlot().setAnnotations(annot);
 			return pw;
 		}else{
 			if(iw.getClass().getName().equals("ij.gui.PlotWindow")){
@@ -275,6 +277,8 @@ public class jutils{
 				float[][][] errors=(float[][][])runPW4VoidMethod(iw,"getErrors");
 				if(errors!=null) p4.addErrors(errors);
 			}
+			String[] annot=(String[])runPW4VoidMethod(iw,"getAnnotations");
+			if(annot!=null) p4.setAnnotations(annot);
 			return p4;
 		}else{
 			if(iw.getClass().getName().equals("ij.gui.PlotWindow")){
@@ -737,6 +741,15 @@ public class jutils{
 
 	public static Color get_closest_color(int value){
 		return colors[get_closest_color_index(value)];
+	}
+	
+	public static String get_closest_color_name(int value){
+		return colornames[get_closest_color_index(value)];
+	}
+	
+	public static String get_closest_color_name(Color color){
+		int value=color.getRGB();
+		return colornames[get_closest_color_index(value)];
 	}
 
 	public static Color[] colors={Color.black,Color.blue,Color.green,Color.red,Color.magenta,Color.cyan,Color.yellow,Color.orange};

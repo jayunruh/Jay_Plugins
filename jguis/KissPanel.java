@@ -14,12 +14,14 @@ import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.GenericDialog;
 import ij.gui.ImageCanvas;
+import ij.gui.ImageWindow;
 import ij.gui.Line;
 import ij.gui.Roi;
 import ij.process.ColorProcessor;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
 import ij.text.TextWindow;
+import jalgs.algutils;
 import jalgs.interpolation;
 import jalgs.jdataio;
 import jalgs.jsort;
@@ -75,6 +77,8 @@ public class KissPanel extends Panel implements ActionListener,ItemListener,Mous
 	public boolean dapilast=true; //if last channel is really just dapi
 	public boolean coloravg=false;
 	public boolean dosmooth=false;
+	public boolean outnormimg=false;
+	public boolean classify=false;
 	public int smoothd=10;
 	public int xsizerank=8;
 	public int ysizerank=23;
@@ -86,7 +90,7 @@ public class KissPanel extends Panel implements ActionListener,ItemListener,Mous
 	public int[][] code;
 	public int[][] positions;
 	public boolean[] flip;
-	private Button create_karyotype,save_data,guess_assign,out_stats,out_roi_contr,flip_button;
+	private Button create_karyotype,save_data,guess_assign,out_stats,out_roi_contr,flip_button,out_scaled,class_button;
 	private Checkbox mask_check;
 	private Label idlabel,assignlabel,smoothlabel,smoothdlabel;
 	private Label[] statlabels;
@@ -102,6 +106,7 @@ public class KissPanel extends Panel implements ActionListener,ItemListener,Mous
 	public float[][] object_stats,unmixed;
 	private float[][] spec_stack; // here is the multispectral image
 	private float[][][] spectra; // here are the spectra [dye][2][values]
+	private float[][] classdefs;
 	private int[] areas;
 	private int[] arearank;
 	private ImagePlus oldcolorkissimp;
@@ -502,6 +507,14 @@ public class KissPanel extends Panel implements ActionListener,ItemListener,Mous
 		flip_button.setBounds(10,150+(nch+7)*30,75,30);
 		add(flip_button);
 		flip_button.addActionListener(this);
+		out_scaled=new Button("Show Scaled");
+		out_scaled.setBounds(10,150+(nch+8)*30,75,30);
+		add(out_scaled);
+		out_scaled.addActionListener(this);
+		class_button=new Button("Classify");
+		class_button.setBounds(90,150+(nch+8)*30,75,30);
+		add(class_button);
+		class_button.addActionListener(this);
 	}
 	
 	public void initClusters(){
@@ -591,6 +604,17 @@ public class KissPanel extends Panel implements ActionListener,ItemListener,Mous
 				//update_kiss();
 				//update_image();
 			}
+		}
+		if(e.getSource()==out_scaled){
+			outnormimg=true;
+			regenerate_kiss();
+			outnormimg=false;
+		}
+		if(e.getSource()==class_button){
+			classify=!classify;
+			if(!classify) classdefs=null;
+			regenerate_kiss();
+			update_karyotype();
 		}
 		if(e.getSource()==out_stats){
 			String headings="";
@@ -1207,11 +1231,15 @@ public class KissPanel extends Panel implements ActionListener,ItemListener,Mous
 			lutmaxs[2][i]=rgb[2];
 		}
 		//IJ.log("test1");
+		if(classify) outnormimg=true;
+		float[][] normimg=null;
+		if(outnormimg) normimg=new float[nch+1][width*height];
 		for(int i=0;i<width*height;i++){
 			if(objects[i]>0.0f){
 				int[] rgb=new int[3];
 				float tempobjmax=objmax[(int)objects[i]-1];
 				for(int j=0;j<(nch+1);j++){
+					if(outnormimg) normimg[j][i]=(pixels[j][i]-mins[j])/(maxs[j]-mins[j]);
 					if(showcolors[j]){
 						float percentmax=0.4f*(pixels[j][i]-mins[j])/(maxs[j]-mins[j]);
 						//float percentmax=temp_obj_stats[(int)objects[i]-1][j]; //this would give uniform shading
@@ -1230,6 +1258,44 @@ public class KissPanel extends Panel implements ActionListener,ItemListener,Mous
 				cpixels[i]=jutils.rgb2intval(rgb[0],rgb[1],rgb[2]);
 			}
 		}
+		if(classify){
+			outnormimg=false;
+			//need to get the class definitions somehow here
+			//try to get them as a plot window
+			if(classdefs==null){
+				ImageWindow[] iw=jutils.selectPlots(false,1,new String[]{"Class Definitions"});
+				if(iw==null) classify=false;
+				else{
+					classdefs=(float[][])jutils.runPW4VoidMethod(iw[0],"getYValues");
+				}
+			}
+			if(classdefs!=null){
+    			float[][] classified=classify_pixels(normimg,classdefs);
+    			for(int i=0;i<width*height;i++){
+    				if(objects[i]>0.0f){
+    					int[] rgb=new int[3];
+    					float tempobjmax=objmax[(int)objects[i]-1];
+    					for(int j=0;j<(nch+1);j++){
+    						if(showcolors[j]){
+    							float percentmax=0.4f*classified[j][i];
+    							percentmax/=tempobjmax;
+    							for(int k=0;k<3;k++){
+    								rgb[k]+=(int)(lutmaxs[k][j]*percentmax);
+    							}
+    						}
+    					}
+    					if(rgb[0]>255) rgb[0]=255;
+    					if(rgb[1]>255) rgb[1]=255;
+    					if(rgb[2]>255) rgb[2]=255;
+    					if(rgb[0]<0) rgb[0]=0;
+    					if(rgb[1]<0) rgb[1]=0;
+    					if(rgb[2]<0) rgb[2]=0;
+    					cpixels[i]=jutils.rgb2intval(rgb[0],rgb[1],rgb[2]);
+    				}
+    			}
+			}
+		}
+		if(outnormimg) new ImagePlus("Norm Image",jutils.array2stack(normimg,width,height)).show();
 		//IJ.log("test2");
 		int[] oldcpixels=cpixels.clone();
 		//new ImagePlus("test image",new ColorProcessor(width,height,cpixels.clone())).show();
@@ -1240,6 +1306,58 @@ public class KissPanel extends Panel implements ActionListener,ItemListener,Mous
 		}else{
 			colorkissimp.setProcessor(new ColorProcessor(width,height,cpixels));
 		}
+	}
+	
+	public static float[][] classify_pixels(float[][] normimg,float[][] classdefs){
+		//this method outputs a new verion of normimg with all non-zero channel profiles replace by the classdefs profiles
+		//with the most similar normalized vector angle
+		int nclasses=classdefs.length;
+		int classchans=classdefs[0].length;
+		int npix=normimg[0].length;
+		//start by normalizing our class definitions
+		float[][] classdefsnorm=new float[nclasses][classchans];
+		for(int i=0;i<nclasses;i++){
+			float length=0.0f;
+			for(int j=0;j<classchans;j++) length+=classdefs[i][j]*classdefs[i][j];
+			length=(float)Math.sqrt(length);
+			for(int j=0;j<classchans;j++) classdefsnorm[i][j]=classdefs[i][j]/length;
+		}
+		float[][] classimg=algutils.clone_multidim_array(normimg);
+		for(int i=0;i<npix;i++){
+			float[] vec=new float[classchans];
+			float length=0.0f;
+			for(int j=0;j<classchans;j++){
+				vec[j]=normimg[j][i];
+				length+=vec[j]*vec[j];
+			}
+			if(length>0.0f){
+				length=(float)Math.sqrt(length);
+				for(int j=0;j<classchans;j++) vec[j]/=length;
+				float mindist=vec_dist(vec,classdefsnorm[0]);
+				int classid=0;
+				for(int j=1;j<nclasses;j++){
+					float tempdist=vec_dist(vec,classdefsnorm[j]);
+					if(tempdist<mindist){
+						classid=j;
+						mindist=tempdist;
+					}
+				}
+				for(int j=0;j<classchans;j++){
+					classimg[j][i]=classdefs[classid][j];
+				}
+			}
+		}
+		return classimg;
+	}
+	
+	public static float vec_dist(float[] vec1,float[] vec2){
+		//returns some distance measure between the two vectors
+		//here we try the dot product angle
+		float dotprod=0.0f;
+		for(int i=0;i<vec1.length;i++){
+			dotprod+=vec1[i]*vec2[i];
+		}
+		return (float)Math.acos(dotprod);
 	}
 
 	public void update_kiss(){

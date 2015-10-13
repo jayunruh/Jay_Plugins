@@ -998,6 +998,29 @@ public class findblobs3{
 		distance+=Math.sqrt((xpts[0]-xpts[polypts-1])*(xpts[0]-xpts[polypts-1])+(ypts[0]-ypts[polypts-1])*(ypts[0]-ypts[polypts-1]));
 		return distance;
 	}
+	
+	public double get_smoothed_perimeter(Polygon poly){
+		//adapted from the ImageJ PolygonRoi class
+		int nPoints=poly.npoints;
+		int[] xp=poly.xpoints;
+		int[] yp=poly.ypoints;
+		double length=0.0;
+		double dx = (xp[0]+xp[1]+xp[2])/3.0-xp[0];
+        double dy = (yp[0]+yp[1]+yp[2])/3.0-yp[0];
+        length += Math.sqrt(dx*dx+dy*dy);
+        for (int i=1; i<nPoints-2; i++) {
+            dx = (xp[i+2]-xp[i-1])/3.0; // = (x[i]+x[i+1]+x[i+2])/3-(x[i-1]+x[i]+x[i+1])/3
+            dy = (yp[i+2]-yp[i-1])/3.0; // = (y[i]+y[i+1]+y[i+2])/3-(y[i-1]+y[i]+y[i+1])/3
+            length += Math.sqrt(dx*dx+dy*dy);
+        }
+        dx = xp[nPoints-1]-(xp[nPoints-3]+xp[nPoints-2]+xp[nPoints-1])/3.0;
+        dy = yp[nPoints-1]-(yp[nPoints-3]+yp[nPoints-2]+yp[nPoints-1])/3.0;
+        length += Math.sqrt(dx*dx+dy*dy);
+        dx = xp[nPoints-1]-xp[0];
+        dy = yp[nPoints-1]-yp[0];
+        length += Math.sqrt(dx*dx+dy*dy);
+		return length;
+	}
 
 	public void filter_area(float[] objects,int[] arealims){
 		filter_area(objects,arealims,false);
@@ -1011,9 +1034,17 @@ public class findblobs3{
 	 */
 	public void filter_area(float[] objects,int[] arealims,boolean renumber){
 		int[] hist=get_areas(objects);
+		boolean[] delete=new boolean[hist.length];
 		for(int i=0;i<hist.length;i++){
 			if(hist[i]<arealims[0]||hist[i]>arealims[1]){
-				delete_object(objects,i+1);
+				delete[i]=true;
+				//delete_object(objects,i+1);
+			}
+		}
+		for(int i=0;i<width*height;i++){
+			if(objects[i]>0.0f){
+				int index=(int)objects[i];
+				if(delete[index-1]) objects[i]=0.0f;
 			}
 		}
 		if(renumber)
@@ -1068,7 +1099,7 @@ public class findblobs3{
 					}
 				}
 			}
-			float perimeter=(float)get_perimeter(outlines[i]);
+			float perimeter=(float)get_smoothed_perimeter(outlines[i]);
 			float circ=4.0f*(float)Math.PI*(area/(perimeter*perimeter));
 			if(area<minarea||area>maxarea||circ<mincirc||circ>maxcirc){
 				delete_object(objects,id,r);
@@ -1100,6 +1131,33 @@ public class findblobs3{
 			}
 		}
 		return hist;
+	}
+	
+	public float[][] get_area_perim_circ(float[] objects){
+		return get_area_perim_circ(objects,get_object_outlines(objects));
+	}
+	
+	public float[][] get_area_perim_circ(float[] objects,Polygon[] outlines){
+		//returns three arrays, the first with areas and the second with perimeters, then circularities
+		float[][] retvals=new float[3][outlines.length];
+		for(int i=0;i<outlines.length;i++){
+			float id=i+1;
+			int area=0;
+			Rectangle r=outlines[i].getBounds();
+			for(int j=r.y;j<(r.y+r.height);j++){
+				for(int k=r.x;k<(r.x+r.width);k++){
+					if(objects[k+j*width]==id){
+						area++;
+					}
+				}
+			}
+			float perimeter=(float)get_smoothed_perimeter(outlines[i]);
+			float circ=4.0f*(float)Math.PI*(area/(perimeter*perimeter));
+			retvals[0][i]=(float)area;
+			retvals[1][i]=perimeter;
+			retvals[2][i]=circ;
+		}
+		return retvals;
 	}
 
 	public float get_object_stats(float[] objects,int id,Object measurement,String stat){

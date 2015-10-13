@@ -15,7 +15,7 @@ public class rect3D extends element3D implements Cloneable{
 	public point3D[] pt;
 	public int xsize,ysize,zsize;
 
-	// here we have a 3D line
+	// this is really a cube with rectangular sides
 	public rect3D(int x,int y,int z,int xsize1,int ysize1,int zsize1,Color color1){
 		pt=new point3D[8];
 		xsize=xsize1;

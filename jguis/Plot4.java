@@ -682,6 +682,14 @@ public class Plot4{
 				counter++;
 			}
 		}
+		String[] newannot=null;
+		if(annotations!=null){
+			newannot=new String[nseries-ndelete];
+			counter=0;
+			for(int i=0;i<nseries;i++){
+				if(!fate[i]){newannot[counter]=annotations[i]; counter++;}
+			}
+		}
 		nseries-=ndelete;
 		maxpts=newmaxpts;
 		npts=newnpts;
@@ -689,6 +697,7 @@ public class Plot4{
 		yValues=newyValues;
 		shapes=newshapes;
 		colors=newcolors;
+		annotations=newannot;
 		if(rescale){
 			autoscale();
 		}

@@ -18,6 +18,7 @@ public class edit_plot_colors_jru_v1 implements PlugIn {
 	public void run(String arg) {
 		ImageWindow iw=WindowManager.getCurrentWindow();
 		int[] colors=(int[])jutils.runPW4VoidMethod(iw,"getColors");
+		int[] shapes=(int[])jutils.runPW4VoidMethod(iw,"getShapes");
 		int selected=(Integer)jutils.runPW4VoidMethod(iw,"getSelected");
 		String[] clabels={"black","blue","green","red","magenta","cyan","yellow","orange"};
 		GenericDialog gd=new GenericDialog("Options");
@@ -26,9 +27,11 @@ public class edit_plot_colors_jru_v1 implements PlugIn {
 			length=clabels.length;
 		}
 		if(selected>=0){
-			gd.addChoice("Series "+(selected+1)+" color",clabels,clabels[colors[selected]%8]);
+			gd.addChoice("Series "+(selected+1)+" color",Plot4.color_names,Plot4.color_names[colors[selected]%8]);
+			gd.addChoice("Series "+(selected+1)+" shape",Plot4.shape_names,Plot4.shape_names[shapes[selected]]);
 			gd.showDialog(); if(gd.wasCanceled()){return;}
 			colors[selected]=gd.getNextChoiceIndex();
+			shapes[selected]=gd.getNextChoiceIndex();
 			jutils.runPW4VoidMethod(iw,"updatePlot");
 		} else {
 			for(int i=0;i<length;i++){

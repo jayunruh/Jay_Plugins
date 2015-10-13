@@ -53,8 +53,10 @@ public class gausfunc{
 		for(int i=0;i<nr;i++){
 			sum+=temp[i];
 		}
-		for(int i=0;i<nr;i++){
-			temp[i]/=sum;
+		if(sum!=0.0){
+			for(int i=0;i<nr;i++){
+				temp[i]/=sum;
+			}
 		}
 		return temp;
 	}
@@ -169,6 +171,28 @@ public class gausfunc{
 			float yval=(float)getinterpgaus(Math.abs(i-yc),stdev);
 			for(int j=xstart;j<=xend;j++){
 				float xval=(float)getinterpgaus(Math.abs(j-xc),stdev);
+				image[j+i*width]+=amp*xval*yval;
+			}
+		}
+	}
+	
+	public void draw_2D_func(double[] image,double xc,double yc,int width,int height,double stdev,double amp){
+		draw_2D_func(image,xc,yc,width,height,stdev,amp,4.0f);
+	}
+	
+	public void draw_2D_func(double[] image,double xc,double yc,int width,int height,double stdev,double amp,float cutoff){
+		int ystart=(int)(yc-cutoff*stdev);
+		if(ystart<0) ystart=0;
+		int yend=(int)(yc+cutoff*stdev);
+		if(yend>=height) yend=(height-1);
+		int xstart=(int)(xc-cutoff*stdev);
+		if(xstart<0) xstart=0;
+		int xend=(int)(xc+cutoff*stdev);
+		if(xend>=width) xend=(width-1);
+		for(int i=ystart;i<=yend;i++){
+			double yval=getinterpgaus(Math.abs(i-yc),stdev);
+			for(int j=xstart;j<=xend;j++){
+				double xval=getinterpgaus(Math.abs(j-xc),stdev);
 				image[j+i*width]+=amp*xval*yval;
 			}
 		}
