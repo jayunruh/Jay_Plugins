@@ -224,6 +224,14 @@ public class algutils{
 		}
 		return out;
 	}
+	
+	public static float[][] convert_arr_float2(Object[] input){
+		float[][] out=new float[input.length][];
+		for(int i=0;i<input.length;i++){
+			out[i]=convert_arr_float2(input[i]);
+		}
+		return out;
+	}
 
 	/*****************************
 	 * makes a copy of an array as an int

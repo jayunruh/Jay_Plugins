@@ -9,6 +9,7 @@
 package jalgs.jseg;
 
 import jalgs.algutils;
+import jalgs.gui_interface;
 import jalgs.jstatistics;
 
 import java.awt.Polygon;
@@ -23,6 +24,7 @@ public class findblobs3D{
 	int maxStackSize=500; // will be increased as needed
 	int[][] stack=new int[maxStackSize][3];
 	int stackSize;
+	public gui_interface gui;
 
 	public findblobs3D(int width1,int height1,int depth1){
 		width=width1;
@@ -30,10 +32,32 @@ public class findblobs3D{
 		depth=depth1;
 		fb=new findblobs3(width,height);
 		nobjects=0;
+		gui=null;
+	}
+	
+	public findblobs3D(int width1,int height1,int depth1,gui_interface gui){
+		width=width1;
+		height=height1;
+		depth=depth1;
+		fb=new findblobs3(width,height);
+		nobjects=0;
+		this.gui=gui;
 	}
 	
 	public void set_objects(float[][] objects){
 		nobjects=(int)maxarray(objects);
+	}
+	
+	public float[][] dofindblobs(Object[] data1){
+		if(data1[0] instanceof byte[]){
+			byte[][] temp=new byte[data1.length][];
+			for(int i=0;i<data1.length;i++) temp[i]=(byte[])data1[i];
+			return dofindblobs(temp);
+		} else {
+			float[][] temp=new float[data1.length][];
+			for(int i=0;i<temp.length;i++) temp[i]=(float[])data1[i];
+			return dofindblobs(temp,0.5f);
+		}
 	}
 
 	public float[][] dofindblobs(byte[][] data1){
@@ -54,6 +78,7 @@ public class findblobs3D{
 						fill3D(temp,objects,sliceblobs,id,k,j,i);
 					}
 				}
+				if(gui!=null) gui.showProgress(j+i*height,depth*height);
 			}
 		}
 		nobjects=id;
@@ -100,6 +125,8 @@ public class findblobs3D{
 	}
 
 	public void clear_edges(float[][] objects,boolean renumber){
+		int totlength=width*height+width*depth+height*depth;
+		int counter=0;
 		for(int i=0;i<width*height;i++){
 			// get the top and bottom
 			if(objects[0][i]>0.0f){
@@ -108,6 +135,8 @@ public class findblobs3D{
 			if(objects[depth-1][i]>0.0f){
 				delete_object(objects,objects[depth-1][i]);
 			}
+			counter++;
+			if(gui!=null) gui.showProgress(counter,totlength);
 		}
 		for(int k=1;k<(depth-1);k++){
 			// now the sides
@@ -118,6 +147,8 @@ public class findblobs3D{
 				if(objects[k][i+(height-1)*width]>0.0f){
 					delete_object(objects,objects[k][i+(height-1)*width]);
 				}
+				counter++;
+				if(gui!=null) gui.showProgress(counter,totlength);
 			}
 			for(int i=0;i<height;i++){
 				if(objects[k][i*width]>0.0f){
@@ -126,6 +157,8 @@ public class findblobs3D{
 				if(objects[k][i*width+width-1]>0.0f){
 					delete_object(objects,objects[k][i*width+width-1]);
 				}
+				counter++;
+				if(gui!=null) gui.showProgress(counter,totlength);
 			}
 		}
 		if(renumber) renumber_objects(objects);
@@ -628,6 +661,7 @@ public class findblobs3D{
     			}
 			}
 			stats[i]=jstatistics.getstatistic(stat,temp,null);
+			if(gui!=null) gui.showProgress(i,nobjects);
 		}
 		return stats;
 	}
@@ -664,6 +698,7 @@ public class findblobs3D{
 			if(hist[i]<arealims[0]||hist[i]>arealims[1]){
 				delete_object(objects,i+1);
 			}
+			if(gui!=null) gui.showProgress(i,hist.length);
 		}
 		if(renumber)
 			renumber_objects(objects);
@@ -683,12 +718,41 @@ public class findblobs3D{
 						centroids[index-1][3]+=1.0f;
 					}
 				}
+				if(gui!=null) gui.showProgress(j+i*height,depth*height);
 			}
 		}
 		for(int i=0;i<nblobs;i++){
 			centroids[i][0]/=centroids[i][3];
 			centroids[i][1]/=centroids[i][3];
 			centroids[i][2]/=centroids[i][3];
+		}
+		return centroids;
+	}
+	
+	public float[][] getCentroidsAreasAvgs(float[][] objects,Object[] measurement){
+		int nblobs=get_nblobs(objects);
+		float[][] centroids=new float[nblobs][5];
+		for(int i=0;i<objects.length;i++){
+			float[] tempmeas=algutils.convert_arr_float2(measurement[i]);
+			for(int j=0;j<height;j++){
+				for(int k=0;k<width;k++){
+					int index=(int)objects[i][k+j*width];
+					if(index>0){
+						centroids[index-1][0]+=k;
+						centroids[index-1][1]+=j;
+						centroids[index-1][2]+=i;
+						centroids[index-1][3]+=1.0f;
+						centroids[index-1][4]+=tempmeas[k+j*width];
+					}
+				}
+				if(gui!=null) gui.showProgress(j+i*height,depth*height);
+			}
+		}
+		for(int i=0;i<nblobs;i++){
+			centroids[i][0]/=centroids[i][3];
+			centroids[i][1]/=centroids[i][3];
+			centroids[i][2]/=centroids[i][3];
+			centroids[i][4]/=centroids[i][3];
 		}
 		return centroids;
 	}

@@ -127,6 +127,7 @@ public class NLLSfit_v3{
 			double[] dfit=fitclass.fitfunc(params);
 			chisquared=calculate_c2_fit(dfit,fitparams,data,weights);
 			double tempdouble=0.0;
+			int overcount=0;
 			do{
 				c2old=chisquared;
 				int counter=1;
@@ -182,8 +183,11 @@ public class NLLSfit_v3{
 				tempdouble=(c2old-chisquared)/chisquared;
 				if(tempdouble>=0.0&&currlambda>=0.0){
 					currlambda/=10.0;
+					overcount=0;
 				}else{
 					currlambda*=10.0;
+					if(tempdouble<0.0) overcount++;
+					if(overcount>3) break;
 				}
 			}while(tempdouble>toler||c2old<chisquared);
 			stats[0]=iterations;

@@ -243,6 +243,7 @@ public class PlotWindow3D extends ImageWindow implements ActionListener,Clipboar
 			float[][] tempxvals=p3.getXValues();
 			float[][] tempyvals=p3.getYValues();
 			float[][] tempzvals=p3.getZValues()[0];
+			int[] npts=p3.getNpts()[0];
 			int nser=p3.getNSeries();
 			for(int i=0;i<nser;i++){
 				headings.append("x"+i+"\ty"+i+"\tz"+i);
@@ -251,7 +252,8 @@ public class PlotWindow3D extends ImageWindow implements ActionListener,Clipboar
 			}
 			for(int i=0;i<maxpts;i++){
 				for(int j=0;j<nser;j++){
-					sb.append(""+tempxvals[j][i]+"\t"+tempyvals[j][i]+"\t"+tempzvals[j][i]);
+					if(i>=npts[j]) sb.append("NaN\tNaN\tNaN");
+					else sb.append(""+tempxvals[j][i]+"\t"+tempyvals[j][i]+"\t"+tempzvals[j][i]);
 					if(j<(nser-1))
 						sb.append("\t");
 				}
@@ -396,21 +398,51 @@ public class PlotWindow3D extends ImageWindow implements ActionListener,Clipboar
 		}
 		IJ.showStatus("Copying plot values...");
 		StringBuffer sb=new StringBuffer();
-		int maxypts=p3.getmaxypts();
-		float[][][] zValues=p3.getZValues();
-		for(int i=0;i<p3.getNSeries();i++){
-			for(int j=0;j<p3.getmaxxpts();j++){
-				for(int k=0;k<maxypts;k++){
-					sb.append(""+zValues[i][j][k]);
-					if(k<(maxypts-1)){
+		StringBuffer headings=new StringBuffer();
+		if(p3 instanceof Traj3D){
+			int maxpts=p3.getmaxxpts();
+			float[][] tempxvals=p3.getXValues();
+			float[][] tempyvals=p3.getYValues();
+			float[][] tempzvals=p3.getZValues()[0];
+			int[] npts=p3.getNpts()[0];
+			int nser=p3.getNSeries();
+			for(int i=0;i<nser;i++){
+				headings.append("x"+i+"\ty"+i+"\tz"+i);
+				if(i<nser-1)
+					headings.append("\t");
+			}
+			for(int i=0;i<maxpts;i++){
+				for(int j=0;j<nser;j++){
+					if(i>=npts[j]) sb.append("NaN\tNaN\tNaN");
+					else sb.append(""+tempxvals[j][i]+"\t"+tempyvals[j][i]+"\t"+tempzvals[j][i]);
+					if(j<(nser-1))
 						sb.append("\t");
-					}
 				}
 				sb.append("\n");
 			}
-			sb.append("\n");
+		}else{
+			int tempmaxypts=p3.getmaxypts();
+			float[][][] tempzvals=p3.getZValues();
+			for(int j=0;j<tempmaxypts;j++){
+				headings.append("y"+j);
+				if(j<(tempmaxypts-1)){
+					headings.append("\t");
+				}
+			}
+			for(int i=0;i<p3.getNSeries();i++){
+				for(int j=0;j<p3.getmaxxpts();j++){
+					for(int k=0;k<tempmaxypts;k++){
+						sb.append(""+tempzvals[i][j][k]);
+						if(k<(tempmaxypts-1)){
+							sb.append("\t");
+						}
+					}
+					sb.append("\n");
+				}
+				sb.append("\n");
+			}
 		}
-		String text=sb.toString();
+		String text=headings.toString()+"\n"+sb.toString();
 		StringSelection contents=new StringSelection(text);
 		systemClipboard.setContents(contents,this);
 		IJ.showStatus(text.length()+" characters copied to Clipboard");

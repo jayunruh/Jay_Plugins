@@ -30,6 +30,7 @@ public class gausfunc{
 				return 0.0f;
 		}
 		double rrel=r/stdev;
+		if(rrel<0.0) rrel=-rrel;
 		int rp=(int)(rrel*100.0);
 		double rem=rrel*100.0-rp;
 		if(rp<999){

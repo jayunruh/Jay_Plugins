@@ -95,7 +95,13 @@ public class cat_hyperstacks_jru_v1 implements PlugIn, FrameInterface {
 		String fileName=sd.getFileName();
 		String fileDir=sd.getDirectory();
 		if(fileName==null){return;}
-		Tiff_Writer tw=new Tiff_Writer(currimp,nfiles*stacksize,this);
+		Tiff_Writer tw=null;
+		if(scale==1.0) tw=new Tiff_Writer(currimp,nfiles*stacksize,this);
+		else{
+			ImageProcessor ip=currimp.getProcessor();
+			ImageProcessor ip2=ip.resize((int)(width*scale),(int)(height*scale));
+			tw=new Tiff_Writer(currimp,ip2.getWidth(),ip2.getHeight(),nfiles*stacksize,this);
+		}
 		frameiterator=0;
 		channeliterator=0;
 		sliceiterator=0;

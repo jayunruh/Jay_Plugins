@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Hashtable;
 
+import ome.units.UNITS;
 import ome.units.quantity.Length;
 //import org.slf4j.LoggerFactory;
 //import ch.qos.logback.classic.Level;
@@ -127,6 +128,7 @@ public class LOCI_file_reader{
 			float zsize=1.0f;
 			float tsize=1.0f;
 			if(!nometa){
+				//Length temp=new Length(1.0,UNITS.MICROM);
 				if(omexmlMetadata.getPixelsPhysicalSizeX(series)!=null)
 					psize=omexmlMetadata.getPixelsPhysicalSizeX(series).value().floatValue();
 				if(omexmlMetadata.getPixelsPhysicalSizeZ(series)!=null)

@@ -112,7 +112,8 @@ public class traj_2_roi_jru_v1 implements PlugIn {
 			xvals2[i]=(int)xvals[i];
 			yvals2[i]=(int)yvals[i];
 		}
-		return new PolygonRoi(xvals2,yvals2,npts,Roi.POLYLINE);
+		if(npts==1) return new PointRoi(xvals2[0],yvals2[0]);
+		else return new PolygonRoi(xvals2,yvals2,npts,Roi.POLYLINE);
 	}
 
 	public int[][] traj2int(float[] xvals,float[] yvals,int npts){

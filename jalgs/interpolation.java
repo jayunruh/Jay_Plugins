@@ -23,6 +23,23 @@ public class interpolation{
 		return retimage;
 	}
 	
+	public static float[] affine_transform(Object image,int width,int height,double[][] trans,int newwidth,int newheight){
+		//here we transform the coordinates of the new image back to the old image
+		float[] retimage=new float[newwidth*newheight];
+		float xoff=0.5f*(float)(newwidth-width);
+		float yoff=0.5f*(float)(newheight-height);
+		for(int i=0;i<newheight;i++){
+			float tempy=(float)i-yoff;
+			for(int j=0;j<newwidth;j++){
+				float tempx=(float)j-xoff;
+				float newx=(float)trans[0][0]*tempx+(float)trans[0][1]*tempy+(float)trans[0][2];
+				float newy=(float)trans[1][0]*tempx+(float)trans[1][1]*tempy+(float)trans[1][2];
+				retimage[j+i*newwidth]=interp2D(image,width,height,newx,newy);
+			}
+		}
+		return retimage;
+	}
+	
 	/**********
 	 * here the destination image must be a float image
 	 * @param src
@@ -735,6 +752,14 @@ public class interpolation{
 	public static float calcdist_3D(float x1,float y1,float z1,float x2,float y2,float z2){
 		return (float)Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)+(z2-z1)*(z2-z1));
 	}
+	
+	public static float calcdist_ND(float[] x1,float[] x2){
+		float dist2=0.0f;
+		for(int i=0;i<x1.length;i++){
+			dist2+=(x2[i]-x1[i])*(x2[i]-x1[i]);
+		}
+		return (float)Math.sqrt(dist2);
+	}
 
 	public static float get_float_index(float[] arr,float position){
 		int length=arr.length;
@@ -848,6 +873,37 @@ public class interpolation{
 			return integral;
 		else
 			return integral/(end-begin);
+	}
+	
+	public static float[][] resampleTraj(float[][] traj,float dx){
+		//this resamples an n-dimension trajectory with spacing dx
+		int dims=traj[0].length;
+		float[] dists=new float[traj.length-1];
+		float totdist=0.0f;
+		for(int i=1;i<traj.length;i++){
+			dists[i-1]=calcdist_ND(traj[i],traj[i-1]);
+			totdist+=dists[i-1];
+		}
+		int npts=(int)(totdist/dx)+1;
+		float[][] newtraj=new float[npts][traj[0].length];
+		float pos=0.0f;
+		int ind=0;
+		newtraj[0]=traj[0];
+		for(int i=1;i<npts;i++){
+			float target=dx*(float)i;
+			while(pos<target){
+				pos+=dists[ind];
+				ind++;
+			}
+			if(pos==target){
+				newtraj[i]=traj[ind-1];
+			} else {
+				float prev=pos-dists[ind-2];
+				float frac=(target-prev)/(pos-prev);
+				for(int j=0;j<dims;j++) newtraj[i][j]=traj[ind-2][j]+frac*(traj[ind-1][j]-traj[ind-2][j]);
+			}
+		}
+		return newtraj;
 	}
 
 }

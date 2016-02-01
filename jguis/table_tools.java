@@ -730,6 +730,24 @@ public class table_tools{
 		tp.setColumnHeadings(collabels);
 		tp.append(print_listtable(list));
 	}
+	
+	public static void change_table_labels(TextPanel tp,String[] newlabels){
+		change_table_labels(tp,print_string_array(newlabels));
+	}
+	
+	public static void change_table_labels(TextPanel tp,String newlabels){
+		if(!newlabels.equals(tp.getColumnHeadings())){
+			List<List<String>> listtable=table2listtable(tp);
+			String[] headings2=split_string_tab(newlabels);
+			String[] oldheadings=getcollabels(tp);
+			if(headings2.length>oldheadings.length){
+				List<String> row1=listtable.get(0);
+				int start=row1.size();
+				for(int i=start;i<headings2.length;i++) row1.add("");
+			}
+			replace_table(tp,listtable,newlabels);
+		}
+	}
 
 	public static void create_table(String title,List<List<String>> list,String[] collabels){
 		int ncolumns=list.get(0).size();
@@ -768,6 +786,36 @@ public class table_tools{
 			title2="Table";
 		}
 		new TextWindow(title2,print_string_array(labels),print_float_array(list),400,200);
+	}
+	
+	public static void create_table(String title,double[][] list,String[] collabels){
+		int ncolumns=list[0].length;
+		String[] labels=collabels;
+		if(collabels==null){
+			labels=new String[ncolumns];
+			for(int i=0;i<ncolumns;i++)
+				labels[i]="col"+(i+1);
+		}
+		String title2=title;
+		if(title==null){
+			title2="Table";
+		}
+		new TextWindow(title2,print_string_array(labels),print_double_array(list),400,200);
+	}
+	
+	public static void create_table(String title,int[][] list,String[] collabels){
+		int ncolumns=list[0].length;
+		String[] labels=collabels;
+		if(collabels==null){
+			labels=new String[ncolumns];
+			for(int i=0;i<ncolumns;i++)
+				labels[i]="col"+(i+1);
+		}
+		String title2=title;
+		if(title==null){
+			title2="Table";
+		}
+		new TextWindow(title2,print_string_array(labels),print_int_array(list),400,200);
 	}
 
 	public static String print_string_array(String[] data){

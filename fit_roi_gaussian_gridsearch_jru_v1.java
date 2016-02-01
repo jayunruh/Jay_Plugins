@@ -49,8 +49,8 @@ public class fit_roi_gaussian_gridsearch_jru_v1 implements PlugIn, NLLSfitinterf
 		gd2.addCheckbox("Output_Roi_Color",false);
 		gd2.showDialog(); if(gd2.wasCanceled()){return;}
 		findmax=gd2.getNextBoolean();
-		int xpts=(int)gd2.getNextNumber(); r.width=xpts;
-		int ypts=(int)gd2.getNextNumber(); r.height=ypts;
+		xpts=(int)gd2.getNextNumber(); r.width=xpts;
+		ypts=(int)gd2.getNextNumber(); r.height=ypts;
 		boolean singchan=gd2.getNextBoolean();
 		boolean outcolor=gd2.getNextBoolean();
 		r.x=centerx-xpts/2;
@@ -170,24 +170,24 @@ public class fit_roi_gaussian_gridsearch_jru_v1 implements PlugIn, NLLSfitinterf
 					if(tw==null){
 						tw=new TextWindow("Gaussian_Output","baseline\tamplitude\tstdev\txc\tyc\tzslice\tb1\ta1\tb2\ta2\troicolor","",400,200);
 					}
-					tw.append(""+(float)ampoffset[1]+"\t"+(float)ampoffset[0]+"\t"+(float)params[0]+"\t"+((float)params[1]+xoff)+"\t"+((float)params[2]+yoff)+"\t"+(float)(maxslice+1)+"\t"+(float)champoffset[0][1]+"\t"+(float)champoffset[0][0]+"\t"+(float)champoffset[1][1]+"\t"+(float)champoffset[1][0]+"\t"+rcolor+"\n");
+					tw.append(""+(float)ampoffset[1]+"\t"+(float)ampoffset[0]+"\t"+(float)params[0]+"\t"+((float)params[1]+xoff)+"\t"+((float)params[2]+yoff)+"\t"+(float)(maxslice)+"\t"+(float)champoffset[0][1]+"\t"+(float)champoffset[0][0]+"\t"+(float)champoffset[1][1]+"\t"+(float)champoffset[1][0]+"\t"+rcolor+"\n");
 				} else {
 					if(tw==null){
 						tw=new TextWindow("Gaussian_Output","baseline\tamplitude\tstdev\txc\tyc\tzslice\tb1\ta1\tb2\ta2","",400,200);
 					}
-					tw.append(""+(float)ampoffset[1]+"\t"+(float)ampoffset[0]+"\t"+(float)params[0]+"\t"+((float)params[1]+xoff)+"\t"+((float)params[2]+yoff)+"\t"+(float)(maxslice+1)+"\t"+(float)champoffset[0][1]+"\t"+(float)champoffset[0][0]+"\t"+(float)champoffset[1][1]+"\t"+(float)champoffset[1][0]+"\n");
+					tw.append(""+(float)ampoffset[1]+"\t"+(float)ampoffset[0]+"\t"+(float)params[0]+"\t"+((float)params[1]+xoff)+"\t"+((float)params[2]+yoff)+"\t"+(float)(maxslice)+"\t"+(float)champoffset[0][1]+"\t"+(float)champoffset[0][0]+"\t"+(float)champoffset[1][1]+"\t"+(float)champoffset[1][0]+"\n");
 				}
 			} else {
 				if(outcolor){
 					if(tw==null){
 						tw=new TextWindow("Gaussian_Output","baseline\tamplitude\tstdev\txc\tyc\tzslice\troicolor","",400,200);
 					}
-					tw.append(""+(float)ampoffset[1]+"\t"+(float)ampoffset[0]+"\t"+(float)params[0]+"\t"+((float)params[1]+xoff)+"\t"+((float)params[2]+yoff)+"\t"+(float)(maxslice+1)+"\t"+rcolor+"\n");
+					tw.append(""+(float)ampoffset[1]+"\t"+(float)ampoffset[0]+"\t"+(float)params[0]+"\t"+((float)params[1]+xoff)+"\t"+((float)params[2]+yoff)+"\t"+(float)(maxslice)+"\t"+rcolor+"\n");
 				} else {
 					if(tw==null){
 						tw=new TextWindow("Gaussian_Output","baseline\tamplitude\tstdev\txc\tyc\tzslice","",400,200);
 					}
-					tw.append(""+(float)ampoffset[1]+"\t"+(float)ampoffset[0]+"\t"+(float)params[0]+"\t"+((float)params[1]+xoff)+"\t"+((float)params[2]+yoff)+"\t"+(float)(maxslice+1)+"\n");
+					tw.append(""+(float)ampoffset[1]+"\t"+(float)ampoffset[0]+"\t"+(float)params[0]+"\t"+((float)params[1]+xoff)+"\t"+((float)params[2]+yoff)+"\t"+(float)(maxslice)+"\n");
 				}
 			}
 		} else {
@@ -203,6 +203,7 @@ public class fit_roi_gaussian_gridsearch_jru_v1 implements PlugIn, NLLSfitinterf
 				IJ.log("amp2 = "+(float)champoffset[1][0]);
 			}
 		}
+		//IJ.log(""+r.width+" , "+r.height+" , "+data.length);
 		new ImagePlus("fit",new FloatProcessor(r.width,r.height,fit,null)).show();		
 	}
 

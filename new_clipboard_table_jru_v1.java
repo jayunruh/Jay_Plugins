@@ -26,10 +26,12 @@ public class new_clipboard_table_jru_v1 implements PlugIn {
 		String[] delims={"tab","comma","space"};
 		gd.addChoice("Delimiter",delims,delims[0]);
 		gd.addCheckbox("Treat_Consecutive_Delims_As_One",true);
+		gd.addStringField("Title","Clipboard");
 		gd.showDialog(); if(gd.wasCanceled()){return;}
 		boolean titles=gd.getNextBoolean();
 		int delimindex=gd.getNextChoiceIndex();
 		boolean noconsec=gd.getNextBoolean();
+		String title=gd.getNextString();
 		String delim="\t";
 		if(delimindex==1) delim=",";
 		if(delimindex==2) delim=" ";
@@ -55,6 +57,6 @@ public class new_clipboard_table_jru_v1 implements PlugIn {
 			headings=table_tools.list2stringarray(listtable.get(0));
 			listtable.remove(0);
 		}
-		table_tools.create_table("Clipboard",listtable,headings);
+		table_tools.create_table(title,listtable,headings);
 	}
 }

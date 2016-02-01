@@ -47,6 +47,17 @@ public class profiler{
 		return length;
 	}
 
+	/*************
+	 * This outputs a straightened 2D profile for a polyline
+	 * @param pixels
+	 * @param width
+	 * @param height
+	 * @param polyroi
+	 * @param connected
+	 * @param linewidth
+	 * @param or_index
+	 * @return
+	 */
 	public static float[] getStraightened(Object pixels,int width,int height,Polygon polyroi,boolean connected,int linewidth,int or_index){
 		if(linewidth<2){
 			return getProfile(pixels,width,height,polyroi,connected,linewidth,or_index);
@@ -112,6 +123,20 @@ public class profiler{
 		return profile;
 	}
 	
+	/*************
+	 * This outputs a straightened 3D profile
+	 * @param image
+	 * @param width
+	 * @param height
+	 * @param xvals
+	 * @param yvals
+	 * @param zvals
+	 * @param connected
+	 * @param linewidth
+	 * @param or_index
+	 * @param zratio
+	 * @return
+	 */
 	public static float[] get3DStraightened(Object[] image,int width,int height,float[] xvals,float[] yvals,float[] zvals,boolean connected,int linewidth,int or_index,float zratio){
 		if(linewidth<2){
 			return get3DProfile(image,width,height,xvals,yvals,zvals,connected,linewidth,or_index,zratio);
@@ -145,7 +170,7 @@ public class profiler{
 					profile[(counter+k)*linewidth+j]=tempfloat[k];
 				}
 				if(i==(nlines-1)&&!connected){
-					profile[(counter+templength-1)*linewidth+j]=tempfloat[templength-1];
+					if(tempfloat.length>1) profile[(counter+templength-1)*linewidth+j]=tempfloat[templength-1];
 				}
 			}
 			counter+=(templength-1);
@@ -178,6 +203,17 @@ public class profiler{
 		return profile;
 	}
 
+	/*************
+	 * This outputs a 2D thick polyline profile
+	 * @param pixels
+	 * @param width
+	 * @param height
+	 * @param polyroi
+	 * @param connected
+	 * @param linewidth
+	 * @param or_index
+	 * @return
+	 */
 	public static float[] getProfile(Object pixels,int width,int height,Polygon polyroi,boolean connected,int linewidth,int or_index){
 		int length=getPolygonLength(polyroi,connected);
 		int[] xvals=polyroi.xpoints;
@@ -331,6 +367,17 @@ public class profiler{
 		return profile;
 	}
 	
+	/*************
+	 * This gives a thick 2D line profile for a single segment
+	 * @param coords
+	 * @param image
+	 * @param outsign
+	 * @param or_index
+	 * @param linewidth
+	 * @param width
+	 * @param height
+	 * @return
+	 */
 	public static float[] get2DLineProfile(float[] coords,Object image,int outsign,int or_index,int linewidth,int width,int height){
 		float[] profile=null;
 		for(int j=0;j<linewidth;j++){
@@ -357,6 +404,14 @@ public class profiler{
 		return profile;
 	}
 
+	/**********************
+	 * This outputs a thin profile for a single segment
+	 * @param coords: {x1,y1,x2,y2}
+	 * @param image
+	 * @param width
+	 * @param height
+	 * @return
+	 */
 	public static float[] getLineProfile(float[] coords,Object image,int width,int height){
 		int length=(int)get2DLength(coords);
 		float[] line=new float[length];

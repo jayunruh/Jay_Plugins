@@ -59,6 +59,24 @@ public class Tiff_Writer{
 		this.cal=imp.getCalibration();
 	}
 	
+	/**********************
+	 * Use this version if you want to change the width and height
+	 * @param imp
+	 * @param width
+	 * @param height
+	 * @param nframes
+	 * @param finterface
+	 */
+	public Tiff_Writer(ImagePlus imp,int width,int height,int nframes,FrameInterface finterface){
+		this.imp=imp;
+		this.finterface=finterface;
+		this.ip=imp.getProcessor();
+		this.width=width;
+		this.height=height;
+		this.stackframes=nframes;
+		this.cal=imp.getCalibration();
+	}
+	
 	public boolean saveAsTiff(String path,ImagePlus imp){
 		this.imp=imp;
 		ip=imp.getProcessor();

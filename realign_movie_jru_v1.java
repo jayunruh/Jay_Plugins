@@ -17,7 +17,7 @@ public class realign_movie_jru_v1 implements PlugIn {
 
 	public void run(String arg) {
 		int[] wList = WindowManager.getIDList();
-		String[] titles = new String[wList.length];
+		String[] titles = new String[wList.length+1];
 		for(int i=0;i<wList.length;i++){
 			ImagePlus imp = WindowManager.getImage(wList[i]);
 			if(imp!=null){
@@ -26,15 +26,18 @@ public class realign_movie_jru_v1 implements PlugIn {
 				titles[i]="NA";
 			}
 		}
+		titles[wList.length]="null";
 		GenericDialog gd2=new GenericDialog("Options");
 		gd2.addChoice("Image",titles,titles[0]);
 		gd2.addChoice("Track",titles,titles[0]);
+		gd2.addChoice("Angles",titles,titles[wList.length]);
 		gd2.addCheckbox("Interpolate?",true);
 		gd2.addCheckbox("Difference_Track?",false);
 		gd2.showDialog();
 		if(gd2.wasCanceled()){return;}
 		int index1 = gd2.getNextChoiceIndex();
 		int index2 = gd2.getNextChoiceIndex();
+		int index3=gd2.getNextChoiceIndex();
 		boolean interp=gd2.getNextBoolean();
 		boolean difftrack=gd2.getNextBoolean();
 		ImagePlus imp = WindowManager.getImage(wList[index1]);
@@ -52,19 +55,25 @@ public class realign_movie_jru_v1 implements PlugIn {
 		ImageWindow iw=imp2.getWindow();
 		float[] xvals1=((float[][])jutils.runPW4VoidMethod(iw,"getXValues"))[0];
 		float[] yvals1=((float[][])jutils.runPW4VoidMethod(iw,"getYValues"))[0];
+		float[] angles1=new float[xvals1.length];
+		if(index3<wList.length) angles1=((float[][])jutils.runPW4VoidMethod(WindowManager.getImage(wList[index3]).getWindow(),"getYValues"))[0];
 		float[] xvals=new float[xvals1.length];
 		float[] yvals=new float[xvals1.length];
+		float[] angles=new float[xvals1.length];
 		if(!difftrack){
 			for(int i=0;i<xvals.length;i++){
 				xvals[i]=-xvals1[i];
 				yvals[i]=-yvals1[i];
+				angles[i]=-angles1[i];
 			}
 		} else {
 			xvals[0]=0.0f;
 			yvals[0]=0.0f;
+			angles[0]=0.0f;
 			for(int i=1;i<xvals.length;i++){
 				xvals[i]=xvals[i-1]+(xvals1[i]-xvals1[0]);
 				yvals[i]=yvals[i-1]+(yvals1[i]-yvals1[0]);
+				angles[i]=angles[i-1]+(angles1[i]-angles1[0]);
 			}
 		}
 		float xmin=xvals[0]; float xmax=xvals[0];
@@ -101,6 +110,7 @@ public class realign_movie_jru_v1 implements PlugIn {
 				}
 				if(interp){
 					float[] tempimage2=interpolation.shift_image(currimage,width,height,xvals[k]-(float)intxmin,yvals[k]-(float)intymin);
+					if(angles[k]!=0.0f) tempimage2=interpolation.rotate_image(currimage,width,height,angles[k],0.0f,0.0f);
 					float[] tempimage3=new float[newwidth*newheight];
 					for(int i=0;i<height;i++){
 						for(int j=0;j<width;j++){
@@ -111,6 +121,7 @@ public class realign_movie_jru_v1 implements PlugIn {
 				} else {
 					for(int i=0;i<height;i++){
 						for(int j=0;j<width;j++){
+							//need to add rotation here
 							int index5=j+(int)xvals[k]-intxmin+1+(i+(int)yvals[k]-intymin+1)*newwidth;
 							int index6=j+i*width;
 							if(typeindex==0){((float[])tempimage)[index5]=((float[])currimage)[index6];}

@@ -39,7 +39,7 @@ public class filter_objects_jru_v1 implements PlugIn {
 		for(int i=0;i<size;i++){
 			byte[] data=(byte[])stack.getProcessor(i+1).getPixels();
 			float[] objects=fb.dofindblobs(data);
-			fb.clear_edges(objects);
+			if(clearedges) fb.clear_edges(objects);
 			int[] filter={minarea,maxarea};
 			fb.filter_area(objects,filter);
 			if(newimage){

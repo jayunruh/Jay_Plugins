@@ -48,6 +48,8 @@ public class analysis_auto_corr_v2 implements PlugIn {
 		boolean pad=false;
 		gd.addCheckbox("Pad Trajectory?",pad);
 		gd.addCheckbox("Simple Analysis?",false);
+		int pmfreq=20000000;
+		gd.addNumericField("Photon Mode Freq",pmfreq,0);
 		gd.showDialog(); if(gd.wasCanceled()){return;}
 		sfreq=gd.getNextNumber();
 		int psfflag=gd.getNextChoiceIndex();
@@ -59,6 +61,7 @@ public class analysis_auto_corr_v2 implements PlugIn {
 		brightcorr=gd.getNextBoolean();
 		pad=gd.getNextBoolean();
 		boolean simple=gd.getNextBoolean();
+		pmfreq=(int)gd.getNextNumber();
 		trajkhz=((float)sfreq/(float)binby)/1000.0f;
 		khz=(float)sfreq/1000.0f;
 		int nfiles=0;
@@ -103,7 +106,7 @@ public class analysis_auto_corr_v2 implements PlugIn {
 						int[] pmdata=new int[length1];
 						if(!ioclass.skipstreambytes(instream,128)){showioerror(); instream.close(); return;}
 						if(!ioclass.readintelintfile(instream,length1,pmdata)){showioerror(); instream.close(); return;}
-						tmdata=(new pmodeconvert()).pm2tm(pmdata,sfreq,20000000);
+						tmdata=(new pmodeconvert()).pm2tm(pmdata,sfreq,pmfreq);
 					} else {
 						if(fileflag==1){
 							tmdata=new float[length2];

@@ -12,9 +12,9 @@ import java.util.List;
 
 public interface track_interface{
 
-	public int getNFrames();
+	public int getNFrames(); //gets the number of frames
 
-	public List<float[]> getNextFrameParams();
+	public List<float[]> getNextFrameParams(); //gets a list of object parameters starting with x, y, ...
 
 	public void put_assignments(int[] assignments);
 

@@ -32,6 +32,7 @@ public class polyline_kymograph_jru_v1 implements PlugIn {
 		gd.addChoice("Positioning",orientation,orientation[0]);
 		gd.addCheckbox("Output_Straightened",false);
 		gd.addCheckbox("Single_Frame_Profile",false);
+		gd.addCheckbox("All_Channels (for single frame)",false);
 		gd.showDialog();
 		if(gd.wasCanceled()){return;}
 		linewidth=(int)gd.getNextNumber();
@@ -40,6 +41,7 @@ public class polyline_kymograph_jru_v1 implements PlugIn {
 		int or_index=gd.getNextChoiceIndex();
 		boolean straighten=gd.getNextBoolean();
 		boolean single=gd.getNextBoolean();
+		boolean both=gd.getNextBoolean();
 
 		int width=imp.getWidth();
 		int height=imp.getHeight();
@@ -51,7 +53,10 @@ public class polyline_kymograph_jru_v1 implements PlugIn {
 			frames=slices;
 			slices=1;
 		}
-		if(single){frames=1; nchannels=1;}
+		if(single){
+			frames=1; 
+			if(!both) nchannels=1;
+		}
 
 		int[] xvals,yvals;
 		int nlines,npts;
@@ -132,19 +137,47 @@ public class polyline_kymograph_jru_v1 implements PlugIn {
 				}
 			}
 		} else {
-			Object pixels=imp.getProcessor().getPixels();
-			float[] temp=profiler.getProfile(pixels,width,height,polyroi,connected,linewidth,or_index);
-			length=temp.length;
-			kstack=new ImageStack(length,1);
-			if(cumulative){
-				for(int i=0;i<length;i++) temp[i]*=(float)linewidth;
-			}
-			kstack.addSlice("",temp);
-			if(straighten){
-				float[] temp2=profiler.getStraightened(pixels,width,height,polyroi,connected,linewidth,or_index);
-				ImagePlus simp=new ImagePlus("Straightened",new FloatProcessor(linewidth,length,temp2,null));
-				simp.copyScale(imp);
-				simp.show();
+			if(!both || nchannels==1){
+				Object pixels=imp.getProcessor().getPixels();
+				float[] temp=profiler.getProfile(pixels,width,height,polyroi,connected,linewidth,or_index);
+				length=temp.length;
+				kstack=new ImageStack(length,1);
+				if(cumulative){
+					for(int i=0;i<length;i++) temp[i]*=(float)linewidth;
+				}
+				kstack.addSlice("",temp);
+				if(straighten){
+					float[] temp2=profiler.getStraightened(pixels,width,height,polyroi,connected,linewidth,or_index);
+					ImagePlus simp=new ImagePlus("Straightened",new FloatProcessor(linewidth,length,temp2,null));
+					simp.copyScale(imp);
+					simp.show();
+				}
+			} else {
+				int frame=imp.getT();
+				int slice=imp.getZ();
+				Object[] pixels=jutils.get3DCSeries(stack,slice-1,frame-1,frames,slices,nchannels);
+				Object[] temp2=new Object[pixels.length];
+				for(int i=0;i<pixels.length;i++){
+					float[] temp=profiler.getProfile(pixels[i],width,height,polyroi,connected,linewidth,or_index);
+					length=temp.length;
+					if(i==0) kstack=new ImageStack(length,1);
+					if(cumulative){
+						for(int j=0;j<length;j++) temp[j]*=(float)linewidth;
+					}
+					kstack.addSlice("",temp);
+					if(straighten){
+						temp2[i]=profiler.getStraightened(pixels,width,height,polyroi,connected,linewidth,or_index);
+					}
+				}
+				if(straighten){
+					ImagePlus simp=new ImagePlus("Straightened",jutils.array2stack(temp2,linewidth,length));
+					simp.copyScale(imp);
+					simp.setOpenAsHyperStack(true);
+					simp.setDimensions(pixels.length,1,1);
+					CompositeImage ci=new CompositeImage(simp,CompositeImage.COMPOSITE);
+					ci.copyLuts(imp);
+					ci.show();
+				}
 			}
 		}
 		if(frames==1){

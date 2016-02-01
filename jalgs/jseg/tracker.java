@@ -67,12 +67,29 @@ public class tracker{
 		}
 		return trajlist;
 	}
+	
+	public List<List<float[]>> track3D(track_interface ti){
+		// the incoming params array must have x and y and z positions as its first three values
+		// this version gets the parameters for each frame through the track_interface
+		// on output the list contains a list of parameter arrays for each trajectory
+		// the last parameter is the first frame the object is detected
+		List<List<float[]>> trajlist=new ArrayList<List<float[]>>();
+		closed=new boolean[maxtrajs];
+		tmleft=new int[maxtrajs];
+		for(int i=0;i<maxtrajs;i++)
+			tmleft[i]=linkdelay;
+		nclosed=0;
+		for(int i=0;i<ti.getNFrames();i++){
+			int[] assign=add_objects(ti.getNextFrameParams(),false,trajlist,i);
+			ti.put_assignments(assign);
+			ti.show_progress(i,ti.getNFrames());
+		}
+		return trajlist;
+	}
 
 	private int[] add_objects(List<float[]> params,boolean twoD,List<List<float[]>> trajlist,int currframe){
 		int nnewobj=params.size();
-		int[] assignments=new int[nnewobj]; // this array contains which
-		// trajectory the object was
-		// assigned to
+		int[] assignments=new int[nnewobj]; // this array contains which trajectory the object was assigned to
 		int noldobj=trajlist.size()-nclosed;
 		float[][] dist=new float[noldobj][nnewobj];
 		int[] indices=new int[noldobj];
@@ -96,10 +113,8 @@ public class tracker{
 		boolean[] oldavail=new boolean[noldobj];
 		for(int i=0;i<noldobj;i++)
 			oldavail[i]=true;
-		// now repeatedly find the global minimum distance, making pairs
-		// unavailable as we find them
-		// once we can't find any distances below the linkrange we cut our
-		// losses and move on
+		// now repeatedly find the global minimum distance, making pairs unavailable as we find them
+		// once we can't find any distances below the linkrange we cut our losses and move on
 		for(int i=0;i<noldobj;i++){
 			int[] pair=find_global_min(dist,oldavail,newavail);
 			if(pair==null)

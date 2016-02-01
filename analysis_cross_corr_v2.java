@@ -56,6 +56,8 @@ public class analysis_cross_corr_v2 implements PlugIn {
 		gd.addCheckbox("Pad Data?",false);
 		gd.addCheckbox("Simple Analysis?",false);
 		gd.addNumericField("ALEX_illumination_delay(us)",2.5,5,15,null);
+		int pmfreq=20000000;
+		gd.addNumericField("Photon Mode Freq",pmfreq,0);
 		gd.showDialog(); if(gd.wasCanceled()){return;}
 		sfreq=gd.getNextNumber();
 		int psfflag=gd.getNextChoiceIndex();
@@ -70,6 +72,7 @@ public class analysis_cross_corr_v2 implements PlugIn {
 		boolean simple=gd.getNextBoolean();
 		double ill_delay=gd.getNextNumber();
 		ill_delay*=1.0e-6;
+		pmfreq=(int)gd.getNextNumber();
 		trajkhz=((float)sfreq/(float)binby)/1000.0f;
 		khz=(float)sfreq/1000.0f;
 		int nfiles=0;
@@ -128,7 +131,7 @@ public class analysis_cross_corr_v2 implements PlugIn {
 							if(!ioclass.readintelintfile(instream2,length2,pmdata2)){showioerror(); instream2.close(); return;}
 						}
 						if(fileflag==3){
-							double swfreq=20000000.0/1000.0111;
+							double swfreq=(double)pmfreq/1000.0111;
 							double divider=20000.0/sfreq;
 							swfreq/=divider;
 							/*if(sfreq==20000.0){
@@ -149,13 +152,13 @@ public class analysis_cross_corr_v2 implements PlugIn {
 								}
 							}*/
 							int offset=0;
-							offset=(new pmodeconvert()).calc_wlswitch_offset(pmdata,swfreq,20000000);
-							float[][] tmdatatemp=(new pmodeconvert()).pm2tm_alex(pmdata,pmdata2,swfreq,20000000,offset,1,ill_delay);
+							offset=(new pmodeconvert()).calc_wlswitch_offset(pmdata,swfreq,pmfreq);
+							float[][] tmdatatemp=(new pmodeconvert()).pm2tm_alex(pmdata,pmdata2,swfreq,pmfreq,offset,1,ill_delay);
 							tmdata=tmdatatemp[0];
 							tmdata2=tmdatatemp[1];
 						} else {
-							tmdata=(new pmodeconvert()).pm2tm(pmdata,sfreq,20000000);
-							tmdata2=(new pmodeconvert()).pm2tm(pmdata2,sfreq,20000000);
+							tmdata=(new pmodeconvert()).pm2tm(pmdata,sfreq,pmfreq);
+							tmdata2=(new pmodeconvert()).pm2tm(pmdata2,sfreq,pmfreq);
 						}
 					} else {
 						if(ch2green){

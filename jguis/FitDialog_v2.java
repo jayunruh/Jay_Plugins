@@ -10,6 +10,7 @@ package jguis;
 
 import ij.IJ;
 import ij.gui.GenericDialog;
+import ij.text.TextPanel;
 import ij.text.TextWindow;
 import jalgs.jdist;
 import jalgs.jstatistics;
@@ -131,6 +132,20 @@ public class FitDialog_v2 implements NLLSfitinterface_v2,TableDialogListener{
 		String collabels="title\tc^2\tIter\t"+table_tools.print_string_array(labels1);
 		TextWindow outtable=new TextWindow(title,collabels,"",400,200);
 		return outtable;
+	}
+	
+	/***************
+	 * here we add columns only if the new fit has more parameters
+	 * @param tw
+	 * @param labels1
+	 */
+	public static void adapt_outtable(TextWindow tw,String[] labels1){
+		TextPanel tp=tw.getTextPanel();
+		String[] oldlabels=table_tools.getcollabels(tp);
+		if(labels1.length>(oldlabels.length-3)){
+			String collabels="title\tc^2\tIter\t"+table_tools.print_string_array(labels1);
+			table_tools.change_table_labels(tp,collabels);
+		}
 	}
 
 	public boolean showoptions(double[] params,int[] fixes){
