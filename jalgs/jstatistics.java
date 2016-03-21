@@ -1441,7 +1441,7 @@ public class jstatistics{
 		for(int i=0;i<data.length;i++){
 			if(!Float.isInfinite(data[i])){
 				if(!Float.isNaN(data[i])){
-					if(data[i]>=extras[1]&&data[i]<=extras[0]){
+					if(data[i]>=extras[0]&&data[i]<=extras[1]){
 						counter++;
 					}
 				}
@@ -1456,7 +1456,7 @@ public class jstatistics{
 		int counter=0;
 		for(int i=0;i<data.length;i++){
 			float temp=(data[i]);
-			if(temp>=extras[1]&&temp<=extras[0]){
+			if(temp>=extras[0]&&temp<=extras[1]){
 				counter++;
 			}
 		}
@@ -1469,7 +1469,7 @@ public class jstatistics{
 		int counter=0;
 		for(int i=0;i<data.length;i++){
 			float temp=data[i]&0xffff;
-			if(temp>=extras[1]&&temp<=extras[0]){
+			if(temp>=extras[0]&&temp<=extras[1]){
 				counter++;
 			}
 		}
@@ -1482,7 +1482,7 @@ public class jstatistics{
 		int counter=0;
 		for(int i=0;i<data.length;i++){
 			float temp=data[i]&0xff;
-			if(temp>=extras[1]&&temp<=extras[0]){
+			if(temp>=extras[0]&&temp<=extras[1]){
 				counter++;
 			}
 		}

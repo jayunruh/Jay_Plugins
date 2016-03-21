@@ -369,13 +369,13 @@ public class profiler{
 	
 	/*************
 	 * This gives a thick 2D line profile for a single segment
-	 * @param coords
+	 * @param coords: {x1,y1,x2,y2}
 	 * @param image
-	 * @param outsign
-	 * @param or_index
+	 * @param outsign: -1 for reverse orientation (perpendicular to line)
+	 * @param or_index: 0, centered, 1, to the right, 2, to the left
 	 * @param linewidth
-	 * @param width
-	 * @param height
+	 * @param width: image width
+	 * @param height: image height
 	 * @return
 	 */
 	public static float[] get2DLineProfile(float[] coords,Object image,int outsign,int or_index,int linewidth,int width,int height){

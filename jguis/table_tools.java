@@ -140,12 +140,7 @@ public class table_tools{
 	public static String createcollabels(int ncols,String prefix,int delim){
 		StringBuffer sb=new StringBuffer();
 		sb.append(prefix+"1");
-		String sep="\t";
-		if(delim==1)
-			sep=",";
-		if(delim==2)
-			sep=" ";
-		if(delim==3) sep="\n";
+		String sep=get_delim(delim);
 		for(int i=1;i<ncols;i++){
 			sb.append(sep+prefix+(i+1));
 		}
@@ -846,15 +841,19 @@ public class table_tools{
 		// delims are tab,comma,space
 		StringBuffer retvals=new StringBuffer();
 		retvals.append(data.get(0));
-		String sep="\t";
-		if(delim==1)
-			sep=",";
-		if(delim==2)
-			sep=" ";
+		String sep=get_delim(delim);
 		for(int i=1;i<data.size();i++){
 			retvals.append(sep+data.get(i));
 		}
 		return retvals.toString();
+	}
+	
+	public static String get_delim(int delim){
+		String sep="\t";
+		if(delim==1) sep=",";
+		if(delim==2) sep=" ";
+		if(delim==3) sep="\n";
+		return sep;
 	}
 
 	/*****************
@@ -867,12 +866,7 @@ public class table_tools{
 		// delims are tab,comma,space
 		StringBuffer retvals=new StringBuffer();
 		retvals.append(data[0]);
-		String sep="\t";
-		if(delim==1)
-			sep=",";
-		if(delim==2)
-			sep=" ";
-		if(delim==3) sep="\n";
+		String sep=get_delim(delim);
 		for(int i=1;i<data.length;i++){
 			retvals.append(sep+data[i]);
 		}
@@ -925,6 +919,16 @@ public class table_tools{
 		retvals.append(""+data[0]);
 		for(int i=1;i<data.length;i++){
 			retvals.append("\t"+data[i]);
+		}
+		return retvals.toString();
+	}
+	
+	public static String print_float_array(float[] data,int delim){
+		StringBuffer retvals=new StringBuffer();
+		retvals.append(""+data[0]);
+		String sep=get_delim(delim);
+		for(int i=1;i<data.length;i++){
+			retvals.append(sep+data[i]);
 		}
 		return retvals.toString();
 	}

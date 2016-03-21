@@ -34,6 +34,25 @@ public class jsobel{
 		float[][] retvals={gradmag,gradangle};
 		return retvals;
 	}
+	
+	public float[][] get_gradient(float[] pixels){
+		float[] xgrad=new float[width*height];
+		float[] ygrad=new float[width*height];
+		float[] gradmag=new float[width*height];
+		float[] gradangle=new float[width*height];
+		for(int i=1;i<(height-1);i++){
+			for(int j=1;j<(width-1);j++){
+				ygrad[i*width+j]=0.5f*(pixels[(i+1)*width+j]-pixels[(i-1)*width+j]);
+				xgrad[i*width+j]=0.5f*(pixels[i*width+j+1]-pixels[i*width+j-1]);
+				int temp=i*width+j;
+				float[] mag_angle=get_mag_angle(xgrad[temp],ygrad[temp]);
+				gradmag[temp]=mag_angle[0];
+				gradangle[temp]=mag_angle[1];
+			}
+		}
+		float[][] retvals={gradmag,gradangle};
+		return retvals;
+	}
 
 	public float[][] do_sobel2(float[] pixels){
 		float[] xgrad=new float[width*height];

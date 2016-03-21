@@ -297,121 +297,6 @@ public class findblobs{
 		return stats;
 	}
 	
-	/*public float[][] dofindblobs4(float[] data,float[] mask){
-		//this is just like dofindblobs2 but we sort the intensities and keep the sort index
-		//that speeds up the max search each time dramatically
-		//this time only sort those above thresh
-		boolean[] binmask=new boolean[width*height];
-		int ctthresh=0;
-		for(int i=0;i<data.length;i++) if(data[i]>=thresh) ctthresh++;
-		float[] abthresh=new float[ctthresh];
-		int[] threshorder=new int[ctthresh];
-		int counter1=0;
-		for(int i=0;i<data.length;i++) if(data[i]>=thresh){abthresh[counter1]=data[i]; threshorder[counter1]=i; counter1++;}
-		int[] order1=jsort.get_javasort_order(abthresh);
-		int[] order=new int[width*height];
-		int temp=width*height;
-		Arrays.fill(order,-1);
-		for(int i=0;i<ctthresh;i++){
-			order[threshorder[i]]=order1[temp-1-i];
-		}
-		abthresh=null;
-		threshorder=null;
-		order1=null;
-		int maxpt=0;
-		int maxx=0;
-		int maxy=0;
-		float maxval=0.0f;
-		boolean ptfound=false;
-		boolean atedge=false;
-		float[][] tempstats=new float[maxblobs][5];
-		int blobcounter=0;
-		int validblobs=0;
-		int searchr=(int)(0.5f*minsep+0.5f);
-		int searchr2=searchr*searchr;
-		int previndex=0;
-		do{
-			// start by finding the maximum point
-			ptfound=false;
-			int[] temp1=maxnotmask(data,binmask,order,previndex);
-			if(temp1==null) break;
-			maxpt=temp1[0];
-			previndex=temp1[1];
-			maxval=data[maxpt];
-			maxy=maxpt/width;
-			maxx=maxpt-maxy*width;
-			if(maxval>=thresh){
-				ptfound=true;
-				int[] limits=getlims(maxx,maxy,searchr);
-				atedge=isatedge(maxx,maxy,limits,searchr);
-				if(!atedge){
-					blobcounter++;
-					float intval=0.0f;
-					tempstats[blobcounter-1][2]=maxval;
-					for(int i=limits[2];i<=limits[3];i++){
-						for(int j=limits[0];j<=limits[1];j++){
-							if(((i-maxy)*(i-maxy)+(j-maxx)*(j-maxx))<=searchr2){
-								int index=j+i*width;
-								binmask[index]=true;
-								if(!Float.isNaN(data[index])){
-    								if(data[index]>=thresh){
-    									mask[index]=blobcounter;
-    									tempstats[blobcounter-1][0]+=data[index]*j;
-    									tempstats[blobcounter-1][1]+=data[index]*i;
-    									intval+=data[index];
-    									tempstats[blobcounter-1][3]+=1.0f;
-    								}
-								}
-							}
-						}
-					}
-					tempstats[blobcounter-1][0]/=intval;
-					tempstats[blobcounter-1][1]/=intval;
-					if(usemaxpt){
-						tempstats[blobcounter-1][0]=maxx;
-						tempstats[blobcounter-1][1]=maxy;
-					}
-					if(tempstats[blobcounter-1][3]>=minarea&&tempstats[blobcounter-1][3]<=maxarea){
-						tempstats[blobcounter-1][4]=1.0f;
-						validblobs++;
-					}
-				}else{
-					for(int i=limits[2];i<=limits[3];i++){
-						for(int j=limits[0];j<=limits[1];j++){
-							if(((i-maxy)*(i-maxy)+(j-maxx)*(j-maxx))<=searchr2){
-								binmask[j+i*width]=true;
-							}
-						}
-					}
-				}
-			}
-		}while(ptfound&&blobcounter<maxblobs);
-		float[][] stats=new float[validblobs][4];
-		int counter=0;
-		for(int i=0;i<blobcounter;i++){
-			if(tempstats[i][4]==1.0f){
-				stats[counter][0]=tempstats[i][0];
-				stats[counter][1]=tempstats[i][1];
-				stats[counter][2]=tempstats[i][2];
-				stats[counter][3]=tempstats[i][3];
-				for(int j=0;j<width*height;j++){
-					if(mask[j]==i+1){
-						mask[j]=counter+1;
-					}
-				}
-				counter++;
-			}else{
-				for(int j=0;j<width*height;j++){
-					if(mask[j]==i+1){
-						mask[j]=0.0f;
-					}
-				}
-			}
-		}
-		// stats are centerx,centery,integral,area
-		return stats;
-	}*/
-	
 	public float[][] dofindblobs3D(float[][] data,float[][] mask,float searchrz,float zedgebuf){
 		//this is just like dofindblobs2 but we sort the intensities and keep the sort index
 		//that speeds up the max search each time dramatically
@@ -523,12 +408,12 @@ public class findblobs{
 		float[][] stats=new float[validblobs][5];
 		int counter=0;
 		for(int i=0;i<blobcounter;i++){
-			if(tempstats[i][4]==1.0f){
+			if(tempstats[i][5]==1.0f){
 				stats[counter][0]=tempstats[i][0];
 				stats[counter][1]=tempstats[i][1];
 				stats[counter][2]=tempstats[i][2];
 				stats[counter][3]=tempstats[i][3];
-				stats[counter][3]=tempstats[i][4];
+				stats[counter][4]=tempstats[i][4];
 				counter++;
 			}
 		}

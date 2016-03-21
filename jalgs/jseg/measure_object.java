@@ -8,7 +8,10 @@
 
 package jalgs.jseg;
 
+import jalgs.algutils;
 import jalgs.interpolation;
+import jalgs.jstatistics;
+import jalgs.profiler;
 
 import java.awt.Polygon;
 import java.awt.Rectangle;
@@ -158,6 +161,60 @@ public class measure_object{
 			}
 		}
 		return count;
+	}
+	
+	/*************
+	 * this method takes a yeast cell mask (object) and uses the transmitted light to find the bud neck and then returns only the bud area portion
+	 * @param ellipseparams
+	 * @param objects
+	 * @param transimg
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	public static Object[] getBudObject(float[] ellipseparams,float[] objects,float[] transimg,int width,int height){
+		//start by creating a profile along the major axis as identified by the ellipse
+		float angle=ellipseparams[2];
+		float major=ellipseparams[3];
+		if(major<5.0f) return null;
+		float x=ellipseparams[0];
+		float y=ellipseparams[1];
+		float[] vec1=measure_object.get_unit_vector(angle);
+		//float[] perpvec={vec1[1],-vec1[0]};
+		float[] coords={x-vec1[0]*0.5f*major,y-vec1[1]*0.5f*major,x+vec1[0]*0.5f*major,y+vec1[1]*0.5f*major};
+		float[] profile=profiler.get2DLineProfile(coords,transimg,1,0,4,width,height);
+		//invert the profile so we can search for maxima
+		for(int i=0;i<profile.length;i++) profile[i]=-profile[i];
+		//search the first and last 25% for the edges and the central 50% for the bud neck
+		int temp=(int)(0.25f*(float)profile.length);
+		int temp2=profile.length-1-temp;
+		float[] first=(float[])algutils.get_subarray(profile,0,temp);
+		float[] last=(float[])algutils.get_subarray(profile,temp2,temp);
+		float[] mid=(float[])algutils.get_subarray(profile,temp,temp+temp);
+		float firstpos=jstatistics.getstatistic("maxpos",first,null);
+		float lastpos=jstatistics.getstatistic("maxpos",last,null);
+		lastpos+=(float)temp2;
+		float midpos=jstatistics.getstatistic("maxpos",mid,null);
+		midpos+=(float)temp;
+		//divide the object perpendicular to the bud neck: save only the bud overlay
+		boolean lastbud=false;
+		if((lastpos-midpos)<(midpos-firstpos)) lastbud=true;
+		float[] midcoords={midpos*vec1[0]+coords[0],midpos*vec1[1]+coords[1]};
+		float[] newobject=new float[width*height];
+		float id=objects[(int)x+width*(int)y];
+		for(int i=0;i<height;i++){
+			for(int j=0;j<width;j++){
+				if(objects[j+i*width]==id){
+					float[] vec2={(float)j-midcoords[0],(float)i-midcoords[1]};
+					float dotprod=vec1[0]*vec2[0]+vec1[1]*vec2[1];
+					newobject[j+i*width]=id;
+					if(lastbud){if(dotprod<0.0f) newobject[j+i*width]=0.0f;}
+					else if(dotprod>0.0f) newobject[j+i*width]=0.0f;
+				}
+			}
+		}
+		float[] measurements={firstpos,midpos,lastpos,midcoords[0],midcoords[1],id};
+		return new Object[]{newobject,measurements};
 	}
 
 	public static float objwidth(float[] image,float id,int width,int height){

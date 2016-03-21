@@ -18,6 +18,7 @@ public class tracker{
 	// eventually will add progeny tracking
 	public int linkdelay,maxtrajs;
 	public float linkrange;
+	public float zratio;
 	private int nclosed;
 	private boolean[] closed;
 	private int[] tmleft;
@@ -25,6 +26,7 @@ public class tracker{
 	public tracker(float linkrange,int linkdelay){
 		this.linkrange=linkrange;
 		this.linkdelay=linkdelay;
+		this.zratio=1.0f;
 		maxtrajs=100000;
 	}
 
@@ -158,7 +160,7 @@ public class tracker{
 		if(twoD){
 			return (float)Math.sqrt((coords2[0]-coords1[0])*(coords2[0]-coords1[0])+(coords2[1]-coords1[1])*(coords2[1]-coords1[1]));
 		}else{
-			return (float)Math.sqrt((coords2[0]-coords1[0])*(coords2[0]-coords1[0])+(coords2[1]-coords1[1])*(coords2[1]-coords1[1])+(coords2[2]-coords1[2])*(coords2[2]-coords1[2]));
+			return (float)Math.sqrt((coords2[0]-coords1[0])*(coords2[0]-coords1[0])+(coords2[1]-coords1[1])*(coords2[1]-coords1[1])+zratio*zratio*(coords2[2]-coords1[2])*(coords2[2]-coords1[2]));
 		}
 	}
 

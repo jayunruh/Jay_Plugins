@@ -13,6 +13,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.GenericDialog;
+import ij.io.FileSaver;
 import ij.process.ImageProcessor;
 import jalgs.algutils;
 
@@ -549,6 +550,193 @@ public class LOCI_file_reader{
 			}
 		}
 		return null;
+	}
+	
+	public String pad_number(int num,int len){
+		String temp=Integer.toString(num);
+		if(temp.length()==len) return temp;
+		if(temp.length()>len) return temp.substring(0,len);
+		for(int i=temp.length();i<len;i++){
+			temp="0"+temp;
+		}
+		return temp;
+	}
+	
+	public boolean batchExportSeries(String directory,String fname,String outdir,boolean nometa){
+		this.nometa=nometa;
+		IMetadata omexmlMetadata=null;
+		if(!nometa)
+			omexmlMetadata=MetadataTools.createOMEXMLMetadata();
+		ImageProcessorReader r=new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
+		try{
+			if(!nometa)
+				r.setMetadataStore(omexmlMetadata);
+			r.setId(directory+fname);
+			nseries=r.getSeriesCount();
+			int maxdigits=Integer.toString(nseries).length();
+			String[] names=new String[nseries];
+			if(!nometa){
+				for(int i=0;i<nseries;i++){
+					r.setSeries(i);
+					names[i]=omexmlMetadata.getImageName(i);
+					if(names[i]==null||names[i]=="")
+						names[i]="Series"+pad_number(i+1,maxdigits);
+				}
+			}else{
+				for(int i=0;i<nseries;i++){
+					names[i]=fname+pad_number(i+1,maxdigits);
+				}
+			}
+			for(int s=0;s<nseries;s++){
+				r.setSeries(s);
+				int num=r.getImageCount();
+				int width=r.getSizeX();
+				int height=r.getSizeY();
+				int channels=r.getSizeC();
+				int slices=r.getSizeZ();
+				int frames=r.getSizeT();
+				String order=r.getDimensionOrder();
+				float psize=1.0f;
+				float zsize=1.0f;
+				float tsize=1.0f;
+				if(!nometa){
+					//Length temp=new Length(1.0,UNITS.MICROM);
+					if(omexmlMetadata.getPixelsPhysicalSizeX(s)!=null)
+						psize=omexmlMetadata.getPixelsPhysicalSizeX(s).value().floatValue();
+					if(omexmlMetadata.getPixelsPhysicalSizeZ(s)!=null)
+						zsize=omexmlMetadata.getPixelsPhysicalSizeZ(s).value().floatValue();
+					if(omexmlMetadata.getPixelsTimeIncrement(s)!=null)
+						tsize=omexmlMetadata.getPixelsTimeIncrement(s).value().floatValue();
+				}
+				ImageStack stack=new ImageStack(width,height);
+				int counter=0;
+				for(int i=0;i<frames;i++){
+					for(int j=0;j<slices;j++){
+						for(int k=0;k<channels;k++){
+							int index=get_stack_index(k,j,i,channels,slices,frames,order,null);
+							//IJ.log(""+k+"\t "+j+"\t "+i+"\t "+index);
+							ImageProcessor ip=r.openProcessors(index)[0];
+							stack.addSlice(ip);
+							IJ.showProgress(counter,frames*slices*channels);
+							counter++;
+						}
+					}
+				}
+				ImagePlus imp=new ImagePlus(names[s],stack);
+				if(!nometa){
+					jutils.set_psize(imp,psize);
+					jutils.set_pdepth(imp,zsize);
+					jutils.set_pinterval(imp,tsize);
+				}
+				imp.setOpenAsHyperStack(true);
+				imp.setDimensions(channels,slices,frames);
+				if(channels>1){
+					imp=new CompositeImage(imp,CompositeImage.COLOR);
+				}
+				FileSaver fs=new FileSaver(imp);
+				fs.saveAsTiffStack(outdir+names[s]+".tif");
+				imp.close();
+				IJ.showStatus(names[s]+" exported");
+				IJ.showProgress(s,nseries);
+				if(IJ.escapePressed()) break;
+			}
+			r.close();
+		}catch(FormatException e){
+			return false;
+		}catch(IOException e){
+			return false;
+		}
+		return true;
+	}
+	
+	public ImagePlus[] batchOpenSeries(String directory,String fname,boolean nometa){
+		this.nometa=nometa;
+		IMetadata omexmlMetadata=null;
+		ImagePlus[] imps=null;
+		if(!nometa)
+			omexmlMetadata=MetadataTools.createOMEXMLMetadata();
+		ImageProcessorReader r=new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
+		try{
+			if(!nometa)
+				r.setMetadataStore(omexmlMetadata);
+			r.setId(directory+fname);
+			nseries=r.getSeriesCount();
+			imps=new ImagePlus[nseries];
+			int maxdigits=Integer.toString(nseries).length();
+			String[] names=new String[nseries];
+			if(!nometa){
+				for(int i=0;i<nseries;i++){
+					r.setSeries(i);
+					names[i]=omexmlMetadata.getImageName(i);
+					if(names[i]==null||names[i]=="")
+						names[i]="Series"+pad_number(i+1,maxdigits);
+				}
+			}else{
+				for(int i=0;i<nseries;i++){
+					names[i]=fname+pad_number(i+1,maxdigits);
+				}
+			}
+			for(int s=0;s<nseries;s++){
+				r.setSeries(s);
+				int num=r.getImageCount();
+				int width=r.getSizeX();
+				int height=r.getSizeY();
+				int channels=r.getSizeC();
+				int slices=r.getSizeZ();
+				int frames=r.getSizeT();
+				String order=r.getDimensionOrder();
+				float psize=1.0f;
+				float zsize=1.0f;
+				float tsize=1.0f;
+				if(!nometa){
+					//Length temp=new Length(1.0,UNITS.MICROM);
+					if(omexmlMetadata.getPixelsPhysicalSizeX(s)!=null)
+						psize=omexmlMetadata.getPixelsPhysicalSizeX(s).value().floatValue();
+					if(omexmlMetadata.getPixelsPhysicalSizeZ(s)!=null)
+						zsize=omexmlMetadata.getPixelsPhysicalSizeZ(s).value().floatValue();
+					if(omexmlMetadata.getPixelsTimeIncrement(s)!=null)
+						tsize=omexmlMetadata.getPixelsTimeIncrement(s).value().floatValue();
+				}
+				ImageStack stack=new ImageStack(width,height);
+				int counter=0;
+				for(int i=0;i<frames;i++){
+					for(int j=0;j<slices;j++){
+						for(int k=0;k<channels;k++){
+							int index=get_stack_index(k,j,i,channels,slices,frames,order,null);
+							//IJ.log(""+k+"\t "+j+"\t "+i+"\t "+index);
+							ImageProcessor ip=r.openProcessors(index)[0];
+							stack.addSlice(ip);
+							IJ.showProgress(counter,frames*slices*channels);
+							counter++;
+						}
+					}
+				}
+				ImagePlus imp=new ImagePlus(names[s],stack);
+				if(!nometa){
+					jutils.set_psize(imp,psize);
+					jutils.set_pdepth(imp,zsize);
+					jutils.set_pinterval(imp,tsize);
+				}
+				imp.setOpenAsHyperStack(true);
+				imp.setDimensions(channels,slices,frames);
+				if(channels>1){
+					imp=new CompositeImage(imp,CompositeImage.COLOR);
+				}
+				imps[s]=imp;
+				/*FileSaver fs=new FileSaver(imp);
+				fs.saveAsTiffStack(outdir+names[s]+".tif");
+				imp.close();*/
+				IJ.showStatus(names[s]+" exported");
+				IJ.showProgress(s,nseries);
+				if(IJ.escapePressed()) break;
+			}
+			r.close();
+		}catch(FormatException e){
+			return null;
+		}catch(IOException e){
+			return null;
+		}
+		return imps;
 	}
 
 }

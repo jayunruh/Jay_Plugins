@@ -1274,6 +1274,66 @@ public class algutils{
 			}
 		}
 	}
+	
+	public static Object expand_array(Object source,int length){
+		if(source instanceof float[]){
+			float[] temp=new float[length];
+			System.arraycopy(source,0,temp,0,((float[])source).length);
+			return temp;
+		}else{
+			if(source instanceof short[]){
+				short[] temp=new short[length];
+				System.arraycopy(source,0,temp,0,((short[])source).length);
+				return temp;
+			}else{
+				if(source instanceof byte[]){
+					byte[] temp=new byte[length];
+					System.arraycopy(source,0,temp,0,((byte[])source).length);
+					return temp;
+				}else{
+					int[] temp=new int[length];
+					System.arraycopy(source,0,temp,0,((int[])source).length);
+					return temp;
+				}
+			}
+		}
+	}
+	
+	public static Object combine_arrays(Object arr1,Object arr2){
+		if(arr1 instanceof float[]){
+			int len1=((float[])arr1).length;
+			int len2=((float[])arr2).length;
+			float[] temp=new float[len1+len2];
+			System.arraycopy(arr1,0,temp,0,len1);
+			System.arraycopy(arr2,0,temp,len1,len2);
+			return temp;
+		}else{
+			if(arr1 instanceof short[]){
+				int len1=((short[])arr1).length;
+				int len2=((short[])arr2).length;
+				short[] temp=new short[len1+len2];
+				System.arraycopy(arr1,0,temp,0,len1);
+				System.arraycopy(arr2,0,temp,len1,len2);
+				return temp;
+			}else{
+				if(arr1 instanceof byte[]){
+					int len1=((byte[])arr1).length;
+					int len2=((byte[])arr2).length;
+					byte[] temp=new byte[len1+len2];
+					System.arraycopy(arr1,0,temp,0,len1);
+					System.arraycopy(arr2,0,temp,len1,len2);
+					return temp;
+				}else{
+					int len1=((int[])arr1).length;
+					int len2=((int[])arr2).length;
+					int[] temp=new int[len1+len2];
+					System.arraycopy(arr1,0,temp,0,len1);
+					System.arraycopy(arr2,0,temp,len1,len2);
+					return temp;
+				}
+			}
+		}
+	}
 
 	public static Object get_subarray(Object source,int off,int length){
 		if(source instanceof float[]){

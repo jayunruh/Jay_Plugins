@@ -83,6 +83,10 @@ public class jutils{
 	public static boolean isPlotHist(ImageWindow iw){
 		return (iw.getClass().getName().equals("jguis.PlotWindowHist") || iw.getClass().getName().equals("jguis.PlotWindow2DHist"));
 	}
+	
+	public static boolean is3DPlot(ImageWindow iw){
+		return (iw.getClass().getName().equals("jguis.PlotWindow3D"));
+	}
 
 	public static boolean isPlot(ImageWindow iw){
 		return(isPW4(iw)||isPW(iw));
@@ -95,7 +99,7 @@ public class jutils{
 	public static boolean isPW(ImageWindow iw){
 		return iw.getClass().getName().equals("ij.gui.PlotWindow");
 	}
-
+	
 	public static Plot4 plot2Plot4(Plot plot){
 		try{
 			Class<?> temp=plot.getClass();

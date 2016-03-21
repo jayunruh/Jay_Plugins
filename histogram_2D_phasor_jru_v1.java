@@ -15,6 +15,7 @@ import ij.plugin.*;
 import ij.measure.*;
 import java.io.*;
 import jguis.*;
+import jalgs.*;
 
 public class histogram_2D_phasor_jru_v1 implements PlugIn {
 
@@ -533,11 +534,14 @@ class CustomWindow3 extends Panel implements ActionListener, AdjustmentListener,
 			//roi is rectangular
 			if(xvalue>roix && xvalue<(roix+roiwidth) && yvalue>roiy && yvalue<(roiy+roiheight)){
 				inroi=true;
-		}}
+			}
+		}
 		if(roishape==1){
 			//roi is oval
+			OvalRoi roi=new OvalRoi(roix,roiy,roiwidth,roiheight);
+			inroi=roi.contains(xvalue,yvalue);
 			//calculate the center of the ellipse and the positions of the foci
-			float centerx=(float)roix+0.5f*(float)roiwidth;
+			/*float centerx=(float)roix+0.5f*(float)roiwidth;
 			float centery=(float)roiy+0.5f*(float)roiheight;
 			float f1x,f1y,f2x,f2y,major;
 			if(roiwidth>=roiheight){
@@ -558,7 +562,8 @@ class CustomWindow3 extends Panel implements ActionListener, AdjustmentListener,
 			//IJ.log("f1x "+f1x+"f2x "+f2x);
 			if((distance1+distance2)<=major){
 				inroi=true;
-		}}
+			}*/
+		}
 		oldxpos=xpos;
 		oldypos=ypos;
 	}
@@ -689,8 +694,17 @@ class CustomWindow3 extends Panel implements ActionListener, AdjustmentListener,
 				}}
 				if(roishape==1){
 					//roi is oval
+					OvalRoi roi=new OvalRoi(roix,roiy,roiwidth,roiheight);
+					if(roi.contains(dumint1,dumint2)){
+						mask[i]=1;
+						score+=1.0;
+						xavg+=histxpix[i];
+						yavg+=histypix[i];
+						xstdev+=histxpix[i]*histxpix[i];
+						ystdev+=histypix[i]*histypix[i];
+					}
 					//calculate the center of the ellipse and the positions of the foci
-					float centerx=(float)roix+0.5f*(float)roiwidth;
+					/*float centerx=(float)roix+0.5f*(float)roiwidth;
 					float centery=(float)roiy+0.5f*(float)roiheight;
 					float f1x,f1y,f2x,f2y,major;
 					if(roiwidth>=roiheight){
@@ -715,7 +729,8 @@ class CustomWindow3 extends Panel implements ActionListener, AdjustmentListener,
 						yavg+=histypix[i];
 						xstdev+=histxpix[i]*histxpix[i];
 						ystdev+=histypix[i]*histypix[i];
-				}}
+					}*/
+				}
 			}
 			if(abovethresh){totpixels+=1.0f;}
 		}
@@ -941,9 +956,9 @@ class CustomWindow3 extends Panel implements ActionListener, AdjustmentListener,
 
 	void save_masked_image(){
 		int[] color_pixels = new int[width*height];
-		int dumint;
+		//int dumint;
 		for(int i=0;i<width*height;i++){
-			dumint=(int)(((disppix[i+currslice*width*height]-dispmin)/(dispmax-dispmin))*256.0);
+			/*dumint=(int)(((disppix[i+currslice*width*height]-dispmin)/(dispmax-dispmin))*256.0);
 			if(threshfirst){
 				if(disppix[i]<thresh){dumint=0;}
 			} else {
@@ -955,11 +970,17 @@ class CustomWindow3 extends Panel implements ActionListener, AdjustmentListener,
 				if(mask[i]==0){color_pixels[i]=0xff000000 + (dumint<<16) + (dumint<<8) + dumint;}
 				else{color_pixels[i]=0xffff0000;}
 			}
-			else{color_pixels[i]=0xff000000;}
+			else{color_pixels[i]=0xff000000;}*/
+			if(mask[i]==0) color_pixels[i]=0xff000000;
+			else color_pixels[i]=0xffff0000;
 		}
+		float[] pixcopy=(float[])algutils.get_subarray(disppix,currslice*width*height,width*height);
 		ColorProcessor cp = new ColorProcessor(width,height,color_pixels);
-		ImagePlus imp2 = new ImagePlus("Masked Image",cp);
+		ImageRoi roi=new ImageRoi(0,0,cp);
+		roi.setZeroTransparent(true);
+		ImagePlus imp2 = new ImagePlus("Masked Image",new FloatProcessor(width,height,pixcopy,null));
 		imp2.show();
+		imp2.setOverlay(new Overlay(roi));
 	}
 
 	void save_decay(){
