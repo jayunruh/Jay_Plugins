@@ -11,6 +11,7 @@ import ij.gui.*;
 import java.awt.*;
 import ij.plugin.*;
 import jguis.*;
+import jalgs.*;
 
 public class divide_line_from_stack_jru_v1 implements PlugIn {
 
@@ -43,18 +44,65 @@ public class divide_line_from_stack_jru_v1 implements PlugIn {
 		ImageStack stack=imp2.getStack();
 		int width=imp2.getWidth(); int height=imp2.getHeight();
 		ImageStack retstack=new ImageStack(width,height);
-
-		for(int i=0;i<length;i++){
-			float[] pixels=((float[])stack.getPixels(i+1)).clone();
-			for(int j=0;j<width*height;j++){
-				if(mult) pixels[j]*=yvals[i];
-				else pixels[j]/=yvals[i];
-			}
-			retstack.addSlice("",pixels);
-		}
 		String name="Divided";
 		if(mult) name="Multiplied";
-		(new ImagePlus(name,retstack)).show();
+		if(stack.getSize()==length){
+			for(int i=0;i<length;i++){
+				float[] pixels=algutils.convert_arr_float(stack.getPixels(i+1));
+				for(int j=0;j<width*height;j++){
+					if(mult) pixels[j]*=yvals[i];
+					else pixels[j]/=yvals[i];
+				}
+				retstack.addSlice("",pixels);
+			}
+			(new ImagePlus(name,retstack)).show();
+		} else {
+			int nframes=imp2.getNFrames();
+			int nslices=imp2.getNSlices();
+			int nchannels=imp2.getNChannels();
+			if(length==nslices){
+				//assume dividing along the z axis
+				int counter=0;
+				for(int i=0;i<nframes;i++){
+					for(int j=0;j<nslices;j++){
+						for(int k=0;k<nchannels;k++){
+							float[] pixels=algutils.convert_arr_float(stack.getPixels(counter+1)); counter++;
+							float div=yvals[j]; if(mult) div=1.0f/div;
+							for(int m=0;m<width*height;m++) pixels[m]/=div;
+							retstack.addSlice("",pixels);
+						}
+					}
+				}				
+			} else if(length==nframes){
+				//assume dividing along the t axis
+				int counter=0;
+				for(int i=0;i<nframes;i++){
+					for(int j=0;j<nslices;j++){
+						for(int k=0;k<nchannels;k++){
+							float[] pixels=algutils.convert_arr_float(stack.getPixels(counter+1)); counter++;
+							float div=yvals[i]; if(mult) div=1.0f/div;
+							for(int m=0;m<width*height;m++) pixels[m]/=div;
+							retstack.addSlice("",pixels);
+						}
+					}
+				}	
+			} else {
+				//assume dividing along the c axis
+				int counter=0;
+				for(int i=0;i<nframes;i++){
+					for(int j=0;j<nslices;j++){
+						for(int k=0;k<nchannels;k++){
+							float[] pixels=algutils.convert_arr_float(stack.getPixels(counter+1)); counter++;
+							float div=yvals[k]; if(mult) div=1.0f/div;
+							for(int m=0;m<width*height;m++) pixels[m]/=div;
+							retstack.addSlice("",pixels);
+						}
+					}
+				}	
+			}
+			jutils.create_hyperstack(name,retstack,imp2).show();
+		}
+
 	}
 
 }

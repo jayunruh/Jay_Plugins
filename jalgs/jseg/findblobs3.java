@@ -1575,7 +1575,7 @@ public class findblobs3{
 		findblobs3 fb=new findblobs3(r.width+4,r.height+4);
 		fb.dilateobjects(temp);
 		Polygon poly2=fb.get_object_outline(temp,1);
-		poly2.translate(-xoff,-yoff);
+		poly2.translate(xoff,yoff);
 		return poly2;
 	}
 
