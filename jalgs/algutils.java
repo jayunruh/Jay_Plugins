@@ -68,6 +68,29 @@ public class algutils{
 		}
 		return null;
 	}
+	
+	/******************
+	 * this converts an array to a specific type, making a copy.  See above for types
+	 * @param oldarr
+	 * @param type
+	 * @return
+	 */
+	public static Object[] convert_array(Object[] oldarr,int type){
+		// can convert from and to byte, short, or float
+		switch(type){
+		case 0:
+			return convert_arr_byte(oldarr);
+		case 1:
+			return convert_arr_short(oldarr);
+		case 2:
+			return convert_arr_float(oldarr);
+		case 3:
+			return convert_arr_double(oldarr);
+		case 4:
+			return convert_arr_int(oldarr);
+		}
+		return null;
+	}
 
 	/*************************************
 	 * makes a copy of an array as a byte
@@ -496,6 +519,14 @@ public class algutils{
 		return getArrVal(arr,x+y*width,dtype);
 	}
 	
+	public static void setPixelVal(Object arr,float val,int x,int y,int width,int height,int dtype){
+		if(x<0) return;
+		if(y<0) return;
+		if(x>=width) return;
+		if(y>=height) return;
+		setArrVal(arr,val,x+y*width,dtype);
+	}
+	
 	public static float getArrVal(Object arr,int index,int dtype){
 		if(dtype==0) return ((byte[])arr)[index]&0xff;
 		if(dtype==1) return ((short[])arr)[index]&0xffff;
@@ -503,6 +534,15 @@ public class algutils{
 		if(dtype==3) return (float)((double[])arr)[index];
 		if(dtype==4) return ((int[])arr)[index];
 		return Float.NaN;
+	}
+	
+	public static void setArrVal(Object arr,float val,int index,int dtype){
+		int intval=(int)val;
+		if(dtype==0) ((byte[])arr)[index]=(byte)intval;
+		if(dtype==1) ((short[])arr)[index]=(short)intval;
+		if(dtype==2) ((float[])arr)[index]=val;
+		if(dtype==3) ((double[])arr)[index]=(double)val;
+		if(dtype==4) ((int[])arr)[index]=intval;
 	}
 
 	/**********************

@@ -295,7 +295,8 @@ public class jutils{
 	}
 
 	public static PlotWindow4 getPW4SelCopy(ImageWindow iw){
-		int selected=((Integer)runPW4VoidMethod(iw,"getSelected")).intValue();
+		int selected=0;
+		if(!iw.getClass().getName().equals("ij.gui.PlotWindow")) selected=((Integer)runPW4VoidMethod(iw,"getSelected")).intValue();
 		return getPW4SelCopy(iw,selected);
 	}
 
@@ -370,12 +371,10 @@ public class jutils{
 
 	public static void savePW4(ImageWindow iw,String filename){
 		Class<?> temp=iw.getClass();
-		if(isPlotFamily(iw)){
+		if(temp.getName().equals("ij.gui.PlotWindow")){
+			savePW(filename,(PlotWindow)iw);
+		} else if(isPlotFamily(iw)){
 			runReflectionMethod(iw,"saveAsObject",new Object[]{filename});
-		}else{
-			if(temp.getName().equals("ij.gui.PlotWindow")){
-				savePW(filename,(PlotWindow)iw);
-			}
 		}
 	}
 

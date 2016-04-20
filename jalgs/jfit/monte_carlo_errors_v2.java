@@ -78,6 +78,17 @@ public class monte_carlo_errors_v2 implements NLLSfitinterface_v2{
 		}
 	}
 
+	/********************************
+	 * gets errors by adding gaussian random numbers to a data set (according to the residuals and weights)
+	 * outputs a params+1 x ntrials array with fit values and last column with the chi squared
+	 * @param params: the fit parameters
+	 * @param fixes: with 1 for fixed and 0 for varied
+	 * @param constraints: a 2 x nparams array with upper and lower constraints
+	 * @param data: the data
+	 * @param weights: the weights (can be null)
+	 * @param ntrials: number of trials (usually 500)
+	 * @return
+	 */
 	public double[][] geterrors(double[] params,int[] fixes,double[][] constraints,float[] data,float[] weights,int ntrials){
 		random=new rngs();
 		int oldnfit=0;

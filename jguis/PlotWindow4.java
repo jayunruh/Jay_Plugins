@@ -619,11 +619,15 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 					}else{
 						if(b==selbutton){
 							p3.selectSeries(p3.getSelected()+1);
-							IJ.showStatus("Series "+(p3.getSelected()+1)+" of "+p3.getNSeries()+" Selected");
+							String annot="";
+							if(p3.getAnnotations()!=null) annot=":"+(p3.getAnnotations())[p3.getSelected()];
+							IJ.showStatus("Series "+(p3.getSelected()+1)+" of "+p3.getNSeries()+" Selected"+annot);
 							updatePlot();
 						}else{
 							p3.selectSeries(p3.getSelected()-1);
-							IJ.showStatus("Series "+(p3.getSelected()+1)+" of "+p3.getNSeries()+" Selected");
+							String annot="";
+							if(p3.getAnnotations()!=null) annot=":"+(p3.getAnnotations())[p3.getSelected()];
+							IJ.showStatus("Series "+(p3.getSelected()+1)+" of "+p3.getNSeries()+" Selected"+annot);
 							updatePlot();
 						}
 					}

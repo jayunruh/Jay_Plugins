@@ -641,6 +641,12 @@ public class table_tools{
 		return temp;
 	}
 	
+	public static float[][] get_matrix(List<List<String>> list){
+		float[][] temp=new float[list.size()][];
+		for(int i=0;i<list.size();i++) temp[i]=get_column_array(list,i);
+		return temp;
+	}
+	
 	public static String[] get_listtable_column(List<List<String>> list,int col){
 		String[] temp=new String[list.size()];
 		for(int i=0;i<temp.length;i++){

@@ -584,7 +584,7 @@ public class fit_gaussian{
 	}
 	
 	/****************
-	 * a 1D gaussian fitting function with no use intervention
+	 * a 1D gaussian fitting function with no user intervention
 	 * @param xvals1: can be null
 	 * @param yvals
 	 * @param params: base, xc, stdev,amp
@@ -674,6 +674,84 @@ public class fit_gaussian{
 			}
 		}
 		return tempc2/(length-numfit);
+	}
+	
+	/****************
+	 * a 1D gaussian fitting function with no user intervention
+	 * @param xvals1: can be null
+	 * @param yvals
+	 * @param params: base, xc, stdev,amp
+	 * @param stats
+	 * @param constraints
+	 * @param fixes
+	 * @return
+	 */
+	public float[] run1D2GFit(float[] xvals1,float[] yvals,double[] params1,double[] stats,double[][] constraints1,int[] fixes){
+		float[] tempx=new float[yvals.length];
+		if(xvals1!=null) tempx=xvals1;
+		else for(int i=0;i<tempx.length;i++) tempx[i]=(float)i;
+		double[] params=params1;
+		if(params1==null) params=guess1DParams(tempx,yvals,yvals.length); //note that if this happens, we will not return the params variables
+		double sumparams=0.0; for(int i=0;i<params.length;i++) sumparams+=params[i]*params[i];
+		if(sumparams==0.0) params=guess1DParams(tempx,yvals,yvals.length);
+		double[][] constraints=constraints1;
+		if(constraints1==null) constraints=get1DConstraints(tempx,params,yvals.length);
+		int maxiter=10;
+		float[] fit=new float[yvals.length];
+		for(int i=0;i<yvals.length;i++) fit[i]=(float)gf.getinterpgaus(Math.abs(tempx[i]-params[1]),params[2])*(float)params[3]+(float)params[0];
+		double[][] jacobian=new double[4][4];
+		double[] jvector=new double[4];
+		int iter=0;
+		double c2=calculate_c2_1D_fit(fit,4,yvals,0.0f);
+		double oldc2;
+		iterloop: for(iter=0;iter<maxiter;iter++){
+			fit=new float[yvals.length];
+			for(int i=0;i<yvals.length;i++) fit[i]=(float)gf.getinterpgaus(Math.abs(tempx[i]-params[1]),params[2])*(float)params[3]+(float)params[0];
+			oldc2=c2;
+			c2=calculate_c2_1D_fit(fit,4,yvals,0.0f);
+			if(iter>0){
+				if(Math.abs((oldc2-c2)/c2)<toler){
+					break iterloop;
+				}
+			}
+			jacobian=new double[4][4];
+			jvector=new double[4];
+			for(int i=0;i<yvals.length;i++){
+				double temp=fit[i];
+				double temp2=yvals[i];
+				double tempx2=((double)tempx[i]-(double)params[1])/(params[2]*params[2]);
+				double[] d={1.0,(temp-params[0])*tempx2,(temp-params[0])*(tempx2*tempx2)*params[2],(temp-params[0])/params[3]};
+				for(int k=0;k<4;k++){
+					for(int l=0;l<=k;l++){
+						jacobian[k][l]+=d[k]*d[l];
+					}
+					jvector[k]+=d[k]*(temp2-temp);
+				}
+			}
+			for(int k=0;k<3;k++){
+				for(int l=(k+1);l<4;l++){
+					jacobian[k][l]=jacobian[l][k];
+				}
+			}
+			double[] dparams=new double[4];
+			(new matrixsolve()).gjsolve(jacobian,jvector,dparams,4);
+			if(fixes[0]==0) params[0]+=dparams[0];
+			if(fixes[1]==0) params[1]+=dparams[1];
+			if(fixes[2]==0) params[2]+=dparams[2];
+			if(fixes[3]==0) params[3]+=dparams[3];
+			for(int i=0;i<4;i++){
+				if(fixes[i]==0){
+					if(Double.isNaN(params[i])) params[i]=constraints[0][i];
+					if(Double.isInfinite(params[i])) params[i]=constraints[1][i];
+					if(params[i]<constraints[0][i]) params[i]=constraints[0][i];
+					if(params[i]>constraints[1][i]) params[i]=constraints[1][i];
+				}
+			}
+		}
+		stats[0]=(double)iter;
+		stats[1]=c2;
+		for(int i=0;i<params.length;i++) params1[i]=params[i];
+		return fit;
 	}
 
 }
