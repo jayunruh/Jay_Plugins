@@ -52,6 +52,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Vector;
 
 public class jutils{
 
@@ -102,17 +103,26 @@ public class jutils{
 	
 	public static Plot4 plot2Plot4(Plot plot){
 		try{
+			//need to update this for new data model use allPlotObjects?
 			Class<?> temp=plot.getClass();
-			Field datafield=temp.getDeclaredField("storedData");
-			datafield.setAccessible(true);
-			ArrayList data=(ArrayList)datafield.get(plot);
+			//Field datafield=temp.getDeclaredField("storedData");
+			//datafield.setAccessible(true);
+			//ArrayList data=(ArrayList)datafield.get(plot);
+			/*Field plotobjfield=temp.getDeclaredField("allPlotObjects");
+			plotobjfield.setAccessible(true);
+			Vector<?> allPlotObjects=(Vector<?>)plotobjfield.get(plot);*/
+			/*Field maincurvefield=temp.getDeclaredField("getMainCurveObject");
+			maincurvefield.setAccessible(true);
+			Object po=maincurvefield.get(plot);*/
 			Field xlabelfield=temp.getDeclaredField("xLabel");
 			xlabelfield.setAccessible(true);
 			String xlabel=(String)xlabelfield.get(plot);
 			Field ylabelfield=temp.getDeclaredField("yLabel");
 			ylabelfield.setAccessible(true);
 			String ylabel=(String)ylabelfield.get(plot);
-			Field xminfield=temp.getDeclaredField("xMin");
+			double[] limits=plot.getLimits();
+			double xmin=limits[0]; double xmax=limits[1]; double ymin=limits[2]; double ymax=limits[3];
+			/*Field xminfield=temp.getDeclaredField("xMin");
 			xminfield.setAccessible(true);
 			double xmin=(Double)xminfield.get(plot);
 			Field yminfield=temp.getDeclaredField("yMin");
@@ -123,13 +133,16 @@ public class jutils{
 			double xmax=(Double)xmaxfield.get(plot);
 			Field ymaxfield=temp.getDeclaredField("yMax");
 			ymaxfield.setAccessible(true);
-			double ymax=(Double)ymaxfield.get(plot);
-			Field ebarsfield=temp.getDeclaredField("errorBars");
+			double ymax=(Double)ymaxfield.get(plot);*/
+			/*Field ebarsfield=temp.getDeclaredField("errorBars");
 			ebarsfield.setAccessible(true);
-			float[] ebars=(float[])ebarsfield.get(plot);
-			int nseries=data.size()/2;
-			Plot4 p4=new Plot4(xlabel,ylabel,(float[])data.get(0),(float[])data.get(1));
-			for(int i=2;i<data.size();i+=2){
+			float[] ebars=(float[])ebarsfield.get(plot);*/
+			//int nseries=data.size()/2;
+			float[] xvals=plot.getXValues();
+			float[] yvals=plot.getYValues();
+			//Plot4 p4=new Plot4(xlabel,ylabel,(float[])data.get(0),(float[])data.get(1));
+			Plot4 p4=new Plot4(xlabel,ylabel,xvals,yvals);
+			/*for(int i=2;i<data.size();i+=2){
 				p4.addPoints((float[])data.get(i),(float[])data.get(i+1),true);
 			}
 			int maxpts=p4.getmaxpts();
@@ -137,7 +150,7 @@ public class jutils{
 				float[][] ebars2=new float[nseries][maxpts];
 				System.arraycopy(ebars,0,ebars2[0],0,ebars.length);
 				p4.addErrors(ebars2);
-			}
+			}*/
 			p4.setLimits(new float[]{(float)xmin,(float)xmax,(float)ymin,(float)ymax});
 			return p4;
 		}catch(NoSuchFieldException e){
@@ -177,7 +190,8 @@ public class jutils{
 	}
 
 	public static Plot getPWPlot(PlotWindow pw){
-		return (Plot)getReflectionField(pw,"plot");
+		//return (Plot)getReflectionField(pw,"plot");
+		return pw.getPlot();
 	}
 
 	public static PlotWindow4 pw2pw4(PlotWindow pw){
@@ -191,10 +205,7 @@ public class jutils{
 		if(temp.getName().equals("jguis.PlotWindow4")||temp.getName().equals("jguis.PlotWindow3D")||temp.getName().equals("jguis.PlotWindowHist") || temp.getName().equals("jguis.PlotWindow2DHist")){
 			data=runReflectionMethod(iw,method,null,null);
 		}else if(temp.getName().equals("ij.gui.PlotWindow")){
-			Plot4 plot=plot2Plot4(getPWPlot((PlotWindow)iw)); // first
-			// convert
-			// into a
-			// Plot
+			Plot4 plot=plot2Plot4(getPWPlot((PlotWindow)iw)); // first convert into a Plot
 			if(method.equals("getAllLabels")){
 				data=new String[]{iw.getTitle(),plot.getxLabel(),plot.getyLabel()};
 			}else{

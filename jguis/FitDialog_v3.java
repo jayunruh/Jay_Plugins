@@ -9,8 +9,8 @@
 package jguis;
 
 import ij.IJ;
+import ij.gui.DialogListener;
 import ij.gui.GenericDialog;
-import ij.text.TextPanel;
 import ij.text.TextWindow;
 import jalgs.jdist;
 import jalgs.jstatistics;
@@ -19,10 +19,10 @@ import jalgs.jfit.NLLSfitinterface_v2;
 import jalgs.jfit.monte_carlo_errors_v2;
 import jalgs.jfit.support_plane_errors_v2;
 
-import javax.swing.JTable;
-import javax.swing.event.TableModelEvent;
+import java.awt.AWTEvent;
+import java.awt.GridLayout;
 
-public class FitDialog_v2 implements NLLSfitinterface_v2,TableDialogListener{
+public class FitDialog_v3 implements DialogListener,NLLSfitinterface_v2{
 	public PlotWindow4 pw;
 	public NLLSfitinterface_v2 callclass;
 	public NLLSfit_v2 fitclass;
@@ -38,9 +38,13 @@ public class FitDialog_v2 implements NLLSfitinterface_v2,TableDialogListener{
 	private TextWindow tw;
 	private boolean redirect;
 
-	// this class handles the procedures associated with fitting
-	// this version uses a table dialog for more fitting parameters
-	public FitDialog_v2(PlotWindow4 pw,NLLSfitinterface_v2 callclass,String[] labels){
+	/******************************
+	 * this class handles the procedures associated with fitting a plot, this version uses a grid layout genericdialog
+	 * @param pw
+	 * @param callclass
+	 * @param labels
+	 */
+	public FitDialog_v3(PlotWindow4 pw,NLLSfitinterface_v2 callclass,String[] labels){
 		this.pw=pw;
 		this.callclass=callclass;
 		this.labels=labels;
@@ -52,9 +56,27 @@ public class FitDialog_v2 implements NLLSfitinterface_v2,TableDialogListener{
 		}
 		manual=gd.getNextBoolean();
 		fitclass=new NLLSfit_v2(this,0.0001,50,0.1);
-		xvals=pw.getXValues(0);
-		yvals=pw.getYValues(0);
-		pw.addPoints(xvals,new float[xvals.length],false);
+		if(pw!=null){
+			xvals=pw.getXValues(0);
+			yvals=pw.getYValues(0);
+			pw.addPoints(xvals,new float[xvals.length],true);
+		}
+		redirect=false;
+	}
+	
+	public FitDialog_v3(float[] ypts,NLLSfitinterface_v2 callclass,String[] labels){
+		//this.pw=pw;
+		this.callclass=callclass;
+		this.labels=labels;
+		GenericDialog gd=new GenericDialog("Options");
+		gd.addCheckbox("Manual_Fit",true);
+		gd.showDialog();
+		if(gd.wasCanceled()){
+			return;
+		}
+		manual=gd.getNextBoolean();
+		fitclass=new NLLSfit_v2(this,0.0001,50,0.1);
+		this.yvals=ypts;
 		redirect=false;
 	}
 
@@ -64,15 +86,15 @@ public class FitDialog_v2 implements NLLSfitinterface_v2,TableDialogListener{
 		this.constraints=constraints;
 		this.fixes=fixes;
 		double[] stats=new double[2];
-		while(showoptions(this.params,this.fixes)){
+		while(showoptions(params,fixes)){
 			if(checkc2){
 				fitclass.maxiter=0;
 			}else{
 				fitclass.maxiter=50;
 			}
-			float[] fit=fitclass.fitdata(this.params,this.fixes,this.constraints,yvals,weights,stats,true);
+			float[] fit=fitclass.fitdata(params,fixes,constraints,yvals,weights,stats,true);
 			c2=(float)stats[1];
-			pw.updateSeries(fit,1,true);
+			if(pw!=null) pw.updateSeries(fit,1,true);
 			iterations=(int)stats[0];
 			if(!manual){
 				break;
@@ -92,24 +114,24 @@ public class FitDialog_v2 implements NLLSfitinterface_v2,TableDialogListener{
 		this.constraints=constraints;
 		this.fixes=fixes;
 		double[] stats=new double[2];
-		while(showoptions(this.params,this.fixes)){
+		while(showoptions(params,fixes)){
 			if(checkc2){
 				fitclass.maxiter=0;
 			}else{
 				fitclass.maxiter=50;
 			}
-			float[] fit=fitclass.fitdata(this.params,this.fixes,this.constraints,yvals,weights,stats,true);
+			float[] fit=fitclass.fitdata(params,fixes,constraints,yvals,weights,stats,true);
 			c2=(float)stats[1];
-			pw.updateSeries(fit,1,true);
+			if(pw!=null) pw.updateSeries(fit,1,true);
 			iterations=(int)stats[0];
 			if(!manual){
 				break;
 			}
-			IJ.selectWindow(pw.getTitle());
 		}
 
 		StringBuffer sb=new StringBuffer();
-		sb.append(pw.getTitle());
+		if(pw!=null) sb.append(pw.getTitle());
+		else sb.append("no plot");
 		IJ.log("Chi Squared = "+(float)stats[1]);
 		sb.append("\t"+(float)stats[1]);
 		IJ.log("Iterations = "+(int)stats[0]);
@@ -118,8 +140,10 @@ public class FitDialog_v2 implements NLLSfitinterface_v2,TableDialogListener{
 			IJ.log(labels[i]+" : "+params[i]+" : Fixed : "+(fixes[i]==1));
 			sb.append("\t"+(float)params[i]);
 		}
-		if(outtable!=null)
+		if(outtable!=null){
+			//IJ.log(sb.toString());
 			outtable.append(sb.toString());
+		}
 	}
 
 	public TextWindow make_outtable(String title){
@@ -133,78 +157,56 @@ public class FitDialog_v2 implements NLLSfitinterface_v2,TableDialogListener{
 		TextWindow outtable=new TextWindow(title,collabels,"",400,200);
 		return outtable;
 	}
-	
-	/***************
-	 * here we add columns only if the new fit has more parameters
-	 * @param tw
-	 * @param labels1
-	 */
-	public static void adapt_outtable(TextWindow tw,String[] labels1){
-		TextPanel tp=tw.getTextPanel();
-		String[] oldlabels=table_tools.getcollabels(tp);
-		if(labels1.length>(oldlabels.length-3)){
-			String collabels="title\tc^2\tIter\t"+table_tools.print_string_array(labels1);
-			table_tools.change_table_labels(tp,collabels);
-		}
-	}
 
 	public boolean showoptions(double[] params,int[] fixes){
-		updatePlot(params);
-		int nparams=params.length;
-		Object[][] tabledata=new Object[nparams+5][3];
-		String[] columnlabels={"Parameters","Values","Fix?"};
-		tabledata[0][0]="Check chi^2?";
-		tabledata[0][1]=new Boolean(checkc2);
-		for(int i=0;i<nparams;i++){
-			tabledata[i+1][0]=labels[i];
-			tabledata[i+1][1]=new Double(params[i]);
-			tabledata[i+1][2]=new Boolean(fixes[i]==1);
+		GenericDialog gd=new GenericDialog("Starting Fit Parameters");
+		gd.setLayout(new GridLayout(params.length+5, 2));
+		gd.addCheckbox("Check Chi Squared",checkc2); gd.addMessage(" "); gd.addMessage(" ");
+		for(int i=0;i<params.length;i++){
+			gd.addNumericField(labels[i],params[i],5,10,null); gd.addCheckbox("Fix"+(i+1)+"?",(fixes[i]==1));
 		}
-		tabledata[nparams+1][0]="Get Errors";
-		tabledata[nparams+1][1]=new Boolean(false);
-		tabledata[nparams+2][0]="Edit Constraints";
-		tabledata[nparams+2][1]=new Boolean(false);
-		tabledata[nparams+3][0]="Iterations";
-		tabledata[nparams+3][1]=new Integer(iterations);
-		tabledata[nparams+4][0]="Chi Squared";
-		tabledata[nparams+4][1]=new Double(c2);
-		TableDialog2 td=new TableDialog2(null,null,"Fit Parameters",columnlabels,tabledata,null);
-		td.addTableDialogListener(this);
-		Object[][] retvals=TableDialog2.showDialog(td);
-		//Object[][] retvals=jguis.TableDialog2.showDialog(null,null,"Fit Parameters",columnlabels,tabledata,null);
-		if(retvals==null) return false;
-		checkc2=((Boolean)retvals[0][1]).booleanValue();
-		for(int i=0;i<nparams;i++){
-			params[i]=((Double)retvals[i+1][1]).doubleValue();
-			fixes[i]=((Boolean)retvals[i+1][2]).booleanValue()?1:0;
+		gd.addCheckbox("Get_Errors",false); gd.addCheckbox("Edit_Constraints",false); gd.addMessage(" ");
+		gd.addNumericField("Iterations",iterations,0); gd.addMessage(" ");
+		gd.addNumericField("Chi Squared",c2,5,10,null); gd.addMessage(" ");
+		gd.addDialogListener(this);
+		gd.showDialog();
+		if(gd.wasCanceled()){
+			return false;
 		}
-		boolean geterrs=((Boolean)retvals[nparams+1][1]).booleanValue();
-		if(geterrs){
-			if(!get_errors(params,fixes)) return false;
+		checkc2=gd.getNextBoolean();
+		for(int i=0;i<params.length;i++){
+			params[i]=gd.getNextNumber();
+			if(gd.getNextBoolean()){
+				fixes[i]=1;
+			}else{
+				fixes[i]=0;
+			}
 		}
-		boolean showconstraints=((Boolean)retvals[nparams+2][1]).booleanValue();
-		if(showconstraints){
-			if(!showconstraintsdialog()) return false;
+		if(gd.getNextBoolean()){
+			if(!get_errors(params,fixes)){
+				return false;
+			}
+		}
+		if(gd.getNextBoolean()){
+			if(!showconstraintsdialog()){
+				return false;
+			}
 		}
 		return true;
 	}
 	
 	private boolean showconstraintsdialog(){
+		GenericDialog gd=new GenericDialog("Constraints");
 		int nparams=labels.length;
-		Object[][] tabledata=new Object[nparams][3];
-		String[] columnlabels={"Parameters","Lower Limit","Upper Limit"};
+		gd.setLayout(new GridLayout(nparams+2,4));
+		gd.addMessage(" "); gd.addMessage("Lower_Limit"); gd.addMessage(" "); gd.addMessage("Upper_Limit"); 
 		for(int i=0;i<nparams;i++){
-			tabledata[i][0]=labels[i];
-			tabledata[i][1]=constraints[0][i];
-			tabledata[i][2]=constraints[1][i];
+			gd.addNumericField(labels[i],constraints[0][i],5,15,null); gd.addNumericField("upper",constraints[1][i],5,15,null); 
 		}
-		Object[][] retvals=jguis.TableDialog2.showDialog(null,null,"Constraints",columnlabels,tabledata,null);
-		if(retvals==null){
-			return false;
-		}
+		gd.showDialog(); if(gd.wasCanceled()) return false;
 		for(int i=0;i<nparams;i++){
-			constraints[0][i]=((Double)retvals[i][1]).doubleValue();
-			constraints[1][i]=((Double)retvals[i][2]).doubleValue();
+			constraints[0][i]=gd.getNextNumber();
+			constraints[1][i]=gd.getNextNumber();
 		}
 		return true;
 	}
@@ -287,25 +289,22 @@ public class FitDialog_v2 implements NLLSfitinterface_v2,TableDialogListener{
 		return true;
 	}
 
-	/*public boolean dialogItemChanged(GenericDialog gd,AWTEvent e){
+	public boolean dialogItemChanged(GenericDialog gd,AWTEvent e){
 		checkc2=gd.getNextBoolean();
 		double[] params=new double[labels.length];
 		int[] fixes=new int[labels.length];
 		for(int i=0;i<params.length;i++){
 			params[i]=gd.getNextNumber();
-			if(gd.getNextBoolean()){
-				fixes[i]=1;
-			}else{
-				fixes[i]=0;
-			}
+			if(gd.getNextBoolean()) fixes[i]=1;
+			else fixes[i]=0;
 		}
 		NLLSfit_v2 fitclass=new NLLSfit_v2(this,0);
 		double[] stats=new double[2];
 		float[] fit=fitclass.fitdata(params,fixes,null,yvals,weights,stats,true);
-		pw.updateSeries(fit,1,true);
+		if(pw!=null) pw.updateSeries(fit,1,true);
 		c2=(float)stats[1];
 		return true;
-	}*/
+	}
 
 	public double[] fitfunc(double[] params){
 		return callclass.fitfunc(params);
@@ -316,28 +315,5 @@ public class FitDialog_v2 implements NLLSfitinterface_v2,TableDialogListener{
 			tw.append(results);
 		else
 			callclass.showresults(results);
-	}
-
-	public void tableDataChanged(JTable table,TableModelEvent e,Object[][] tabledata){
-		checkc2=((Boolean)tabledata[0][1]).booleanValue();
-		double[] params=new double[labels.length];
-		int[] fixes=new int[labels.length];
-		for(int i=0;i<params.length;i++){
-			params[i]=((Double)tabledata[i+1][1]).doubleValue();
-			fixes[i]=((Boolean)tabledata[i+1][2]).booleanValue()?1:0;
-		}
-		NLLSfit_v2 fitclass=new NLLSfit_v2(this,0);
-		double[] stats=new double[2];
-		float[] fit=fitclass.fitdata(params,fixes,null,yvals,weights,stats,true);
-		pw.updateSeries(fit,1,false);
-		c2=(float)stats[1];
-		return;
-	}
-	
-	public void updatePlot(double[] params){
-		NLLSfit_v2 fitclass=new NLLSfit_v2(this,0);
-		double[] stats=new double[2];
-		float[] fit=fitclass.fitdata(params,fixes,null,yvals,weights,stats,true);
-		pw.updateSeries(fit,1,false);
 	}
 }

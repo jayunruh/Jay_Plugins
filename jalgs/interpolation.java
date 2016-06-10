@@ -64,6 +64,35 @@ public class interpolation{
 			}
 		}
 	}
+	
+	public static void shift_copy_image(Object src,int srcwidth,int srcheight,Object dest1,int destwidth,int destheight,float xoff,float yoff){
+		if(src instanceof int[]){
+			//this is a color image
+			byte[][] rgb=algutils.intval2rgb((int[])src);
+			byte[][] temp=new byte[3][destwidth*destheight];
+			shift_copy_image(rgb[0],srcwidth,srcheight,temp[0],destwidth,destheight,xoff,yoff);
+			shift_copy_image(rgb[1],srcwidth,srcheight,temp[1],destwidth,destheight,xoff,yoff);
+			shift_copy_image(rgb[2],srcwidth,srcheight,temp[2],destwidth,destheight,xoff,yoff);
+			int[] temp2=algutils.rgb2intval(temp[0],temp[1],temp[2]);
+			algutils.copy_subarray(temp2,0,dest1,0,destwidth*destheight);
+		} else {
+    		float[] dest=new float[destwidth*destheight];
+    		for(int i=0;i<destheight;i++){
+    			float newy=(float)i-yoff;
+    			if(newy>=0.0f && newy<(float)(srcheight-1)){
+        			for(int j=0;j<destwidth;j++){
+        				float newx=(float)j-xoff;
+        				if(newx>=0.0f && newx<(float)(srcwidth-1)){
+        					dest[j+i*destwidth]=interp2D(src,srcwidth,srcheight,newx,newy);
+        				}
+        			}
+    			}
+    		}
+    		int type=algutils.get_array_type(src);
+    		Object temp=algutils.convert_array(dest,type);
+    		algutils.copy_subarray(temp,0,dest1,0,destwidth*destheight);
+		}
+	}
 
 	public static float[] scale_image(Object image,int width,int height,float s){
 		float[] retimage=new float[width*height];

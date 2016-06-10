@@ -131,26 +131,9 @@ public class analysis_cross_corr_v2 implements PlugIn {
 							if(!ioclass.readintelintfile(instream2,length2,pmdata2)){showioerror(); instream2.close(); return;}
 						}
 						if(fileflag==3){
-							double swfreq=(double)pmfreq/1000.0111;
+							double swfreq=20000000.0/1000.0111;
 							double divider=20000.0/sfreq;
 							swfreq/=divider;
-							/*if(sfreq==20000.0){
-							} else {
-								if(sfreq==10000.0){
-									swfreq/=2.0;
-								} else {
-									if(sfreq==5000.0){
-										swfreq/=4.0;
-									} else {
-										if(sfreq==2000.0){
-											swfreq/=10.0;
-										} else {
-											IJ.showMessage("Incorrect switching frequency");
-											return;
-										}
-									}
-								}
-							}*/
 							int offset=0;
 							offset=(new pmodeconvert()).calc_wlswitch_offset(pmdata,swfreq,pmfreq);
 							float[][] tmdatatemp=(new pmodeconvert()).pm2tm_alex(pmdata,pmdata2,swfreq,pmfreq,offset,1,ill_delay);

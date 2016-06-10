@@ -60,6 +60,22 @@ public class FitDialog implements DialogListener,NLLSfitinterface_v2{
 		pw.addPoints(xvals,new float[xvals.length],true);
 		redirect=false;
 	}
+	
+	public FitDialog(float[] ypts,NLLSfitinterface_v2 callclass,String[] labels){
+		//this.pw=pw;
+		this.callclass=callclass;
+		this.labels=labels;
+		GenericDialog gd=new GenericDialog("Options");
+		gd.addCheckbox("Manual_Fit",true);
+		gd.showDialog();
+		if(gd.wasCanceled()){
+			return;
+		}
+		manual=gd.getNextBoolean();
+		fitclass=new NLLSfit_v2(this,0.0001,50,0.1);
+		this.yvals=ypts;
+		redirect=false;
+	}
 
 	public void run_fit(double[] params,float[] weights,double[][] constraints,int[] fixes){
 		this.weights=weights;
@@ -75,7 +91,7 @@ public class FitDialog implements DialogListener,NLLSfitinterface_v2{
 			}
 			float[] fit=fitclass.fitdata(params,fixes,constraints,yvals,weights,stats,true);
 			c2=(float)stats[1];
-			pw.updateSeries(fit,1,true);
+			if(pw!=null) pw.updateSeries(fit,1,true);
 			iterations=(int)stats[0];
 			if(!manual){
 				break;
@@ -96,14 +112,11 @@ public class FitDialog implements DialogListener,NLLSfitinterface_v2{
 		this.fixes=fixes;
 		double[] stats=new double[2];
 		while(showoptions(params,fixes)){
-			if(checkc2){
-				fitclass.maxiter=0;
-			}else{
-				fitclass.maxiter=50;
-			}
+			if(checkc2) fitclass.maxiter=0;
+			else fitclass.maxiter=50;
 			float[] fit=fitclass.fitdata(params,fixes,constraints,yvals,weights,stats,true);
 			c2=(float)stats[1];
-			pw.updateSeries(fit,1,true);
+			if(pw!=null) pw.updateSeries(fit,1,true);
 			iterations=(int)stats[0];
 			if(!manual){
 				break;
@@ -111,7 +124,8 @@ public class FitDialog implements DialogListener,NLLSfitinterface_v2{
 		}
 
 		StringBuffer sb=new StringBuffer();
-		sb.append(pw.getTitle());
+		if(pw!=null) sb.append(pw.getTitle());
+		else sb.append("no plot");
 		IJ.log("Chi Squared = "+(float)stats[1]);
 		sb.append("\t"+(float)stats[1]);
 		IJ.log("Iterations = "+(int)stats[0]);
@@ -252,16 +266,13 @@ public class FitDialog implements DialogListener,NLLSfitinterface_v2{
 		int[] fixes=new int[labels.length];
 		for(int i=0;i<params.length;i++){
 			params[i]=gd.getNextNumber();
-			if(gd.getNextBoolean()){
-				fixes[i]=1;
-			}else{
-				fixes[i]=0;
-			}
+			if(gd.getNextBoolean()) fixes[i]=1;
+			else fixes[i]=0;
 		}
 		NLLSfit_v2 fitclass=new NLLSfit_v2(this,0);
 		double[] stats=new double[2];
 		float[] fit=fitclass.fitdata(params,fixes,null,yvals,weights,stats,true);
-		pw.updateSeries(fit,1,true);
+		if(pw!=null) pw.updateSeries(fit,1,true);
 		c2=(float)stats[1];
 		return true;
 	}

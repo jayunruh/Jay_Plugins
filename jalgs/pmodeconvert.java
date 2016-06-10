@@ -351,7 +351,7 @@ public class pmodeconvert{
 	}
 
 	public float calc_wlswitch_phase(int[] pmdata,double swfreq,int pmfreq){
-		double swtime2=2.0e7/swfreq;
+		double swtime2=pmfreq/swfreq;
 		double currtime=0.0;
 		double G=0.0;
 		double S=0.0;

@@ -16,6 +16,8 @@ import java.util.List;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfDouble;
+import org.opencv.core.MatOfInt;
 import org.opencv.core.MatOfRect;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
@@ -67,6 +69,25 @@ public class test_opencv{
 			Rectangle[] faces3=new Rectangle[faces2.length];
 			for(int i=0;i<faces2.length;i++) faces3[i]=new Rectangle(faces2[i].x,faces2[i].y,faces2[i].width,faces2[i].height);
 			return faces3;
+		} else {return null;}
+	}
+	
+	public static Object[] find_faces2(byte[] image,int width,int height,double scaleFactor,int minNeighbors,String classifierpath){
+		System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+		Mat gray=Mat.zeros(height,width,CvType.CV_8U);
+		gray.put(0,0,image);
+		CascadeClassifier facecascade=new CascadeClassifier(classifierpath);
+		MatOfRect faces=new MatOfRect();
+		//parameters are image, output, scalefactor, minneighbors, flags, minsize, maxsize
+		//facecascade.detectMultiScale(gray,faces,scaleFactor,minNeighbors,Objdetect.CASCADE_SCALE_IMAGE,new Size(10,10),new Size(width,height));
+		MatOfInt rejectLevels=new MatOfInt();
+		MatOfDouble levelWeights=new MatOfDouble();
+		facecascade.detectMultiScale3(gray,faces,rejectLevels,levelWeights,scaleFactor,minNeighbors,Objdetect.CASCADE_SCALE_IMAGE,new Size(10,10),new Size(width,height),true);
+		if(!faces.empty()){
+			Rect[] faces2=faces.toArray();
+			Rectangle[] faces3=new Rectangle[faces2.length];
+			for(int i=0;i<faces2.length;i++) faces3[i]=new Rectangle(faces2[i].x,faces2[i].y,faces2[i].width,faces2[i].height);
+			return new Object[]{faces3,rejectLevels.toArray(),levelWeights.toArray()};
 		} else {return null;}
 	}
 	

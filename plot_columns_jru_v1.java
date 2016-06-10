@@ -13,6 +13,7 @@ import ij.plugin.*;
 import ij.util.*;
 import ij.text.*;
 import jguis.*;
+import jalgs.*;
 
 public class plot_columns_jru_v1 implements PlugIn {
 
@@ -32,12 +33,14 @@ public class plot_columns_jru_v1 implements PlugIn {
 		gd.addCheckbox("Z Vals Column?",haszvals);
 		boolean haserrs=false;
 		gd.addCheckbox("Y Errs Column?",haserrs);
+		gd.addCheckbox("Sort by y val?",false);
 		gd.showDialog();
 		if(gd.wasCanceled()){return;}
 		int index=gd.getNextChoiceIndex();
 		hasxvals=gd.getNextBoolean();
 		haszvals=gd.getNextBoolean();
 		haserrs=gd.getNextBoolean();
+		boolean sorty=gd.getNextBoolean();
 		if(niframes[index] instanceof TextWindow){
 			TextWindow tw=(TextWindow)niframes[index];
 			TextPanel tp=tw.getTextPanel();
@@ -80,6 +83,16 @@ public class plot_columns_jru_v1 implements PlugIn {
 				yvals[i]=Float.parseFloat(data[yindex]);
 				if(haszvals) zvals[i]=Float.parseFloat(data[zindex]);
 				if(haserrs) errs[i]=Float.parseFloat(data[errsindex]);
+			}
+			if(sorty){
+				int[] order=jsort.javasort_order(yvals);
+				if(haserrs){
+					float[] temperrs=new float[errs.length];
+					for(int i=0;i<errs.length;i++){
+						temperrs[i]=errs[order[i]];
+					}
+					errs=temperrs;
+				}
 			}
 			if(!haszvals){
 				PlotWindow4 pw=new PlotWindow4(tw.getTitle()+" Plot",col_labels[xindex],col_labels[yindex],xvals,yvals);

@@ -12,6 +12,75 @@ import java.util.Arrays;
 
 public class algutils{
 
+	public static int[] rgb2intval(byte[] r,byte[] g,byte[] b){
+		int[] temp=new int[r.length];
+		for(int i=0;i<r.length;i++) temp[i]=rgb2intval(r[i],g[i],b[i]);
+		return temp;
+	}
+	
+	public static int rgb2intval(int r,int g,int b){
+		int temp=0xff000000|(r<<16)|(g<<8)|b;
+		return temp;
+	}
+	
+	public static int argb2intval(int a,int r,int g,int b){
+		int temp= (a<<24)|(r<<16)|(g<<8)|b;
+		return temp;
+	}
+
+	public static int rgb2intval(float r,float g,float b){
+		int r2=(int)r;
+		if(r2>255)
+			r2=255;
+		if(r2<0)
+			r2=0;
+		int g2=(int)g;
+		if(g2>255)
+			g2=255;
+		if(g2<0)
+			g2=0;
+		int b2=(int)b;
+		if(r2>255)
+			b2=255;
+		if(b2<0)
+			b2=0;
+		int temp=0xff000000|(r2<<16)|(g2<<8)|b2;
+		return temp;
+	}
+	
+	public static int[] intval2rgb(int value){
+		int[] temp=new int[3];
+		temp[0]=(value&0xff0000)>>16;
+		temp[1]=(value&0xff00)>>8;
+		temp[2]=value&0xff;
+		return temp;
+	}
+
+	public static byte[][] intval2rgb(int[] values){
+		byte[][] temp=new byte[3][values.length];
+		for(int i=0;i<values.length;i++){
+			int[] temp2=intval2rgb(values[i]);
+			temp[0][i]=(byte)temp2[0];
+			temp[1][i]=(byte)temp2[1];
+			temp[2][i]=(byte)temp2[2];
+		}
+		return temp;
+	}
+
+	public static int rgb2intval(byte r,byte g,byte b){
+		int temp=0xff000000|((r&0xff)<<16)|((g&0xff)<<8)|(b&0xff);
+		return temp;
+	}
+	
+	public static Object create_array(int length,int type){
+		if(type==0) return new byte[length];
+		if(type==1) return new short[length];
+		if(type==2) return new float[length];
+		if(type==3) return new double[length];
+		if(type==4) return new int[length];
+		return null;
+	}
+	
 	/*********************************
 	 * this returns my own array type index: 0 for byte, 1 for short, 2 for float, 3 for double, and 4 for int
 	 * @param arr

@@ -289,7 +289,6 @@ public class Traj3D extends Plot3D{
 		int[] newshapes=new int[nseries];
 		int[] newcolors=new int[nseries];
 		int newmaxxpts=0;
-		int newmaxypts=0;
 		if(npts[series]==maxxpts){
 			for(int i=0;i<=nseries;i++){
 				if(i!=series){
@@ -302,7 +301,7 @@ public class Traj3D extends Plot3D{
 			newmaxxpts=maxxpts;
 		}
 		newxValues=new float[nseries][newmaxxpts];
-		newyValues=new float[nseries][newmaxypts];
+		newyValues=new float[nseries][newmaxxpts];
 		newzValues=new float[nseries][newmaxxpts];
 		for(int i=0;i<series;i++){
 			newnpts[i]=npts[i];
@@ -325,7 +324,6 @@ public class Traj3D extends Plot3D{
 			}
 		}
 		maxxpts=newmaxxpts;
-		maxypts=newmaxypts;
 		npts=newnpts;
 		xValues=newxValues;
 		yValues=newyValues;
@@ -375,7 +373,7 @@ public class Traj3D extends Plot3D{
 			}
 		}else{
 			newxValues=new float[nseries][maxxpts];
-			newyValues=new float[nseries][maxypts];
+			newyValues=new float[nseries][maxxpts];
 			newzValues=new float[nseries][maxxpts];
 			for(int i=0;i<(nseries-1);i++){
 				newnpts[i]=npts[i];

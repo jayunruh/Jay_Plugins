@@ -919,6 +919,15 @@ public class table_tools{
 		}
 		return retvals.toString();
 	}
+	
+	public static String print_float_array(float[][] data,int delim){
+		StringBuffer retvals=new StringBuffer();
+		retvals.append(print_float_array(data[0],delim));
+		for(int i=1;i<data.length;i++){
+			retvals.append("\n"+print_float_array(data[i],delim));
+		}
+		return retvals.toString();
+	}
 
 	public static String print_float_array(float[] data){
 		StringBuffer retvals=new StringBuffer();

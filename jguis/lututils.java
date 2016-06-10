@@ -284,5 +284,18 @@ public class lututils{
 			return false;
 		}
 	}
+	
+	public static int[] applyLUT(float[] image,float min,float max,byte[][] lut){
+		int[] colorpix=new int[image.length];
+		for(int i=0;i<image.length;i++){
+			int temp=(int)(255.5f*(image[i]-min)/(max-min));
+			if(Float.isNaN(image[i])) temp=0;
+			if(Float.isInfinite(image[i])) temp=255;
+			if(temp>255) temp=255;
+			if(temp<0) temp=0;
+			colorpix[i]=jutils.rgb2intval(lut[0][temp],lut[1][temp],lut[2][temp]);
+		}
+		return colorpix;
+	}
 
 }
