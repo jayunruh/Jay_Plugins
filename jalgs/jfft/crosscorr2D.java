@@ -89,7 +89,7 @@ public class crosscorr2D{
 		return real1;
 	}
 	
-	public float[][] phaseCorr(float[] pix1,float[] pix2){
+	public float[][] phaseCorr(float[] pix1,float[] pix2,boolean outcrosscorr){
 		float[] real1=pix1.clone();
 		float[] real2=pix2.clone();
 		float[] im1=new float[width*height];
@@ -105,7 +105,7 @@ public class crosscorr2D{
 			stdev1+=pix1[i]*pix1[i];
 			stdev2+=pix2[i]*pix2[i];
 			float length1=(float)Math.sqrt(real1[i]*real1[i]+im1[i]*im1[i]);
-			float a1=real1[i], b1=im1[i], c1=real2[i], d1=im2[i];
+			float a1=real1[i], b1=im1[i], c1=real2[i], d1=im2[i]; //these are the raw values
 			if(length1<(float)0.00001){
 				real1[i]=0.0f; im1[i]=0.0f;
 			} else {
@@ -117,26 +117,52 @@ public class crosscorr2D{
 			} else {
 				real2[i]/=length2; im2[i]/=length2;
 			}
-			float a=real1[i], b=im1[i], c=real2[i], d=im2[i];
+			float a=real1[i], b=im1[i], c=real2[i], d=im2[i]; //these are the normalized (and filtered) values
 			real1[i]=a*c+b*d;
 			im1[i]=a*d-b*c;
 			real2[i]=a1*c1+b1*d1;
 			im2[i]=a1*d1-b1*c1;
 		}
 		fft.dorealfft2D(real1,im1,true); //this is the phase correlation
-		fft.dorealfft2D(real2,im2,true); //this is the cross correlation (unnormalized)
-		double totsize=width*height;
-		avg1/=totsize;
-		avg2/=totsize;
-		stdev1/=totsize;
-		stdev2/=totsize;
-		stdev1-=avg1*avg1; stdev2-=avg2*avg2;
-		stdev1=Math.sqrt(stdev1); stdev2=Math.sqrt(stdev2);
-		float tempa=(float)(avg1*avg2*totsize);
-		float tempb=(float)(stdev1*stdev2*totsize);
-		for(int i=0;i<width*height;i++) real2[i]=(real2[i]-tempa)/tempb;
-		im2=null; im1=null;
-		return new float[][]{real1,real2};
+		if(!outcrosscorr) return new float[][]{real1};
+		else{ 
+			fft.dorealfft2D(real2,im2,true); //this is the cross correlation (unnormalized)
+    		double totsize=width*height;
+    		avg1/=totsize;
+    		avg2/=totsize;
+    		stdev1/=totsize;
+    		stdev2/=totsize;
+    		stdev1-=avg1*avg1; stdev2-=avg2*avg2;
+    		stdev1=Math.sqrt(stdev1); stdev2=Math.sqrt(stdev2);
+    		float tempa=(float)(avg1*avg2*totsize);
+    		float tempb=(float)(stdev1*stdev2*totsize);
+    		for(int i=0;i<width*height;i++) real2[i]=(real2[i]-tempa)/tempb;
+    		im2=null; im1=null;
+    		return new float[][]{real1,real2};
+		}
+	}
+	
+	public float[][] phaseCorr(float[] real,float[] im,float[] real2,float[] im2){
+		//here we start with already fft'd data and don't output the crosscorr
+		//now normalize the fft pixels and conjugate multiply
+		float[] real1=real.clone();
+		float[] im1=im.clone();
+		for(int i=0;i<width*height;i++){
+			float length1=(float)Math.sqrt(real1[i]*real1[i]+im1[i]*im1[i]);
+			float a=0.0f,b=0.0f;
+			if(length1>=(float)0.00001){
+				a=real1[i]/length1; b=im1[i]/length1;
+			}
+			float length2=(float)Math.sqrt(real2[i]*real2[i]+im2[i]*im2[i]);
+			float c=0.0f,d=0.0f;
+			if(length2>=(float)0.00001){
+				c=real2[i]/length2; d=im2[i]/length2;
+			}
+			real1[i]=a*c+b*d;
+			im1[i]=a*d-b*c;
+		}
+		//fft.dorealfft2D(real1,im1,true); //this is the phase correlation--the calling program can do this
+		return new float[][]{real1,im1};
 	}
 
 	public float[] docrosscorr2D(short[] data1,short[] data2,boolean doshiftxcenter,boolean doshiftycenter){

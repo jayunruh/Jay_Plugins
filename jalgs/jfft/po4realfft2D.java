@@ -8,7 +8,10 @@
 
 package jalgs.jfft;
 
-public class po4realfft2D{
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
+public class po4realfft2D implements Cloneable{
 	public po4tworealfft r2fft; // here is the tworealfft used for this
 	// calculation
 	public po4fft cfft;
@@ -52,6 +55,8 @@ public class po4realfft2D{
 		cfft=new po4fft(length1,bitorder1,cosvals1);
 	}
 
+
+	
 	public po4realfft2D(int length11,int length12,float[] cosvals11,float[] cosvals21,int fftindex1,int fftindex2){
 		length1=length11;
 		length2=length12;
@@ -61,6 +66,23 @@ public class po4realfft2D{
 		r2fft=new po4tworealfft(length2,bitorder2,cosvals2,fftindex2);
 		// cfft=new po4fft(length1,bitorder1,cosvals1);
 		cfft=fftutils.construct_fft(length1,fftindex1,bitorder1,cosvals1);
+	}
+	
+	public po4realfft2D(int length11,int length12,float[] cosvals11,float[] cosvals21,po4tworealfft r2fft,po4fft cfft){
+		length1=length11;
+		length2=length12;
+		cosvals1=cosvals11;
+		cosvals2=cosvals21;
+		//initrevbits(fftindex1,fftindex2);
+		bitorder1=cfft.bitorder;
+		bitorder2=r2fft.bitorder;
+		this.r2fft=r2fft;
+		// cfft=new po4fft(length1,bitorder1,cosvals1);
+		this.cfft=cfft;
+	}
+	
+	public Object clone(){
+		return new po4realfft2D(length1,length2,cosvals1.clone(),cosvals2.clone(),(po4tworealfft)r2fft.clone(),(po4fft)cfft.clone());
 	}
 
 	public void dorealfft2D(float[] real,float[] im,boolean inverse){
@@ -133,6 +155,8 @@ public class po4realfft2D{
 			}
 		}
 	}
+	
+
 
 	private void initcosvals(){
 		cosvals1=new float[length1];
@@ -160,3 +184,5 @@ public class po4realfft2D{
 	}
 
 }
+
+

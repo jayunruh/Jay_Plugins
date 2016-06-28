@@ -8,6 +8,9 @@
 
 package jalgs.jfft;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import jalgs.algutils;
 
 public class fftutils{
@@ -231,6 +234,46 @@ public class fftutils{
 			phase[i]=complex_phase(real[i],im[i]);
 		}
 		return phase;
+	}
+	
+	public static void dorealfft2D(float[][] real,float[][] im,boolean inverse,int nthreads,po4realfft2D fft){
+		//here is a multithreaded implementation for multiple ffts
+		ExecutorService executor=null;
+		if(nthreads>1)
+			executor=Executors.newFixedThreadPool(nthreads);
+		for(int i=0;i<real.length;i++){
+			if(nthreads>1){
+				Runnable worker=new rfft2D(real[i],im[i],inverse,fft);
+				executor.execute(worker);
+			} else{
+				//fft.dorealfft2D(real[i],im[i],inverse);
+				po4realfft2D fft2=(po4realfft2D)fft.clone();
+				fft2.dorealfft2D(real[i],im[i],inverse);
+			}
+		}
+		if(nthreads>1){
+			executor.shutdown();
+			// Wait until all threads are finished
+			while(!executor.isTerminated()){}
+		}
+	}
+
+}
+
+class rfft2D implements Runnable{
+	float[] real,im;
+	po4realfft2D fft;
+	boolean inverse;
+
+	public rfft2D(float[] real,float[] im,boolean inverse,po4realfft2D fft){
+		this.fft=(po4realfft2D)fft.clone();
+		this.real=real;
+		this.im=im;
+		this.inverse=inverse;
+	}
+
+	public void run(){
+		fft.dorealfft2D(real,im,inverse);
 	}
 
 }

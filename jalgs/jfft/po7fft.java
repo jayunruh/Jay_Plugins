@@ -8,7 +8,7 @@
 
 package jalgs.jfft;
 
-public class po7fft extends po4fft{
+public class po7fft extends po4fft implements Cloneable{
 	// public int[] bitorder;
 	// public float[] cosvals;
 	// public int length;
@@ -44,6 +44,10 @@ public class po7fft extends po4fft{
 		length=size;
 		cosvals=cosvals1;
 		initrevbits();
+	}
+	
+	public Object clone(){
+		return new po7fft(length,bitorder.clone(),cosvals.clone());
 	}
 
 	public void dopo4fft(float[] data,boolean inverse){

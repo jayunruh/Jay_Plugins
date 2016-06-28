@@ -57,15 +57,20 @@ public class thresh_3D_fraction_max_jru_v1 implements PlugIn {
 		}
 		GenericDialog gd=new GenericDialog("Options");
 		gd.addNumericField("Fraction of 3D "+stat+"?",fraction,5,15,null);
+		gd.addCheckbox("Use Upper Threshold?",false);
+		gd.addNumericField("Upper: Fraction of 3D "+stat+"?",fraction,5,15,null);
 		gd.showDialog(); if(gd.wasCanceled()){return;}
 		fraction=(float)gd.getNextNumber();
+		boolean upper=gd.getNextBoolean();
+		float ufraction=(float)gd.getNextNumber();
 		ImageStack threshstack=new ImageStack(width,height);
 		int counter=0;
 		for(int i=0;i<frames;i++){
 			for(int j=0;j<slices;j++){
 				for(int k=0;k<channels;k++){
 					float thresh=maxval[k][i]*fraction;
-					Object threshed=threshhold_image(jutils.get3DSlice(stack,i,j,k,frames,slices,channels),thresh);
+					float uthresh=maxval[k][i]*ufraction;
+					Object threshed=threshhold_image(jutils.get3DSlice(stack,i,j,k,frames,slices,channels),thresh,upper,uthresh);
 					if(newimg) threshstack.addSlice("",threshed);
 					else jutils.set3DSlice(stack,threshed,i,j,k,frames,slices,channels);
 					counter++;
@@ -85,7 +90,7 @@ public class thresh_3D_fraction_max_jru_v1 implements PlugIn {
 		}
 	}
 
-	Object threshhold_image(Object pixels,float threshhold){
+	Object threshhold_image(Object pixels,float threshhold,boolean upper,float uthreshold){
 		if(pixels instanceof float[]){
 			float[] temppix=(float[])pixels;
 			int length=temppix.length;
@@ -93,6 +98,7 @@ public class thresh_3D_fraction_max_jru_v1 implements PlugIn {
 			for(int i=0;i<length;i++){
 				if(temppix[i]>threshhold){
 					retvals[i]=1.0f;
+					if(upper && temppix[i]>=uthreshold) retvals[i]=0.0f;
 				}
 			}
 			return retvals;
@@ -104,6 +110,7 @@ public class thresh_3D_fraction_max_jru_v1 implements PlugIn {
 				float temp=(float)(temppix[i]&0xffff);
 				if(temp>threshhold){
 					retvals[i]=(short)1;
+					if(upper && temppix[i]>=uthreshold) retvals[i]=(short)0;
 				}
 			}
 			return retvals;
@@ -115,6 +122,7 @@ public class thresh_3D_fraction_max_jru_v1 implements PlugIn {
 				float temp=(float)(temppix[i]&0xff);
 				if(temp>threshhold){
 					retvals[i]=(byte)255;
+					if(upper && temppix[i]>=uthreshold) retvals[i]=(byte)0;
 				}
 			}
 			return retvals;

@@ -861,6 +861,35 @@ public class algutils{
 		temp[7]=objects[temp2];
 		return temp;
 	}
+	
+	public static Object getNeighborsWrapped(Object image,int x,int y,int width,int height){
+		Object temp=getNeighbors(image,x,y,width,height);
+		if(temp==null){
+			//handle out of bounds images by wrapping to the other side
+			float[] temp2=new float[8];
+			int dtype=get_array_type(image);
+			int xpos=x-1; if(xpos<0) xpos+=width; if(xpos>=width) xpos-=width;
+			int ypos=y-1; if(ypos<0) ypos+=height; if(ypos>=height) ypos-=height;
+			temp2[0]=getPixelVal(image,x,y,width,height,dtype);
+			xpos=x; if(xpos<0) xpos+=width; if(xpos>=width) xpos-=width;
+			temp2[1]=getPixelVal(image,x,y,width,height,dtype);
+			xpos=x+1; if(xpos<0) xpos+=width; if(xpos>=width) xpos-=width;
+			temp2[2]=getPixelVal(image,x,y,width,height,dtype);
+			ypos=y; if(ypos<0) ypos+=height; if(ypos>=height) ypos-=height;
+			temp2[4]=getPixelVal(image,x,y,width,height,dtype);
+			xpos=x-1; if(xpos<0) xpos+=width; if(xpos>=width) xpos-=width;
+			temp2[3]=getPixelVal(image,x,y,width,height,dtype);
+			ypos=y+1; if(ypos<0) ypos+=height; if(ypos>=height) ypos-=height;
+			temp2[5]=getPixelVal(image,x,y,width,height,dtype);
+			xpos=x; if(xpos<0) xpos+=width; if(xpos>=width) xpos-=width;
+			temp2[6]=getPixelVal(image,x,y,width,height,dtype);
+			xpos=x+1; if(xpos<0) xpos+=width; if(xpos>=width) xpos-=width;
+			temp2[7]=getPixelVal(image,x,y,width,height,dtype);
+			return convert_array(temp2,dtype);
+		} else {
+			return temp;
+		}
+	}
 
 	public static float[] getNeighbors2(float[] objects,int x,int y,int width,int height){
 		// here we include the center pixel and edges are returned as possible

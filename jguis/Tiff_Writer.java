@@ -128,7 +128,7 @@ public class Tiff_Writer{
 		}
 		saveSizes();
 		try{
-			DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path)));
+			BufferedOutputStream out=new BufferedOutputStream(new FileOutputStream(path));
 			byte[] hdr={73,73,42,0,8,0,0,0};
 			// write the header
 			out.write(hdr);
