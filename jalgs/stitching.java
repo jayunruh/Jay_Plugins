@@ -814,41 +814,48 @@ public class stitching{
 			}
 		}
 		//get the median statistics for our data
-		//assume we have enough horizontal and vertical pairs (what if we don't--because of poor correlation)
-		float vmedxdiff=jstatistics.getstatistic("median",algutils.get_subarray(vertvals[0],0,numvert),null);
-		float vmedydiff=jstatistics.getstatistic("median",algutils.get_subarray(vertvals[1],0,numvert),null);
-		float vdist=(float)Math.sqrt((vmedxdiff-vguessxdiff)*(vmedxdiff-vguessxdiff)+(vmedydiff-vguessydiff)*(vmedydiff-vguessydiff));
-		//gui.showMessage(""+vguessydiff+" , "+vdist);
-		if(vdist>vtoler){
-			vmedxdiff=vguessxdiff; vmedydiff=vguessydiff;
-			vout=true;
-			gui.showMessage("vertical median beyond tolerance, setting to guess");
+		float hmedxdiff=0.0f, hmedydiff=0.0f, hdist=0.0f;
+		if(numhor>1){
+    		hmedxdiff=jstatistics.getstatistic("median",algutils.get_subarray(horvals[0],0,numhor),null);
+    		hmedydiff=jstatistics.getstatistic("median",algutils.get_subarray(horvals[1],0,numhor),null);
+    		hdist=(float)Math.sqrt((hmedxdiff-hguessxdiff)*(hmedxdiff-hguessxdiff)+(hmedydiff-hguessydiff)*(hmedydiff-hguessydiff));
+
 		}
-		float hmedxdiff=jstatistics.getstatistic("median",algutils.get_subarray(horvals[0],0,numhor),null);
-		float hmedydiff=jstatistics.getstatistic("median",algutils.get_subarray(horvals[1],0,numhor),null);
-		float hdist=(float)Math.sqrt((hmedxdiff-hguessxdiff)*(hmedxdiff-hguessxdiff)+(hmedydiff-hguessydiff)*(hmedydiff-hguessydiff));
-		if(hdist>htoler){
+		if(hdist>htoler || numhor<2){
 			hmedxdiff=hguessxdiff; hmedydiff=hguessydiff;
 			hout=true;
 			gui.showMessage("horizontal median beyond tolerance, setting to guess");
 		}
 		gui.showMessage("horizontal median shift");
 		gui.showMessage(""+hmedxdiff+" , "+hmedydiff);
+		float vmedxdiff=0.0f, vmedydiff=0.0f, vdist=0.0f;;
+		if(numvert>1){
+			vmedxdiff=jstatistics.getstatistic("median",algutils.get_subarray(vertvals[0],0,numvert),null);
+			vmedydiff=jstatistics.getstatistic("median",algutils.get_subarray(vertvals[1],0,numvert),null);
+			vdist=(float)Math.sqrt((vmedxdiff-vguessxdiff)*(vmedxdiff-vguessxdiff)+(vmedydiff-vguessydiff)*(vmedydiff-vguessydiff));
+			//gui.showMessage(""+vguessydiff+" , "+vdist);
+
+		}
+		if(vdist>vtoler || numvert<2){
+			vmedxdiff=vguessxdiff; vmedydiff=vguessydiff;
+			vout=true;
+			gui.showMessage("vertical median beyond tolerance, setting to guess");
+		}
 		gui.showMessage("vertical median shift");
 		gui.showMessage(""+vmedxdiff+" , "+vmedydiff);
-		float dmedxdiff=0.0f; float dmedydiff=0.0f;
+		float dmedxdiff=0.0f; float dmedydiff=0.0f, ddist=0.0f;;
 		if(numdiag>1){ //we might not have diagonal pairs
 			dmedxdiff=jstatistics.getstatistic("median",algutils.get_subarray(diagvals[0],0,numdiag),null);
 			dmedydiff=jstatistics.getstatistic("median",algutils.get_subarray(diagvals[1],0,numdiag),null);
-			float ddist=(float)Math.sqrt((dmedxdiff-dguessxdiff)*(dmedxdiff-dguessxdiff)+(dmedydiff-dguessydiff)*(dmedydiff-dguessydiff));
-			if(ddist>dtoler){
-				dmedxdiff=dguessxdiff; dmedydiff=dguessydiff;
-				dout=true;
-				gui.showMessage("diagonal median beyond tolerance, setting to guess");
-			}
-			gui.showMessage("diagonal median shift");
-			gui.showMessage(""+dmedxdiff+" , "+dmedydiff);
+			ddist=(float)Math.sqrt((dmedxdiff-dguessxdiff)*(dmedxdiff-dguessxdiff)+(dmedydiff-dguessydiff)*(dmedydiff-dguessydiff));
 		}
+		if(ddist>dtoler || numdiag<2){
+			dmedxdiff=dguessxdiff; dmedydiff=dguessydiff;
+			dout=true;
+			gui.showMessage("diagonal median beyond tolerance, setting to guess");
+		}
+		gui.showMessage("diagonal median shift");
+		gui.showMessage(""+dmedxdiff+" , "+dmedydiff);
 
 		int hcounter=0; int vcounter=0; int dcounter=0;
 		for(int i=0;i<pairs.length;i++){
