@@ -544,10 +544,6 @@ public class stitching{
 		//now do the forward fft
 		po4realfft2D fft=ccclass.fft;
 		fftutils.dorealfft2D(real,im,false,nthreads,fft);
-		//fft.dorealfft2D(real,im,false,nthreads);
-		/*for(int i=0;i<pix1.length;i++){
-			fft.dorealfft2D(real[i],im[i],false);
-		}*/
 		float[][] ccr=new float[pairs.length][];
 		float[][] cci=new float[pairs.length][];
 		for(int i=0;i<pairs.length;i++){
@@ -557,10 +553,6 @@ public class stitching{
 			cci[i]=temp[1];
 		}
 		fftutils.dorealfft2D(ccr,cci,true,nthreads,fft);
-		//fft.dorealfft2D(ccr,cci,true,nthreads);
-		/*for(int i=0;i<pairs.length;i++){
-			fft.dorealfft2D(ccr[i],cci[i],true);
-		}*/
 		cci=null;
 		//zero the origin: it is not important
 		for(int i=0;i<pairs.length;i++){
@@ -627,22 +619,21 @@ public class stitching{
 	
 	public static float[][] preAlign(float[][] pairStats,int fixedindex,int[][] pairs,int nimages, float corrthresh){
 		//start with the fixed pair and propagate backwards and forwards until all are aligned
-		int naligned=1;
 		int nunaligned=nimages-1;
 		float[][] outcoords=new float[nimages][];
 		outcoords[fixedindex]=new float[]{0.0f,0.0f};
-		int prevnunaligned=nunaligned;
+		int prevunaligned=nunaligned;
 		while(nunaligned>0){
 			for(int i=0;i<outcoords.length;i++){
 				if(outcoords[i]!=null){
 					//we found an aligned one, see if it has neighbors with valid phase correlation
-					//if it does, add those to the aligned pool
+					//if it does, add those to the aligned pool and the coordinate system
 					int[][] targets=findConnectedImages(pairs,i,nimages);
 					if(targets==null) continue;
 					for(int j=0;j<targets.length;j++){
 						if(outcoords[targets[j][0]]==null){
     						//ComparePair pair=pairs2.get(targets[j][1]);
-    						float[] pair=pairStats[targets[j][i]];
+    						float[] pair=pairStats[targets[j][1]];
     						int targetmember=pairs[targets[j][1]][1];
     						float[] targetshift=new float[]{pair[0],pair[1]};
     						if(targetmember==i){//the query is the second member of the pair
@@ -653,24 +644,24 @@ public class stitching{
     						if(pair[3]>corrthresh){
     							float[] querycoords=outcoords[i];
     							float[] newcoords={querycoords[0]+targetshift[0],querycoords[1]+targetshift[1]};
-    							outcoords[targets[j][0]]=newcoords;
-    							naligned++; nunaligned--;
+    							outcoords[targetmember]=newcoords;
+    							nunaligned--;
     						}
 						}
 					}
 				}
 			}
-			if(nunaligned>0 && nunaligned==prevnunaligned){
+			if(nunaligned>0 && nunaligned==prevunaligned){
 				//we have isolated images, allow them to be aligned by pairs with invalid phase correlation
-				//use the first valid shift
+				//use the first found partner which is already aligned
+				//just to one isolated image per round to let the others potentially catch up if possible
 				for(int i=0;i<outcoords.length;i++){
 					if(outcoords[i]==null){
 						int[][] targets=findConnectedImages(pairs,i,nimages);
 						for(int j=0;j<targets.length;j++){
 							if(outcoords[targets[j][0]]!=null){
-								//ComparePair pair=pairs2.get(targets[j][1]);
 								float[] pair=pairStats[targets[j][1]];
-								int targetmember=pairs[targets[j][1]][1];
+								int targetmember=pairs[targets[j][1]][1]; //this time the target is the aligned image
 	    						float[] targetshift=new float[]{pair[0],pair[1]};
 	    						targetshift[0]*=-1.0f; //this time we are aligning the query to the target
 	    						targetshift[1]*=-1.0f;
@@ -682,13 +673,15 @@ public class stitching{
 	    						float[] targetcoords=outcoords[targetmember];
 	    						float[] newcoords={targetcoords[0]+targetshift[0],targetcoords[1]+targetshift[1]};
 	    						outcoords[i]=newcoords;
-	    						naligned++; nunaligned--;
+	    						nunaligned--;
 	    						break;
 							}
 						}
 					}
+					if(nunaligned!=prevunaligned) break;
 				}
 			}
+			prevunaligned=nunaligned;
 		}
 		return outcoords;
 	}
@@ -747,9 +740,10 @@ public class stitching{
 		return new int[]{pairtype,pairsign};
 	}
 	
-	public float[] checkCoords(float[][] pairStats,int[][] pairs,float ftoler){
+	public Object[] checkCoords(float[][] pairStats,int[][] pairs,float ftoler,float corrthresh){
 		//this subroutine uses the median displacements for vertical and horizontal pairs
 		//if values are more than ftoler*dimension different than the median, they are converted to the median
+		//they should also be within ftoler of the guess values
 		int halfwidth=width/2;
 		int halfheight=height/2;
 		float[][] vertvals=new float[2][pairs.length];
@@ -767,31 +761,77 @@ public class stitching{
 			float ydiff=yvals[pair2]-yvals[pair1];
 			float axdiff=Math.abs(xdiff);
 			float aydiff=Math.abs(ydiff);
-			if(axdiff>halfwidth && aydiff<halfheight){ //horizontal pairs
-				pairtype[i][0]=0; pairtype[i][1]=(ydiff>0)?1:-1; //forward or backwards pair
-				float mult=(float)pairtype[i][1];
-				horvals[0][numhor]=mult*pair[0]; horvals[1][numhor]=mult*pair[1];
-				numhor++; 
-			}
-			if(axdiff<halfwidth && aydiff>halfheight){ //vertical pairs
-				pairtype[i][0]=1; pairtype[i][1]=(xdiff>0)?1:-1; //up or down pair
-				float mult=(float)pairtype[i][1];
-				vertvals[0][numvert]=mult*pair[0]; vertvals[1][numvert]=mult*pair[1]; 
-				numvert++;
-			}
-			if(axdiff>halfwidth && aydiff>halfheight){ //diagonal pairs
-				pairtype[i][0]=2; pairtype[i][1]=(xdiff>0)?1:-1; //down-right or up-left pairs
-				float mult=(float)pairtype[i][1];
-				diagvals[0][numdiag]=mult*pair[0]; diagvals[1][numdiag]=mult*pair[1]; 
-				numdiag++; 
+    			if(axdiff>halfwidth && aydiff<halfheight){ //horizontal pairs
+    				pairtype[i][0]=0; pairtype[i][1]=(xdiff>0)?1:-1; //forward or backwards pair
+    				float mult=(float)pairtype[i][1];
+    				if(pair[3]>=corrthresh){
+        				horvals[0][numhor]=mult*pair[0]; horvals[1][numhor]=mult*pair[1]; numhor++; 
+    				} else{pair[2]=0.0f; pair[3]=0.0f;}
+    			}
+    			if(axdiff<halfwidth && aydiff>halfheight){ //vertical pairs
+    				pairtype[i][0]=1; pairtype[i][1]=(ydiff>0)?1:-1; //up or down pair
+    				float mult=(float)pairtype[i][1];
+    				if(pair[3]>=corrthresh){
+        				vertvals[0][numvert]=mult*pair[0]; vertvals[1][numvert]=mult*pair[1]; numvert++;
+    				} else{pair[2]=0.0f; pair[3]=0.0f;}
+    			}
+    			if(axdiff>halfwidth && aydiff>halfheight){ //diagonal pairs
+    				pairtype[i][0]=2; pairtype[i][1]=(xdiff>0)?1:-1; //down-right or up-left pairs
+    				float mult=(float)pairtype[i][1];
+    				if(pair[3]>=corrthresh){
+        				diagvals[0][numdiag]=mult*pair[0]; diagvals[1][numdiag]=mult*pair[1]; numdiag++; 
+    				} else{pair[2]=0.0f; pair[3]=0.0f;}
+    			}
+		}
+		float htoler=ftoler*(float)width; //pixel tolerance for difference from median and guess
+		float vtoler=ftoler*(float)height;
+		float dtoler=(float)Math.sqrt(htoler*htoler+vtoler*vtoler);
+		boolean hout=false,vout=false,dout=false;
+		float vguessxdiff=0.0f, vguessydiff=0.0f, hguessxdiff=0.0f, hguessydiff=0.0f, dguessxdiff=0.0f, dguessydiff=0.0f;
+		//start by getting the expected guess shift values
+		for(int i=0;i<pairs.length;i++){
+			if(pairtype[i][0]==0){
+				float xdiff=xvals[pairs[i][1]]-xvals[pairs[i][0]];
+				float ydiff=yvals[pairs[i][1]]-yvals[pairs[i][0]];
+				hguessxdiff=(float)pairtype[i][1]*xdiff; hguessydiff=(float)pairtype[i][1]*ydiff;
+				break;
 			}
 		}
-		//get the median statistics
-		//assume we have enough horizontal and vertical pairs
+		for(int i=0;i<pairs.length;i++){
+			if(pairtype[i][0]==1){
+				float xdiff=xvals[pairs[i][1]]-xvals[pairs[i][0]];
+				float ydiff=yvals[pairs[i][1]]-yvals[pairs[i][0]];
+				vguessxdiff=(float)pairtype[i][1]*xdiff; vguessydiff=(float)pairtype[i][1]*ydiff;
+				break;
+			}
+		}
+		for(int i=0;i<pairs.length;i++){
+			if(pairtype[i][0]==2){
+				float xdiff=xvals[pairs[i][1]]-xvals[pairs[i][0]];
+				float ydiff=yvals[pairs[i][1]]-yvals[pairs[i][0]];
+				dguessxdiff=(float)pairtype[i][1]*xdiff; dguessydiff=(float)pairtype[i][1]*ydiff;
+				break;
+			}
+		}
+		//get the median statistics for our data
+		//assume we have enough horizontal and vertical pairs (what if we don't--because of poor correlation)
 		float vmedxdiff=jstatistics.getstatistic("median",algutils.get_subarray(vertvals[0],0,numvert),null);
 		float vmedydiff=jstatistics.getstatistic("median",algutils.get_subarray(vertvals[1],0,numvert),null);
+		float vdist=(float)Math.sqrt((vmedxdiff-vguessxdiff)*(vmedxdiff-vguessxdiff)+(vmedydiff-vguessydiff)*(vmedydiff-vguessydiff));
+		//gui.showMessage(""+vguessydiff+" , "+vdist);
+		if(vdist>vtoler){
+			vmedxdiff=vguessxdiff; vmedydiff=vguessydiff;
+			vout=true;
+			gui.showMessage("vertical median beyond tolerance, setting to guess");
+		}
 		float hmedxdiff=jstatistics.getstatistic("median",algutils.get_subarray(horvals[0],0,numhor),null);
 		float hmedydiff=jstatistics.getstatistic("median",algutils.get_subarray(horvals[1],0,numhor),null);
+		float hdist=(float)Math.sqrt((hmedxdiff-hguessxdiff)*(hmedxdiff-hguessxdiff)+(hmedydiff-hguessydiff)*(hmedydiff-hguessydiff));
+		if(hdist>htoler){
+			hmedxdiff=hguessxdiff; hmedydiff=hguessydiff;
+			hout=true;
+			gui.showMessage("horizontal median beyond tolerance, setting to guess");
+		}
 		gui.showMessage("horizontal median shift");
 		gui.showMessage(""+hmedxdiff+" , "+hmedydiff);
 		gui.showMessage("vertical median shift");
@@ -800,48 +840,60 @@ public class stitching{
 		if(numdiag>1){ //we might not have diagonal pairs
 			dmedxdiff=jstatistics.getstatistic("median",algutils.get_subarray(diagvals[0],0,numdiag),null);
 			dmedydiff=jstatistics.getstatistic("median",algutils.get_subarray(diagvals[1],0,numdiag),null);
+			float ddist=(float)Math.sqrt((dmedxdiff-dguessxdiff)*(dmedxdiff-dguessxdiff)+(dmedydiff-dguessydiff)*(dmedydiff-dguessydiff));
+			if(ddist>dtoler){
+				dmedxdiff=dguessxdiff; dmedydiff=dguessydiff;
+				dout=true;
+				gui.showMessage("diagonal median beyond tolerance, setting to guess");
+			}
 			gui.showMessage("diagonal median shift");
 			gui.showMessage(""+dmedxdiff+" , "+dmedydiff);
 		}
-		float htoler=ftoler*(float)width; //pixel tolerance for difference from median
-		float vtoler=ftoler*(float)height;
+
 		int hcounter=0; int vcounter=0; int dcounter=0;
 		for(int i=0;i<pairs.length;i++){
 			//ComparePair pair=pairs2.get(i);
 			float[] pair=pairStats[i];
-			if(pairtype[i][0]==0){ //horizontal
-				if(Math.abs(horvals[0][hcounter]-hmedxdiff)>htoler){
-					//the pair is out of bounds, set its offset to the median and zero the correlation
-					float mult=(float)pairtype[i][1];
-					pair[0]=mult*hmedxdiff;
-					pair[1]=mult*hmedydiff;
-					pair[2]=0.0f;
-					pair[3]=0.0f;
-				}
-				hcounter++;
-			}
-			if(pairtype[i][0]==1){ //vertical
-				if(Math.abs(vertvals[0][vcounter]-vmedydiff)>vtoler){
-					float mult=(float)pairtype[i][1];
-					pair[0]=mult*vmedxdiff;
-					pair[1]=mult*vmedydiff;
-					pair[2]=0.0f;
-					pair[3]=0.0f;
-				}
-				vcounter++;
-			}
-			if(pairtype[i][0]==2){ //diagonal
-				if(Math.abs(diagvals[0][dcounter]-dmedxdiff)>htoler){
-					float mult=(float)pairtype[i][1];
-					pair[0]=mult*dmedxdiff;
-					pair[1]=mult*dmedydiff;
-					pair[2]=0.0f;
-					pair[3]=0.0f;
-				}
-				dcounter++;
+			if(pair[3]>=corrthresh){
+    			if(pairtype[i][0]==0){ //horizontal
+    				if(hout || Math.abs(horvals[0][hcounter]-hmedxdiff)>htoler){
+    					//the pair is out of bounds, set its offset to the median and zero the correlation
+    					float mult=(float)pairtype[i][1];
+    					pair[0]=mult*hmedxdiff;
+    					pair[1]=mult*hmedydiff;
+    					pair[2]=0.0f;
+    					pair[3]=0.0f;
+    				}
+    				hcounter++; //counts the valid shifts
+    			}
+    			if(pairtype[i][0]==1){ //vertical
+    				if(vout || Math.abs(vertvals[0][vcounter]-vmedydiff)>vtoler){
+    					float mult=(float)pairtype[i][1];
+    					pair[0]=mult*vmedxdiff;
+    					pair[1]=mult*vmedydiff;
+    					pair[2]=0.0f;
+    					pair[3]=0.0f;
+    				}
+    				vcounter++;
+    			}
+    			if(pairtype[i][0]==2){ //diagonal
+    				if(dout || Math.abs(diagvals[0][dcounter]-dmedxdiff)>htoler){
+    					float mult=(float)pairtype[i][1];
+    					pair[0]=mult*dmedxdiff;
+    					pair[1]=mult*dmedydiff;
+    					pair[2]=0.0f;
+    					pair[3]=0.0f;
+    				}
+    				dcounter++;
+    			}
+			} else {
+				if(pairtype[i][0]==0){pair[0]=(float)pairtype[i][1]*hmedxdiff; pair[1]=(float)pairtype[i][1]*hmedydiff;}
+				if(pairtype[i][0]==1){pair[0]=(float)pairtype[i][1]*vmedxdiff; pair[1]=(float)pairtype[i][1]*vmedydiff;}
+				if(pairtype[i][0]==2){pair[0]=(float)pairtype[i][1]*dmedxdiff; pair[1]=(float)pairtype[i][1]*dmedydiff;}
 			}
 		}
-		return new float[]{hmedxdiff,hmedydiff,vmedxdiff,vmedydiff,dmedxdiff,dmedydiff};
+		float[] medvals={hmedxdiff,hmedydiff,vmedxdiff,vmedydiff,dmedxdiff,dmedydiff};
+		return new Object[]{medvals,pairtype};
 	}
 	
 	public float[] get2DCorr(Object image1,Object image2,int xoff,int yoff,int tolerance){
@@ -862,47 +914,48 @@ public class stitching{
 	
 	public float get2DCorr(Object image1,Object image2,int xshift,int yshift){
 		//this calculates the pearson correlation for only the overlapped region for a set of tolerance x tolerance shifts
-				//this isn't working yet
-				//maybe try your get_roi code from test_stitching
-				int dtype=algutils.get_array_type(image1);
-				float corr=0.0f;
-				float var1=0.0f;
-				float var2=0.0f;
-				float avg1=0.0f;
-				float avg2=0.0f;
-				int xstart1=xshift;
-                int xstart2=0;
-                int xpts=width-xshift;
-                if(xstart1<0){
-                	xstart1=0; xstart2=-xshift; xpts=width+xshift;
-                }
-                int ystart1=yshift;
-                int ystart2=0;
-                int ypts=height-yshift;
-                if(ystart1<0){
-                	ystart1=0; ystart2=-yshift; ypts=height+yshift;
-                }
-                for(int i=0;i<ypts;i++){
-                	for(int j=0;j<xpts;j++){
-                		float val1=algutils.getPixelVal(image1,j+xstart1,i+ystart1,width,height,dtype);
-                		float val2=algutils.getPixelVal(image2,j+xstart2,i+ystart2,width,height,dtype);
-                		avg1+=val1;
-						avg2+=val2;
-						corr+=val1*val2;
-						var1+=val1*val1;
-						var2+=val2*val2;
-                	}
-                }
-                float factor=(float)(xpts*ypts);
-                avg1/=factor;
-				avg2/=factor;
-				var1/=factor;
-				var2/=factor;
-				corr/=factor;
-				var1-=avg1*avg1;
-				var2-=avg2*avg2;
-				corr=(corr-avg1*avg2)/(float)Math.sqrt(var1*var2);
-				return corr;
+		//this isn't working yet
+		//maybe try your get_roi code from test_stitching
+		int dtype=algutils.get_array_type(image1);
+		float corr=0.0f;
+		float var1=0.0f;
+		float var2=0.0f;
+		float avg1=0.0f;
+		float avg2=0.0f;
+		int xstart1=xshift;
+        int xstart2=0;
+        int xpts=width-xshift;
+        if(xstart1<0){
+        	xstart1=0; xstart2=-xshift; xpts=width+xshift;
+        }
+        int ystart1=yshift;
+        int ystart2=0;
+        int ypts=height-yshift;
+        if(ystart1<0){
+        	ystart1=0; ystart2=-yshift; ypts=height+yshift;
+        }
+        for(int i=0;i<ypts;i++){
+        	for(int j=0;j<xpts;j++){
+        		float val1=algutils.getPixelVal(image1,j+xstart1,i+ystart1,width,height,dtype);
+        		float val2=algutils.getPixelVal(image2,j+xstart2,i+ystart2,width,height,dtype);
+        		avg1+=val1;
+				avg2+=val2;
+				corr+=val1*val2;
+				var1+=val1*val1;
+				var2+=val2*val2;
+        	}
+        }
+        float factor=(float)(xpts*ypts);
+        avg1/=factor;
+		avg2/=factor;
+		var1/=factor;
+		var2/=factor;
+		corr/=factor;
+		var1-=avg1*avg1;
+		var2-=avg2*avg2;
+		if(var1>0.0f && var2>0.0f) corr=(corr-avg1*avg2)/(float)Math.sqrt(var1*var2);
+		else corr=0.0f;
+		return corr;
 	}
 	
 	public float[] get2DCorrFFT(Object image1,Object image2,int xoff,int yoff,int tolerance){
