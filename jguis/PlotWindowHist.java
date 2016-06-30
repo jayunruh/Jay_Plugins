@@ -14,6 +14,7 @@ import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
+import ij.io.SaveDialog;
 import ij.process.ColorProcessor;
 import ij.text.TextWindow;
 
@@ -276,14 +277,17 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 	}
 
 	void saveAsText(){
-		FileDialog fd=new FileDialog(this,"Save as Text...",FileDialog.SAVE);
+		/*FileDialog fd=new FileDialog(this,"Save as Text...",FileDialog.SAVE);
 		if(defaultDirectory!=null)
 			fd.setDirectory(defaultDirectory);
 		fd.show();
 		String name=fd.getFile();
 		String directory=fd.getDirectory();
 		defaultDirectory=directory;
-		fd.dispose();
+		fd.dispose();*/
+		SaveDialog sd=new SaveDialog("Save as Text...",getTitle(),"txt");
+		String name=sd.getFileName();
+		String directory=sd.getDirectory();
 		PrintWriter pw=null;
 		try{
 			FileOutputStream fos=new FileOutputStream(directory+name);
@@ -314,14 +318,17 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 	}
 
 	void saveAsBinary(int typeflag){
-		FileDialog fd=new FileDialog(this,"Save as Binary...",FileDialog.SAVE);
+		/*FileDialog fd=new FileDialog(this,"Save as Binary...",FileDialog.SAVE);
 		if(defaultDirectory!=null)
 			fd.setDirectory(defaultDirectory);
 		fd.show();
 		String name=fd.getFile();
 		String directory=fd.getDirectory();
 		defaultDirectory=directory;
-		fd.dispose();
+		fd.dispose();*/
+		SaveDialog sd=new SaveDialog("Save as Binary...",getTitle(),"bin");
+		String name=sd.getFileName();
+		String directory=sd.getDirectory();
 		float[] tempyvals=p3.getXValues()[0];
 		try{
 			OutputStream outstream=new BufferedOutputStream(new FileOutputStream(directory+name));
@@ -359,7 +366,7 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 	}
 
 	void saveAsObject(){
-		FileDialog fd=new FileDialog(this,"Save as Plot Object...",FileDialog.SAVE);
+		/*FileDialog fd=new FileDialog(this,"Save as Plot Object...",FileDialog.SAVE);
 		if(defaultDirectory!=null)
 			fd.setDirectory(defaultDirectory);
 		String temptitle=getTitle();
@@ -367,16 +374,14 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 			temptitle+=".pw2";
 		}
 		fd.setFile(temptitle);
-		/*
-		 * fd.setFilenameFilter( new FilenameFilter(){ public boolean
-		 * accept(File dir,String name){ if(name.endsWith(".pw")){ return true;
-		 * } else { return false; } } } );
-		 */
 		fd.show();
 		String name=fd.getFile();
 		String directory=fd.getDirectory();
 		defaultDirectory=directory;
-		fd.dispose();
+		fd.dispose();*/
+		SaveDialog sd=new SaveDialog("Save as Plot Object...",getTitle(),"pw2");
+		String name=sd.getFileName();
+		String directory=sd.getDirectory();
 		if(name==null||name==""||directory==null||directory=="")
 			return;
 		if(!name.endsWith(".pw2")){

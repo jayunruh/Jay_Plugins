@@ -12,6 +12,7 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
+import ij.io.SaveDialog;
 import ij.measure.Calibration;
 import ij.process.ColorProcessor;
 import ij.text.TextWindow;
@@ -326,14 +327,17 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 	}
 
 	void saveAsText(){
-		FileDialog fd=new FileDialog(this,"Save as Text...",FileDialog.SAVE);
+		SaveDialog sd=new SaveDialog("Save as Text...",getTitle(),"txt");
+		String name=sd.getFileName();
+		String directory=sd.getDirectory();
+		/*FileDialog fd=new FileDialog(this,"Save as Text...",FileDialog.SAVE);
 		if(defaultDirectory!=null)
 			fd.setDirectory(defaultDirectory);
 		fd.show();
 		String name=fd.getFile();
 		String directory=fd.getDirectory();
 		defaultDirectory=directory;
-		fd.dispose();
+		fd.dispose();*/
 		saveAsText(directory+name);
 	}
 
@@ -368,14 +372,17 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 	}
 
 	void saveAsBinary(int saveseries,int typeflag){
-		FileDialog fd=new FileDialog(this,"Save as Binary...",FileDialog.SAVE);
+		/*FileDialog fd=new FileDialog(this,"Save as Binary...",FileDialog.SAVE);
 		if(defaultDirectory!=null)
 			fd.setDirectory(defaultDirectory);
 		fd.show();
 		String name=fd.getFile();
 		String directory=fd.getDirectory();
 		defaultDirectory=directory;
-		fd.dispose();
+		fd.dispose();*/
+		SaveDialog sd=new SaveDialog("Save as Binary...",getTitle(),"bin");
+		String name=sd.getFileName();
+		String directory=sd.getDirectory();
 		saveAsBinary(directory+name,saveseries,typeflag);
 	}
 
@@ -418,7 +425,7 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 	}
 
 	void saveAsObject(){
-		FileDialog fd=new FileDialog(this,"Save as Plot Object...",FileDialog.SAVE);
+		/*FileDialog fd=new FileDialog(this,"Save as Plot Object...",FileDialog.SAVE);
 		if(defaultDirectory!=null)
 			fd.setDirectory(defaultDirectory);
 		String temptitle=getTitle();
@@ -430,7 +437,10 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 		String name=fd.getFile();
 		String directory=fd.getDirectory();
 		defaultDirectory=directory;
-		fd.dispose();
+		fd.dispose();*/
+		SaveDialog sd=new SaveDialog("Save as Plot Object...",getTitle(),"pw2");
+		String name=sd.getFileName();
+		String directory=sd.getDirectory();
 		if(name==null||name==""||directory==null||directory=="")
 			return;
 		if(!name.endsWith(".pw2")){

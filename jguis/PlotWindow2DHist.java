@@ -13,6 +13,7 @@ import ij.ImagePlus;
 import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.gui.Roi;
+import ij.io.SaveDialog;
 import ij.process.ColorProcessor;
 import ij.text.TextWindow;
 import jalgs.jdist;
@@ -348,21 +349,19 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 	}
 
 	void saveAsObject(){
-		FileDialog fd=new FileDialog(this,"Save as Plot Object...",FileDialog.SAVE);
+		/*FileDialog fd=new FileDialog(this,"Save as Plot Object...",FileDialog.SAVE);
 		String temptitle=getTitle();
 		if(!temptitle.endsWith(".pw2")){
 			temptitle+=".pw2";
 		}
 		fd.setFile(temptitle);
-		/*
-		 * fd.setFilenameFilter( new FilenameFilter(){ public boolean
-		 * accept(File dir,String name){ if(name.endsWith(".pw")){ return true;
-		 * } else { return false; } } } );
-		 */
 		fd.show();
 		String name=fd.getFile();
 		String directory=fd.getDirectory();
-		fd.dispose();
+		fd.dispose();*/
+		SaveDialog sd=new SaveDialog("Save as Plot Object...",getTitle(),"pw2");
+		String name=sd.getFileName();
+		String directory=sd.getDirectory();
 		if(name==null||name==""||directory==null||directory=="")
 			return;
 		if(!name.endsWith(".pw2")){
