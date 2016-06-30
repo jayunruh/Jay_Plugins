@@ -595,7 +595,7 @@ public class stitching{
 			if(maxima[i][1]>(float)width) maxima[i][1]-=(float)fftdim;
 			if(maxima[i][2]>(float)height) maxima[i][2]-=(float)fftdim;
 			if(guessshift[0]<-1.0f && maxima[i][1]>1.0f) maxima[i][1]-=(float)fftdim;
-			if(guessshift[1]<-1.0f && maxima[i][2]>1.0f) maxima[i][1]-=(float)fftdim;
+			if(guessshift[1]<-1.0f && maxima[i][2]>1.0f) maxima[i][2]-=(float)fftdim;
 			maxima[i][4]=get2DCorr(pix1,pix2,(int)maxima[i][1],(int)maxima[i][2]);
 			metrics[i]=maxima[i][0];
 		}
@@ -866,30 +866,24 @@ public class stitching{
     				if(hout || Math.abs(horvals[0][hcounter]-hmedxdiff)>htoler){
     					//the pair is out of bounds, set its offset to the median and zero the correlation
     					float mult=(float)pairtype[i][1];
-    					pair[0]=mult*hmedxdiff;
-    					pair[1]=mult*hmedydiff;
-    					pair[2]=0.0f;
-    					pair[3]=0.0f;
+    					pair[0]=mult*hmedxdiff; pair[1]=mult*hmedydiff;
+    					pair[2]=0.0f; pair[3]=0.0f;
     				}
     				hcounter++; //counts the valid shifts
     			}
     			if(pairtype[i][0]==1){ //vertical
-    				if(vout || Math.abs(vertvals[0][vcounter]-vmedydiff)>vtoler){
+    				if(vout || Math.abs(vertvals[1][vcounter]-vmedydiff)>vtoler){
     					float mult=(float)pairtype[i][1];
-    					pair[0]=mult*vmedxdiff;
-    					pair[1]=mult*vmedydiff;
-    					pair[2]=0.0f;
-    					pair[3]=0.0f;
+    					pair[0]=mult*vmedxdiff; pair[1]=mult*vmedydiff;
+    					pair[2]=0.0f; pair[3]=0.0f;
     				}
     				vcounter++;
     			}
     			if(pairtype[i][0]==2){ //diagonal
     				if(dout || Math.abs(diagvals[0][dcounter]-dmedxdiff)>htoler){
     					float mult=(float)pairtype[i][1];
-    					pair[0]=mult*dmedxdiff;
-    					pair[1]=mult*dmedydiff;
-    					pair[2]=0.0f;
-    					pair[3]=0.0f;
+    					pair[0]=mult*dmedxdiff; pair[1]=mult*dmedydiff;
+    					pair[2]=0.0f; pair[3]=0.0f;
     				}
     				dcounter++;
     			}
@@ -921,8 +915,11 @@ public class stitching{
 	
 	public float get2DCorr(Object image1,Object image2,int xshift,int yshift){
 		//this calculates the pearson correlation for only the overlapped region for a set of tolerance x tolerance shifts
-		//this isn't working yet
-		//maybe try your get_roi code from test_stitching
+		//xshift and yshift should always be in range for the image, if not, send a warning
+		if(xshift>(width-1) || yshift>(height-1) || xshift<(1-width) || yshift<(1-height)){
+			gui.showMessage("warning: correlation shift outside of image");
+			return 0.0f;
+		}
 		int dtype=algutils.get_array_type(image1);
 		float corr=0.0f;
 		float var1=0.0f;
