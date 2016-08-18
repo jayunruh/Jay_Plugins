@@ -297,7 +297,7 @@ public class PlotWindow3D extends ImageWindow implements ActionListener,Clipboar
 		String directory=fd.getDirectory();
 		defaultDirectory=directory;
 		fd.dispose();*/
-		SaveDialog sd=new SaveDialog("Save as Text...",getTitle(),"txt");
+		SaveDialog sd=new SaveDialog("Save as Text...",getTitle(),".txt");
 		String name=sd.getFileName();
 		String directory=sd.getDirectory();
 		PrintWriter pw=null;
@@ -343,7 +343,7 @@ public class PlotWindow3D extends ImageWindow implements ActionListener,Clipboar
 		String directory=fd.getDirectory();
 		defaultDirectory=directory;
 		fd.dispose();*/
-		SaveDialog sd=new SaveDialog("Save as Plot Object...",getTitle(),"pw2");
+		SaveDialog sd=new SaveDialog("Save as Plot Object...",getTitle(),".pw2");
 		String name=sd.getFileName();
 		String directory=sd.getDirectory();
 		if(name==null||name==""||directory==null||directory=="")

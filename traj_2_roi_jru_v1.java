@@ -24,7 +24,7 @@ public class traj_2_roi_jru_v1 implements PlugIn {
 		gd.addChoice("Roi Options",new String[]{"Roi_Manager","Overlay","Trails","Squares","Circles"},"Roi_Manager");
 		gd.addCheckbox("Trails Persist",false);
 		gd.addNumericField("Square Size",10,0);
-		gd.addNumericField("Z Ratio (if 3D)",3.0,5,15,null);
+		gd.addNumericField("Z_Ratio (if 3D)",3.0,5,15,null);
 		gd.showDialog(); if(gd.wasCanceled()){return;}
 		int optindex=gd.getNextChoiceIndex();
 		boolean persist=gd.getNextBoolean();

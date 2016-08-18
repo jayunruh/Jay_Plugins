@@ -15,7 +15,7 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
-public class findblobs3{
+public class findblobs3 implements Runnable{
 	// this class finds contiguous blobs using a flood fill mechanism
 	// these blobs can then be sorted using area and circularity
 	// object images are typically stored as floating bit images with contiguous
@@ -25,6 +25,8 @@ public class findblobs3{
 	int[] ystack=new int[maxStackSize];
 	int stackSize;
 	public int width,height,nobjects;
+	public byte[] runin;
+	public float[] runout;
 
 	public findblobs3(int width1,int height1){
 		width=width1;
@@ -54,6 +56,11 @@ public class findblobs3{
 		}
 		nobjects=id;
 		return counter;
+	}
+	
+	public void run(){
+		float[] temp=dofindblobs(runin);
+		System.arraycopy(temp,0,runout,0,width*height);
 	}
 
 	public float[] dofindblobs(Object data1,float thresh){
@@ -312,8 +319,8 @@ public class findblobs3{
 		// object
 		// if it is neighbored by two different objects it stays black
 		// this means that objects will always stay separate
-		for(int i=2;i<(height-2);i++){
-			for(int j=2;j<(width-2);j++){
+		for(int i=1;i<(height-1);i++){
+			for(int j=1;j<(width-1);j++){
 				if(objects[j+i*width]==0.0f){
 					float[] objarray=getNeighbors(objects,j,i);
 					float objid=0.0f;
@@ -837,6 +844,11 @@ public class findblobs3{
 		}
 	}
 	
+	/*****************
+	 * gets all of the fill limits for the objects (xmin,xmax,ymin,ymax)
+	 * @param objects
+	 * @return
+	 */
 	public int[][] getallfilllimits(float[] objects){
 		//int nobjects=(int)maxarray(objects);
 		int[][] lims=new int[nobjects][4];
@@ -863,6 +875,14 @@ public class findblobs3{
 		return lims;
 	}
 
+	/************
+	 * here we flood fill an object just to find its extent
+	 * @param objects
+	 * @param id
+	 * @param x
+	 * @param y
+	 * @return
+	 */
 	public int[] getfilllimits(float[] objects,int id,int x,int y){
 		float fid=id;
 		float[] data=objects.clone();
@@ -1111,17 +1131,44 @@ public class findblobs3{
 		filter_area_circ(objects,get_object_outlines(objects),limits);
 	}
 
+	/***************
+	 * this plugin uses dilation to generate a border around each object
+	 * @param objects: the objects
+	 * @param circrad: the width of the border
+	 * @return
+	 */
 	public float[] get_circ(float[] objects,int circrad){
 		float[] temp=objects.clone();
+		//start by dilating the objects (without touching or renumbering)
 		for(int i=0;i<circrad;i++)
 			dilateobjects(temp,false);
+		//now delete the original object
 		for(int i=0;i<temp.length;i++){
 			if(objects[i]>0.0f)
 				temp[i]=0.0f;
 		}
 		return temp;
 	}
+	
+	/**********************
+	 * this plugin uses dilation to generate a border around each object with a gap in between
+	 * @param objects: the objects
+	 * @param circrad: the border width
+	 * @param circgap: the gap width
+	 * @return
+	 */
+	public float[] get_circ(float[] objects,int circrad,int circgap){
+		float[] temp=objects.clone();
+		for(int i=0;i<circgap;i++)
+			dilateobjects(temp,false);
+		return get_circ(temp,circrad);
+	}
 
+	/************
+	 * gets the areas (in pixels) of all of the objects
+	 * @param objects
+	 * @return
+	 */
 	public int[] get_areas(float[] objects){
 		int nblobs=get_nblobs(objects);
 		int[] hist=new int[nblobs];
@@ -1133,10 +1180,22 @@ public class findblobs3{
 		return hist;
 	}
 	
+	/*****************
+	 * gets the areas, perimeters, and circularities of all of the objects
+	 * @param objects
+	 * @return
+	 */
 	public float[][] get_area_perim_circ(float[] objects){
+		//get the outlines and then call the more specific method
 		return get_area_perim_circ(objects,get_object_outlines(objects));
 	}
 	
+	/************
+	 * gets the areas, perimeters, and circularities (1=round, 0=linear) of all of the objects
+	 * @param objects
+	 * @param outlines: polygon outlines of the objects
+	 * @return
+	 */
 	public float[][] get_area_perim_circ(float[] objects,Polygon[] outlines){
 		//returns three arrays, the first with areas and the second with perimeters, then circularities
 		float[][] retvals=new float[3][outlines.length];
@@ -1160,10 +1219,26 @@ public class findblobs3{
 		return retvals;
 	}
 
+	/*************
+	 * gets the "stat" measurement for object with id value
+	 * @param objects: the objects
+	 * @param id: the id of the selected object
+	 * @param measurement: the measurement image
+	 * @param stat: the statistic to measure
+	 * @return
+	 */
 	public float get_object_stats(float[] objects,int id,Object measurement,String stat){
 		return jstatistics.getstatistic(stat,measurement,width,height,get_object_mask(objects,id),null);
 	}
 
+	/*************
+	 * gets the "stat" measurement for object with id value over an array of measurement images
+	 * @param objects: the objects
+	 * @param id: the id of the selected object
+	 * @param measurement: the measurement image array
+	 * @param stat: the statistic to measure
+	 * @return
+	 */
 	public float[] get_object_stats(float[] objects,int id,Object[] measurement,String stat){
 		boolean[] mask=get_object_mask(objects,id);
 		float[] stats=new float[measurement.length];
@@ -1173,10 +1248,28 @@ public class findblobs3{
 		return stats;
 	}
 	
+	/**************
+	 * gets the "stat" measurement for object with id value over a measurement image
+	 * @param objects: the objects
+	 * @param id: the id of the selected object
+	 * @param measurement: the measurement image
+	 * @param lims: an array of integers with the boundaries for the selected object
+	 * @param stat: the statistic to measure
+	 * @return
+	 */
 	public float get_object_stats(float[] objects,int id,Object measurement,int[] lims,String stat){
 		return jstatistics.getstatistic(stat,measurement,width,height,get_object_mask(objects,id,lims),lims,null);
 	}
 
+	/**************
+	 * gets the "stat" measurement for object with id value over an array of measurement images
+	 * @param objects: the objects
+	 * @param id: the id of the selected object
+	 * @param measurement: the measurement image
+	 * @param lims: an array of integers with the boundaries for the selected object
+	 * @param stat: the statistic to measure
+	 * @return
+	 */
 	public float[] get_object_stats(float[] objects,int id,Object[] measurement,int[] lims,String stat){
 		boolean[] mask=get_object_mask(objects,id,lims);
 		float[] stats=new float[measurement.length];
@@ -1186,6 +1279,13 @@ public class findblobs3{
 		return stats;
 	}
 
+	/**************
+	 * gets all of the object stats for an array of measurement images
+	 * @param objects: the objects
+	 * @param measurement: the measurement image array
+	 * @param stat: the statistic to measure
+	 * @return
+	 */
 	public float[][] get_all_object_stats(float[] objects,Object[] measurement,String stat){
 		float[][] allstats=new float[nobjects][];
 		for(int i=0;i<nobjects;i++)
@@ -1193,6 +1293,13 @@ public class findblobs3{
 		return allstats;
 	}
 
+	/**************
+	 * gets all of the object stats for a measurement image
+	 * @param objects: the objects
+	 * @param measurement: the measurement image
+	 * @param stat: the statistic to measure
+	 * @return
+	 */
 	public float[] get_all_object_stats(float[] objects,Object measurement,String stat){
 		float[] allstats=new float[nobjects];
 		for(int i=0;i<nobjects;i++)
@@ -1200,13 +1307,29 @@ public class findblobs3{
 		return allstats;
 	}
 	
-	public float[][] get_all_object_stats(float[] objects,Object[] measurement,int[] lims,String stat){
+	/**************
+	 * gets all of the object stats for an array of measurement images
+	 * @param objects: the objects
+	 * @param measurement: the measurement image array
+	 * @param lims: the boundaries of the objects
+	 * @param stat: the measurement statistic
+	 * @return
+	 */
+	public float[][] get_all_object_stats(float[] objects,Object[] measurement,int[][] lims,String stat){
 		float[][] allstats=new float[nobjects][];
 		for(int i=0;i<nobjects;i++)
-			allstats[i]=get_object_stats(objects,i+1,measurement,lims,stat);
+			allstats[i]=get_object_stats(objects,i+1,measurement,lims[i],stat);
 		return allstats;
 	}
-
+	
+	/***********
+	 * gets all of the object stats for a measurement image
+	 * @param objects: the objects
+	 * @param measurement: the measurement image
+	 * @param lims: the boundaries of the objects
+	 * @param stat: the measurement statistic
+	 * @return
+	 */
 	public float[] get_all_object_stats(float[] objects,Object measurement,int[] lims,String stat){
 		float[] allstats=new float[nobjects];
 		for(int i=0;i<nobjects;i++)
@@ -1344,6 +1467,30 @@ public class findblobs3{
 			}
 		}
 		return null;
+	}
+	
+	//returns a list of all of the points in this object
+	public List<float[]> getObjectPoints(float[] objects,int[] bounds,int id){
+		List<float[]> coords=new ArrayList<float[]>();
+		for(int i=bounds[2];i<=bounds[3];i++){
+			for(int j=bounds[0];j<=bounds[1];j++){
+				if(objects[j+i*width]==(float)id) coords.add(new float[]{j,i});
+			}
+		}
+		return coords;
+	}
+	
+	public List<float[]> getObjectEdgePoints(float[] objects,int[] bounds,int id){
+		List<float[]> coords=new ArrayList<float[]>();
+		for(int i=bounds[2];i<=bounds[3];i++){
+			for(int j=bounds[0];j<=bounds[1];j++){
+				float[] neighbors=getNeighbors(objects,j,i);
+				int temp=0;
+				for(int k=0;k<neighbors.length;k++) if(neighbors[k]!=(float)id) temp++;
+				if(temp>0) coords.add(new float[]{j,i});
+			}
+		}
+		return coords;
 	}
 	
 	public Polygon get_cluster_outline(float[] objects,float[] clusters,int clusterid){
@@ -1579,6 +1726,13 @@ public class findblobs3{
 		return poly2;
 	}
 
+	/***************
+	 * this version doesn't include the center pixel
+	 * @param objects
+	 * @param x
+	 * @param y
+	 * @return
+	 */
 	public float[] getNeighbors(float[] objects,int x,int y){
 		if(x==0||x>=(width-1)){
 			return null;
@@ -1606,6 +1760,13 @@ public class findblobs3{
 		return temp;
 	}
 
+	/************
+	 * this version includes the center pixel
+	 * @param objects
+	 * @param x
+	 * @param y
+	 * @return
+	 */
 	public float[] getNeighbors2(float[] objects,int x,int y){
 		if(x==0||x>=(width-1)){
 			return null;

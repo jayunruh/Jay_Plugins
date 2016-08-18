@@ -359,7 +359,7 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 		String name=fd.getFile();
 		String directory=fd.getDirectory();
 		fd.dispose();*/
-		SaveDialog sd=new SaveDialog("Save as Plot Object...",getTitle(),"pw2");
+		SaveDialog sd=new SaveDialog("Save as Plot Object...",getTitle(),".pw2");
 		String name=sd.getFileName();
 		String directory=sd.getDirectory();
 		if(name==null||name==""||directory==null||directory=="")

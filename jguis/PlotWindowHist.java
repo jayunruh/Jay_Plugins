@@ -285,7 +285,7 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 		String directory=fd.getDirectory();
 		defaultDirectory=directory;
 		fd.dispose();*/
-		SaveDialog sd=new SaveDialog("Save as Text...",getTitle(),"txt");
+		SaveDialog sd=new SaveDialog("Save as Text...",getTitle(),".txt");
 		String name=sd.getFileName();
 		String directory=sd.getDirectory();
 		PrintWriter pw=null;
@@ -326,7 +326,7 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 		String directory=fd.getDirectory();
 		defaultDirectory=directory;
 		fd.dispose();*/
-		SaveDialog sd=new SaveDialog("Save as Binary...",getTitle(),"bin");
+		SaveDialog sd=new SaveDialog("Save as Binary...",getTitle(),".bin");
 		String name=sd.getFileName();
 		String directory=sd.getDirectory();
 		float[] tempyvals=p3.getXValues()[0];
@@ -379,7 +379,7 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 		String directory=fd.getDirectory();
 		defaultDirectory=directory;
 		fd.dispose();*/
-		SaveDialog sd=new SaveDialog("Save as Plot Object...",getTitle(),"pw2");
+		SaveDialog sd=new SaveDialog("Save as Plot Object...",getTitle(),".pw2");
 		String name=sd.getFileName();
 		String directory=sd.getDirectory();
 		if(name==null||name==""||directory==null||directory=="")

@@ -818,12 +818,36 @@ public class table_tools{
 		}
 		new TextWindow(title2,print_string_array(labels),print_int_array(list),400,200);
 	}
+	
+	public static void create_table(String title,String[][] list,String[] collabels){
+		int ncolumns=list[0].length;
+		String[] labels=collabels;
+		if(collabels==null){
+			labels=new String[ncolumns];
+			for(int i=0;i<ncolumns;i++)
+				labels[i]="col"+(i+1);
+		}
+		String title2=title;
+		if(title==null){
+			title2="Table";
+		}
+		new TextWindow(title2,print_string_array(labels),print_string_array(list),400,200);
+	}
 
 	public static String print_string_array(String[] data){
 		StringBuffer retvals=new StringBuffer();
 		retvals.append(data[0]);
 		for(int i=1;i<data.length;i++){
 			retvals.append("\t"+data[i]);
+		}
+		return retvals.toString();
+	}
+	
+	public static String print_string_array(String[][] data){
+		StringBuffer retvals=new StringBuffer();
+		retvals.append(print_string_array(data[0]));
+		for(int i=1;i<data.length;i++){
+			retvals.append("\n"+print_string_array(data[i]));
 		}
 		return retvals.toString();
 	}

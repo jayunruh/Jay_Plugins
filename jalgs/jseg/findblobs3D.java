@@ -13,6 +13,11 @@ import jalgs.gui_interface;
 import jalgs.jstatistics;
 
 import java.awt.Polygon;
+import java.util.ArrayList;
+import java.util.List;
+
+import quickhull3d.Point3d;
+import quickhull3d.QuickHull3D;
 
 public class findblobs3D{
 	// this class finds contiguous blobs using a flood fill mechanism
@@ -63,19 +68,22 @@ public class findblobs3D{
 	public float[][] dofindblobs(byte[][] data1){
 		float[][] temp=new float[depth][];
 		int[] sliceblobs=new int[depth];
+		int[][][] filllims=new int[depth][][];
 		for(int i=0;i<depth;i++){
 			temp[i]=fb.dofindblobs(data1[i]);
 			sliceblobs[i]=fb.nobjects;
+			filllims[i]=fb.getallfilllimits(temp[i]);
 		}
 		float[][] objects=new float[depth][width*height];
 		// now go through and assemble the 2D objects into 3D objects
+		// objects are removed from the temp array as we fill them
 		int id=0;
 		for(int i=0;i<depth;i++){
 			for(int j=0;j<height;j++){
 				for(int k=0;k<width;k++){
 					if(temp[i][k+j*width]>0.0f){
 						id++;
-						fill3D(temp,objects,sliceblobs,id,k,j,i);
+						fill3D(temp,objects,sliceblobs,filllims,id,k,j,i);
 					}
 				}
 				if(gui!=null) gui.showProgress(j+i*height,depth*height);
@@ -88,19 +96,22 @@ public class findblobs3D{
 	public float[][] dofindblobs(float[][] data1,float thresh){
 		float[][] temp=new float[data1.length][];
 		int[] sliceblobs=new int[depth];
+		int[][][] filllims=new int[depth][][];
 		for(int i=0;i<data1.length;i++){
 			temp[i]=fb.dofindblobs(data1[i],thresh);
 			sliceblobs[i]=fb.nobjects;
+			filllims[i]=fb.getallfilllimits(temp[i]);
 		}
 		float[][] objects=new float[depth][width*height];
 		// now go through and assemble the 2D objects into 3D objects
+		// objects are removed from the temp array as we fill them
 		int id=0;
 		for(int i=0;i<depth;i++){
 			for(int j=0;j<height;j++){
 				for(int k=0;k<width;k++){
 					if(temp[i][k+j*width]>0.0f){
 						id++;
-						fill3D(temp,objects,sliceblobs,id,k,j,i);
+						fill3D(temp,objects,sliceblobs,filllims,id,k,j,i);
 					}
 				}
 			}
@@ -303,6 +314,35 @@ public class findblobs3D{
 			}
 		}
 	}
+	
+	public void delete_object(float[][] objects,float id,int[] filllims){
+		nobjects--;
+		for(int k=filllims[4];k<=filllims[5];k++){
+			for(int i=filllims[2];i<=filllims[3];i++){
+				for(int j=filllims[0];j<=filllims[1];j++){
+					if(objects[k][j+i*width]==id){
+						objects[k][j+i*width]=0.0f;
+					}
+				}
+			}
+		}
+	}
+	
+	public void delete_objects(float[][] objects,int[] ids){
+		nobjects-=ids.length;
+		for(int k=0;k<depth;k++){
+			for(int i=0;i<height;i++){
+				for(int j=0;j<width;j++){
+					int id=(int)objects[k][j+i*width];
+					if(id>0){
+						for(int l=0;l<ids.length;l++){
+							if(id==ids[l]){objects[k][j+i*width]=0.0f; break;}
+						}
+					}
+				}
+			}
+		}
+	}
 
 	private float maxarray(float[] input){
 		float max=input[0];
@@ -495,7 +535,7 @@ public class findblobs3D{
 	// Does a 4-connected 3D flood fill
 	// the data input stack has been flood filled already with the 2D algorithm
 	// the object gets deleted from data
-	public boolean fill3D(float[][] data,float[][] counter,int[] sliceblobs,int id,int x,int y,int z){
+	public boolean fill3D(float[][] data,float[][] counter,int[] sliceblobs,int[][][] allfilllims,int id,int x,int y,int z){
 		stackSize=0;
 		push(x,y,z);
 		while(true){
@@ -507,7 +547,8 @@ public class findblobs3D{
 			z=cds[2];
 			if(data[z][x+y*width]==0.0f)
 				continue;
-			int[] lims2d=fb.getfilllimits(data[z],(int)data[z][x+y*width],x,y);
+			//int[] lims2d=fb.getfilllimits(data[z],(int)data[z][x+y*width],x,y);
+			int[] lims2d=allfilllims[z][(int)data[z][x+y*width]-1];
 			//if(lims2d[0]<0) lims2d[0]=0;  if(lims2d[1]>=width) lims2d[1]=(width-1);
 			//if(lims2d[2]<0) lims2d[2]=0;  if(lims2d[3]>=height) lims2d[3]=(height-1);
 			fillRegion(data,counter,id,lims2d,z,(int)data[z][x+y*width]); // fill scan-region
@@ -693,12 +734,27 @@ public class findblobs3D{
 	}
 	
 	public void filter_area(float[][] objects,int[] arealims,boolean renumber){
+		//this version uses fill limits
 		int[] hist=get_areas(objects);
+		int[][] filllims=getallfilllimits(objects);
 		for(int i=0;i<hist.length;i++){
 			if(hist[i]<arealims[0]||hist[i]>arealims[1]){
-				delete_object(objects,i+1);
+				delete_object(objects,i+1,filllims[i]);
 			}
 			if(gui!=null) gui.showProgress(i,hist.length);
+		}
+		if(renumber)
+			renumber_objects(objects);
+	}
+	
+	public void filter_area_surface(float[][] objects,int[] arealims,int threshcount,boolean renumber){
+		float[][] stats=getCentroidsAreasSurface(objects,threshcount);
+		int[][] filllims=getallfilllimits(objects);
+		for(int i=0;i<stats.length;i++){
+			if((int)stats[3][i]<arealims[0]||(int)stats[3][i]>arealims[1] || (int)stats[4][i]<arealims[2]||(int)stats[4][i]>arealims[3]){
+				delete_object(objects,i+1,filllims[i]);
+			}
+			if(gui!=null) gui.showProgress(i,stats.length);
 		}
 		if(renumber)
 			renumber_objects(objects);
@@ -757,24 +813,148 @@ public class findblobs3D{
 		return centroids;
 	}
 	
-	public Object[] get_object_outline(float[][] objects,int id){
-		//this is incorrect--need to look for multiple polygons per slice
-		Polygon[] outlines=new Polygon[objects.length];
-		int[] pos=new int[objects.length];
-		int counter=0;
-		for(int i=0;i<objects.length;i++){
-			Polygon temp=fb.get_object_outline(objects[i],id);
-			if(temp!=null){
-				outlines[counter]=temp;
-				pos[counter]=i;
-				counter++;
+	public float[][] getCentroidsAreasSurface(float[][] objects,int threshcount){
+		int nblobs=get_nblobs(objects);
+		float[][] centroids=new float[nblobs][5];
+		//assume that edge voxels are surface
+		for(int i=0;i<depth;i++){
+			for(int j=0;j<height;j++){
+				for(int k=0;k<width;k++){
+					int index=(int)objects[i][k+j*width];
+					if(index>0){
+    					float[] neighbors=getNeighbors(objects,k,j,i);
+    					if(neighbors==null) centroids[index-1][4]+=1.0f;
+    					else {
+        					int count=0;
+        					for(int l=0;l<neighbors.length;l++) if((int)neighbors[l]!=index) count++;
+        					if(count>=threshcount) centroids[index-1][4]+=1.0f;
+    					}
+    					centroids[index-1][3]+=1.0f;
+    					centroids[index-1][0]+=k;
+    					centroids[index-1][1]+=j;
+    					centroids[index-1][2]+=i;
+					}
+				}
 			}
 		}
-		Polygon[] outlines2=new Polygon[counter];
-		System.arraycopy(outlines,0,outlines2,0,counter);
-		int[] pos2=new int[counter];
-		System.arraycopy(pos,0,pos2,0,counter);
-		return new Object[]{outlines2,pos2};
+		for(int i=0;i<nblobs;i++){
+			centroids[i][0]/=centroids[i][3];
+			centroids[i][1]/=centroids[i][3];
+			centroids[i][2]/=centroids[i][3];
+		}
+		return centroids;
+	}
+	
+	public float[] getLongestDimensions(float[][] objects){
+		int nblobs=get_nblobs(objects);
+		int[][] bounds=getallfilllimits(objects);
+		float[] outarr=new float[nblobs];
+		for(int i=0;i<nblobs;i++){
+			outarr[i]=getLongestDimension(objects,bounds[i],i+1);
+		}
+		return outarr;
+	}
+	
+	/**************
+	 * gets and arraylist of all of the coordinates in an object
+	 * @param objects
+	 * @param bounds
+	 * @param id
+	 * @return
+	 */
+	public List<float[]> getObjectCoords(float[][] objects,int[] bounds,int id){
+		List<float[]> coords=new ArrayList<float[]>();
+		for(int i=bounds[4];i<=bounds[5];i++){
+			for(int j=bounds[2];j<=bounds[3];j++){
+				for(int k=bounds[0];k<=bounds[1];k++){
+					if((int)objects[i][k+j*width]==id){
+						coords.add(new float[]{k,j,i});
+					}
+				}
+			}
+		}
+		return coords;
+	}
+	
+	public List<float[]> getObjectSurfCoords(float[][] objects,int[] bounds,int id,int edgethresh){
+		List<float[]> coords=new ArrayList<float[]>();
+		for(int i=bounds[4];i<=bounds[5];i++){
+			for(int j=bounds[2];j<=bounds[3];j++){
+				for(int k=bounds[0];k<=bounds[1];k++){
+					if((int)objects[i][k+j*width]==id){
+						float[] neighbors=getNeighbors(objects,k,j,i);
+						if(neighbors==null) coords.add(new float[]{k,j,i}); //on the image edge
+						else{
+    						int temp=0;
+    						for(int l=0;l<neighbors.length;l++) if(neighbors[l]!=(float)id) temp++;
+    						if(temp>=edgethresh) coords.add(new float[]{k,j,i});
+						}
+					}
+				}
+			}
+		}
+		return coords;
+	}
+	
+	public List<float[]> getConvexHull(float[][] objects,int[] bounds,int id){
+		List<float[]> surf=getObjectSurfCoords(objects,bounds,id,1);
+		Point3d[] points=new Point3d[surf.size()];
+		for(int i=0;i<surf.size();i++) points[i]=new Point3d(surf.get(i)[0],surf.get(i)[1],surf.get(i)[2]);
+		QuickHull3D hull=new QuickHull3D(points);
+		Point3d[] hullpoints=hull.getVertices();
+		List<float[]> hullpoints2=new ArrayList<float[]>();
+		for(int i=0;i<hullpoints.length;i++){
+			hullpoints2.add(new float[]{(float)hullpoints[i].x,(float)hullpoints[i].y,(float)hullpoints[i].z});
+		}
+		return hullpoints2;
+	}
+	
+	/****************
+	 * returns the max distance between two object points
+	 * @param objects
+	 * @param bounds
+	 * @param id
+	 * @return
+	 */
+	public float getLongestDimension(float[][] objects,int[] bounds,int id){
+		List<float[]> coords=getObjectCoords(objects,bounds,id);
+		float maxdist2=0.0f;
+		for(int i=0;i<coords.size();i++){
+			float[] query=coords.get(i);
+			for(int j=i+1;j<coords.size();j++){
+				float[] bait=coords.get(j);
+				float tempdist2=(query[0]-bait[0])*(query[0]-bait[0])+(query[1]-bait[1])*(query[1]-bait[1])+(query[2]-bait[2])*(query[2]-bait[2]);
+				if(tempdist2>maxdist2) maxdist2=tempdist2;
+			}
+		}
+		return (float)Math.sqrt(maxdist2);
+	}
+	
+	public Object[] get_object_outline(float[][] objects,int id){
+		//this is incorrect--need to look for multiple polygons per slice
+		List<Polygon> polylist=new ArrayList<Polygon>();
+		List<Integer> poslist=new ArrayList<Integer>();
+		for(int i=0;i<objects.length;i++){
+			byte[] temp=new byte[objects[i].length];
+			boolean found=false;
+			for(int j=0;j<objects[i].length;j++) if(objects[i][j]==(float)id){temp[j]=(byte)255; found=true;}
+			if(found){
+				float[] idobj=fb.dofindblobs(temp);
+				Polygon[] polys=fb.get_object_outlines(idobj);
+				if(polys==null) continue;
+				for(int j=0;j<polys.length;j++){
+					polylist.add(polys[j]);
+					poslist.add(i);
+				}
+			}
+		}
+		Polygon[] outlines=new Polygon[polylist.size()];
+		int[] pos=new int[polylist.size()];
+		for(int i=0;i<outlines.length;i++){
+			outlines[i]=polylist.get(i);
+			pos[i]=(int)poslist.get(i);
+		}
+		return new Object[]{outlines,pos};
 	}
 
 }

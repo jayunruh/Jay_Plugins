@@ -28,6 +28,8 @@ public class roi_average_subtract_jru_v1 implements PlugIn {
 				ci.setLuts(lut);
 				ci.resetDisplayRanges();
 				ci.show();
+			} else {
+				ci.show();
 			}
 		} else {
 			imp2.show();

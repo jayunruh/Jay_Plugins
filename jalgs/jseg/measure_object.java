@@ -844,34 +844,47 @@ public class measure_object{
 	}
 
 	public static float get_closest_dist(Polygon poly,float x,float y,boolean interp){
-		float mindist=get_dist(poly.xpoints[0],poly.ypoints[0],x,y);
+		float mindist2=get_dist2(poly.xpoints[0],poly.ypoints[0],x,y);
 		int minindex=0;
 		for(int i=1;i<poly.npoints;i++){
-			float dist=get_dist(poly.xpoints[i],poly.ypoints[i],x,y);
-			if(dist<mindist){
+			float dist2=get_dist2(poly.xpoints[i],poly.ypoints[i],x,y);
+			if(dist2<mindist2){
 				minindex=i;
-				mindist=dist;
+				mindist2=dist2;
 			}
 		}
 		if(!interp)
-			return mindist;
+			return (float)Math.sqrt(mindist2);
 		int prev=minindex-1;
 		if(prev<0)
 			prev=poly.npoints-1;
 		int next=minindex+1;
 		if(next>=poly.npoints)
 			next=0;
-		float distprev=get_dist(x,y,poly.xpoints[prev],poly.ypoints[prev]);
-		float distnext=get_dist(x,y,poly.xpoints[next],poly.ypoints[next]);
-		if(distnext<distprev){
-			distprev=distnext;
+		float distprev2=get_dist2(x,y,poly.xpoints[prev],poly.ypoints[prev]);
+		float distnext2=get_dist2(x,y,poly.xpoints[next],poly.ypoints[next]);
+		if(distnext2<distprev2){
+			distprev2=distnext2;
 			prev=next;
 		}
 		return get_closest_dist(poly.xpoints[minindex],poly.ypoints[minindex],poly.xpoints[prev],poly.ypoints[prev],x,y);
 	}
-
-	public static float get_dist(float x1,float y1,float x2,float y2){
-		return (float)Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+	
+	/***********
+	 * is p3 to the left or right of the p1->p2 line when looking down the line from p1 to p2?
+	 * @param x1
+	 * @param y1
+	 * @param x2
+	 * @param y2
+	 * @param x3
+	 * @param y3
+	 * @return
+	 */
+	public static int whichSide(float x1,float y1,float x2,float y2,float x3,float y3){
+		float crossprod=(x2-x1)*(y3-y1)-(y2-y1)*(x3-x1);
+		if(crossprod>0.0f) return 1;
+		else if(crossprod==0.0f) return 0;
+		else return -1;
 	}
 
 	public static float get_closest_dist(float x1,float y1,float x2,float y2,float x3,float y3){
@@ -892,6 +905,14 @@ public class measure_object{
 		float interx=xinc*interdist+x1;
 		float intery=yinc*interdist+y1;
 		return get_dist(interx,intery,x3,y3);
+	}
+	
+	public static float get_dist(float x1,float y1,float x2,float y2){
+		return (float)Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
+	}
+	
+	public static float get_dist2(float x1,float y1,float x2,float y2){
+		return ((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1));
 	}
 
 	public static float[] get_max_coords(float[] image,Polygon poly,int width,int height){

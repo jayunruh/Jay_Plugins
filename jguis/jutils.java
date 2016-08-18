@@ -2105,7 +2105,7 @@ public class jutils{
 	}
 	
 	public static float[] sub_roll_ball_back(float[] image,float ballrad,int width,int height){
-		FloatProcessor fp2=new FloatProcessor(width,height,image,null);
+		FloatProcessor fp2=new FloatProcessor(width,height,image.clone(),null);
 		fp2.snapshot();
 		BackgroundSubtracter bs=new BackgroundSubtracter();
 		bs.rollingBallBackground(fp2,ballrad,false,false,false,true,true);

@@ -327,7 +327,7 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 	}
 
 	void saveAsText(){
-		SaveDialog sd=new SaveDialog("Save as Text...",getTitle(),"txt");
+		SaveDialog sd=new SaveDialog("Save as Text...",getTitle(),".txt");
 		String name=sd.getFileName();
 		String directory=sd.getDirectory();
 		/*FileDialog fd=new FileDialog(this,"Save as Text...",FileDialog.SAVE);
@@ -380,7 +380,7 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 		String directory=fd.getDirectory();
 		defaultDirectory=directory;
 		fd.dispose();*/
-		SaveDialog sd=new SaveDialog("Save as Binary...",getTitle(),"bin");
+		SaveDialog sd=new SaveDialog("Save as Binary...",getTitle(),".bin");
 		String name=sd.getFileName();
 		String directory=sd.getDirectory();
 		saveAsBinary(directory+name,saveseries,typeflag);
@@ -438,7 +438,7 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 		String directory=fd.getDirectory();
 		defaultDirectory=directory;
 		fd.dispose();*/
-		SaveDialog sd=new SaveDialog("Save as Plot Object...",getTitle(),"pw2");
+		SaveDialog sd=new SaveDialog("Save as Plot Object...",getTitle(),".pw2");
 		String name=sd.getFileName();
 		String directory=sd.getDirectory();
 		if(name==null||name==""||directory==null||directory=="")

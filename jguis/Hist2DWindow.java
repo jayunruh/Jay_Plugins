@@ -16,6 +16,7 @@ import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.process.ColorProcessor;
 import ij.process.FloatProcessor;
+import ij.process.ShortProcessor;
 
 import java.awt.Button;
 import java.awt.Checkbox;
@@ -83,6 +84,7 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 	int[] mask;
 	boolean inroi,threshfirst;
 	int imageheight=256;
+	public ImageStack datastack;
 
 	public static void launch_frame(String title,Hist2DWindow panel){
 		final Frame f=new Frame(title);
@@ -114,8 +116,15 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 	public void init(ImagePlus ximp,ImagePlus yimp,ImagePlus dispimp,int calltype){
 		init(ximp,yimp,null,dispimp,calltype);
 	}
-
+	
 	public void init(ImagePlus ximp,ImagePlus yimp,ImagePlus zimp,ImagePlus dispimp,int calltype){
+		init(ximp,yimp,zimp,null,dispimp,calltype);
+	}
+
+	public void init(ImagePlus ximp,ImagePlus yimp,ImagePlus zimp,ImagePlus dataimp,ImagePlus dispimp,int calltype){
+		//calltype is 1: N&B, 2: acceptor photobleaching fret, and 3: ratiometric fret
+		//want to add a spectral phasor option
+		//need a placeholder for profile data
 		init_options();
 		setLayout(null);
 		// initialize all of the variables
@@ -131,6 +140,7 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		ImageStack zstack=null;
 		if(zimp!=null)
 			zstack=zimp.getStack();
+		if(dataimp!=null) datastack=dataimp.getStack();
 		cal=dispimp.getCalibration();
 		slices=xstack.getSize();
 		xpix=new float[width*height*slices];
@@ -138,25 +148,15 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		disppix=new float[width*height*slices];
 		zpix=null;
 		if(zstack!=null)
-			zpix=new float[width*height*slices];
+			zpix=new float[width*height*zstack.getSize()];
 		for(int i=0;i<slices;i++){
-			float[] temp=(float[])xstack.getPixels(i+1);
-			for(int j=0;j<width*height;j++){
-				xpix[j+i*width*height]=temp[j];
-			}
-			temp=(float[])ystack.getPixels(i+1);
-			for(int j=0;j<width*height;j++){
-				ypix[j+i*width*height]=temp[j];
-			}
-			temp=(float[])dispstack.getPixels(i+1);
-			for(int j=0;j<width*height;j++){
-				disppix[j+i*width*height]=temp[j];
-			}
-			if(zpix!=null){
-				temp=(float[])zstack.getPixels(i+1);
-				for(int j=0;j<width*height;j++){
-					zpix[j+i*width*height]=temp[j];
-				}
+			System.arraycopy((float[])xstack.getPixels(i+1),0,xpix,i*width*height,width*height);
+			System.arraycopy((float[])ystack.getPixels(i+1),0,ypix,i*width*height,width*height);
+			System.arraycopy((float[])dispstack.getPixels(i+1),0,disppix,i*width*height,width*height);
+		}
+		if(zstack!=null){
+			for(int i=0;i<zstack.getSize();i++){
+				System.arraycopy((float[])zstack.getPixels(i+1),0,zpix,i*width*height,width*height);
 			}
 		}
 		revert();
@@ -189,7 +189,9 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		saveimg_button=new Button("Save Image");
 		saveimg_button.setBounds(10,50,80,30);
 		saveimg_button.addActionListener(this);
-		saveyimg_button=new Button("Save Y Image");
+		String saveyimglabel="Save Y Image";
+		if(calltype==4) saveyimglabel="Save Profile";
+		saveyimg_button=new Button(saveyimglabel);
 		saveyimg_button.setBounds(100+256+10+110+10+100,10+imageheight+50+260,80,20);
 		saveyimg_button.addActionListener(this);
 
@@ -282,6 +284,9 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		if(calltype==3){
 			templabel="Acc vs. Don";
 		}
+		if(calltype==4){
+			templabel="S vs. G";
+		}
 		plotnorm=new Checkbox(templabel,plottypegroup,(plottype==0)?true:false);
 		plotnorm.setBounds(10,10+imageheight+180,80,20);
 		plotnorm.addItemListener(this);
@@ -291,6 +296,9 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		}
 		if(calltype==3){
 			templabel="Ratio vs. Don";
+		}
+		if(calltype==4){
+			templabel="Ratio vs. G";
 		}
 		plotdiff=new Checkbox(templabel,plottypegroup,(plottype==1)?true:false);
 		plotdiff.setBounds(10,10+imageheight+200,80,20);
@@ -512,7 +520,8 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 			save_masked_image();
 		}
 		if(e.getSource()==saveyimg_button){
-			save_histypix();
+			if(datastack!=null) save_profile();
+			else save_histypix();
 		}
 		xmin=Float.parseFloat(xminval.getText());
 		xmax=Float.parseFloat(xmaxval.getText());
@@ -997,16 +1006,10 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 
 	void revert(){
 		int i;
-		smoothxpix=new float[width*height*slices];
-		smoothypix=new float[width*height*slices];
+		smoothxpix=xpix.clone();
+		smoothypix=ypix.clone();
 		if(zpix!=null)
-			smoothzpix=new float[width*height*slices];
-		for(i=0;i<width*height*slices;i++){
-			smoothxpix[i]=xpix[i];
-			smoothypix[i]=ypix[i];
-			if(zpix!=null)
-				smoothzpix[i]=zpix[i];
-		}
+			smoothzpix=zpix.clone();
 	}
 
 	float median(float[] values){
@@ -1344,6 +1347,41 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		cp.drawString(IJ.d2s(heatmiddle,1),30,87);
 		cp.drawString(IJ.d2s(heatmax,1),30,17);
 		new ImagePlus("Heat Map Calibration",cp).show();
+	}
+	
+	void save_profile(){
+		if(datastack!=null){
+			int stacklength=datastack.getSize()/slices;
+			float[] decay=new float[stacklength];
+			if(datastack.getProcessor(1) instanceof FloatProcessor){
+				for(int i=0;i<width*height;i++){
+					if(mask[i]==1){
+						for(int j=0;j<stacklength;j++){
+							decay[j]+=((float[])datastack.getPixels(currslice*stacklength+j+1))[i];
+						}
+					}
+				}
+			} else if(datastack.getProcessor(1) instanceof ShortProcessor) {
+				for(int i=0;i<width*height;i++){
+					if(mask[i]==1){
+						for(int j=0;j<stacklength;j++){
+							float temp=(float)(((short[])datastack.getPixels(currslice*stacklength+j+1))[i]&0xffff);
+							decay[j]+=temp;
+						}
+					}
+				}
+			} else {
+				for(int i=0;i<width*height;i++){
+					if(mask[i]==1){
+						for(int j=0;j<stacklength;j++){
+							float temp=(float)(((byte[])datastack.getPixels(currslice*stacklength+j+1))[i]&0xff);
+							decay[j]+=temp;
+						}
+					}
+				}
+			}
+			(new PlotWindow4("Masked Profile","channel","Intensity",decay)).draw();
+		}
 	}
 
 	void init_options(){

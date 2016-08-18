@@ -20,9 +20,11 @@ public class track_maximum_jru_v1 implements PlugIn {
 		gd.addCheckbox("interpolate_maximum?",false);
 		String[] centeroptions={"use_upper_left","use_center","use_initial"};
 		gd.addChoice("Traj_Origin",centeroptions,centeroptions[0]);
+		gd.addNumericField("Edge_Buffer",10,0);
 		gd.showDialog(); if(gd.wasCanceled()){return;}
 		boolean interp=gd.getNextBoolean();
 		int origindex=gd.getNextChoiceIndex();
+		int edgebuf=(int)gd.getNextNumber();
 		ImagePlus imp=WindowManager.getCurrentImage();
 		int width=imp.getWidth();
 		int height=imp.getHeight();
@@ -34,13 +36,13 @@ public class track_maximum_jru_v1 implements PlugIn {
 		float[][] traj=new float[2][slices];
 		for(int i=0;i<slices;i++){
 			float[] image=(float[])stack.getPixels(i+1);
-			float max=image[0];
-			int maxj=0;
-			int maxk=0;
+			float max=image[edgebuf+edgebuf*width];
+			int maxj=edgebuf;
+			int maxk=edgebuf;
 			if(r==null){
 				for(int j=0;j<height;j++){
 					for(int k=0;k<width;k++){
-						if(image[k+j*width]>max){
+						if(inbounds(width,height,edgebuf,k,j) && image[k+j*width]>max){
 							max=image[k+j*width];
 							maxk=k;
 							maxj=j;
@@ -52,7 +54,7 @@ public class track_maximum_jru_v1 implements PlugIn {
 				maxj=r.x; maxk=r.y;
 				for(int j=r.y;j<(r.y+r.height);j++){
 					for(int k=r.x;k<(r.x+r.width);k++){
-						if(image[k+j*width]>max){
+						if(inbounds(width,height,edgebuf,k,j) && image[k+j*width]>max){
 							max=image[k+j*width];
 							maxk=k;
 							maxj=j;
@@ -86,6 +88,14 @@ public class track_maximum_jru_v1 implements PlugIn {
 		} else {
 			IJ.log("maxx = "+(traj[0][0]-subx)+" , maxy = "+(traj[1][0]-suby));
 		}
+	}
+
+	public boolean inbounds(int width,int height,int buf,int x,int y){
+		if(x<buf) return false;
+		if(y<buf) return false;
+		if(x>=(width-buf)) return false;
+		if(y>=(height-buf)) return false;
+		return true;
 	}
 
 	public float[] interp_max(float[] image,int width,int height,int maxx,int maxy){

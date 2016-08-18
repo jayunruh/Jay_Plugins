@@ -30,7 +30,7 @@ public class realign_movie_jru_v1 implements PlugIn {
 		GenericDialog gd2=new GenericDialog("Options");
 		gd2.addChoice("Image",titles,titles[0]);
 		gd2.addChoice("Track",titles,titles[0]);
-		gd2.addChoice("Angles",titles,titles[wList.length]);
+		gd2.addChoice("Angles (interpolation only, degrees)",titles,titles[wList.length]);
 		gd2.addCheckbox("Interpolate?",true);
 		gd2.addCheckbox("Difference_Track?",false);
 		gd2.showDialog();
@@ -90,6 +90,9 @@ public class realign_movie_jru_v1 implements PlugIn {
 		int intymin=(int)ymin-1;
 		int newwidth=width+intxmax-intxmin+1;
 		int newheight=height+intymax-intymin+1;
+		float newcenterx=xvals1[0]+xvals[0]-(float)intxmin;
+		float newcentery=yvals1[0]+yvals[0]-(float)intymin;
+		//IJ.log(""+newcenterx+" , "+newcentery);
 		ImageStack retstack=new ImageStack(newwidth,newheight);
 		for(int k=0;k<frames;k++){
 			for(int l=0;l<(slices*channels);l++){
@@ -110,7 +113,7 @@ public class realign_movie_jru_v1 implements PlugIn {
 				}
 				if(interp){
 					float[] tempimage2=interpolation.shift_image(currimage,width,height,xvals[k]-(float)intxmin,yvals[k]-(float)intymin);
-					if(angles[k]!=0.0f) tempimage2=interpolation.rotate_image(currimage,width,height,angles[k],0.0f,0.0f);
+					if(angles[k]!=0.0f) tempimage2=interpolation.rotate_image(tempimage2,width,height,-(float)Math.toRadians(angles[k]),newcenterx,newcentery);
 					float[] tempimage3=new float[newwidth*newheight];
 					for(int i=0;i<height;i++){
 						for(int j=0;j<width;j++){
