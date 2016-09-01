@@ -15,6 +15,7 @@ import ij.gui.ImageWindow;
 import ij.gui.PolygonRoi;
 import ij.gui.Roi;
 import ij.io.SaveDialog;
+import ij.plugin.frame.Recorder;
 import ij.process.ColorProcessor;
 import ij.text.TextWindow;
 
@@ -452,35 +453,57 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 		if(gd.wasCanceled()){
 			return;
 		}
-		limits[0]=(float)gd.getNextNumber();
-		limits[1]=(float)gd.getNextNumber();
-		limits[2]=(float)gd.getNextNumber();
-		limits[3]=(float)gd.getNextNumber();
-		p3.setLimits(limits);
-		p3.setLogAxes(gd.getNextBoolean(),gd.getNextBoolean());
-		p3.setxLabel(gd.getNextString());
-		p3.setyLabel(gd.getNextString());
+		float[] newlims={(float)gd.getNextNumber(),(float)gd.getNextNumber(),(float)gd.getNextNumber(),(float)gd.getNextNumber()};
+		if(limits[0]!=newlims[0] || limits[1]!=newlims[1] || limits[2]!=newlims[2] || limits[3]!=newlims[3]){
+			p3.setLimits(newlims);
+			if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.setLimits",""+newlims[0]+","+newlims[1]+","+newlims[2]+","+newlims[3]);
+		}
+		boolean[] newlogs={gd.getNextBoolean(),gd.getNextBoolean()};
+		if(p3.getLogAxes()[0]!=newlogs[0] || p3.getLogAxes()[1]!=newlogs[1]){
+			p3.setLogAxes(newlogs[0],newlogs[1]);
+			if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.setLogAxes",""+newlogs[0]+","+newlogs[1]);
+		}
+		String[] newlabs={gd.getNextString(),gd.getNextString()};
+		if(!newlabs[0].equals(p3.getxLabel()) || !newlabs[1].equals(p3.getyLabel())){
+			p3.setxLabel(newlabs[0]);
+			p3.setyLabel(newlabs[1]);
+			if(Recorder.record && !IJ.isMacro()){
+				Recorder.record("Ext.setXLabel",newlabs[0]);
+				Recorder.record("Ext.setYLabel",newlabs[1]);
+			}
+		}
 		delsel=gd.getNextBoolean();
+		if(delsel){
+			Recorder.record("Ext.deleteSelected");
+		}
 		ascalex=gd.getNextBoolean();
 		ascaley=gd.getNextBoolean();
 		doscaleroi=gd.getNextBoolean();
-		p3.setmagnification((float)gd.getNextNumber());
+		float newmag=(float)gd.getNextNumber();
+		if(p3.getmagnification()!=newmag){
+			p3.setmagnification(newmag);
+			if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.setMagnification",""+newmag);
+		}
 		float binsize=(float)gd.getNextNumber();
 		if(binsize!=p3.getBinSizeUnits()){
 			p3.setBinSizeUnits(binsize);
+			if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.setBinSize",""+binsize);
 		}
 		savehist=gd.getNextBoolean();
 		if(ascalex){
 			ascalex=false;
 			p3.xautoscale();
+			if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.autoscaleX");
 		}
 		if(ascaley){
 			ascaley=false;
 			p3.yautoscale();
+			if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.autoscaleY");
 		}
 		if(doscaleroi){
 			doscaleroi=false;
 			scaleroi();
+			if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.scaleROI");
 		}
 		updatePlot();
 	}

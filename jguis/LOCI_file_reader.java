@@ -191,6 +191,139 @@ public class LOCI_file_reader{
 			return null;
 		}
 	}
+	
+	/************
+	 * this version collects a subset of channels, slices, and frames
+	 * @param directory
+	 * @param fname
+	 * @param outmeta
+	 * @param series
+	 * @param proj
+	 * @param projstat
+	 * @param refchan
+	 * @param limits: an int array with minch,maxch,minz,maxz,mint,maxt (0 based)
+	 * @return
+	 */
+	public ImagePlus get_loci_subimp(String directory,String fname,boolean outmeta,int series,boolean proj,String projstat,int refchan,int[] limits){
+		IMetadata omexmlMetadata=null;
+		if(!nometa)
+			omexmlMetadata=MetadataTools.createOMEXMLMetadata();
+		ImageProcessorReader r=new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));
+		try{
+			if(!nometa)
+				r.setMetadataStore(omexmlMetadata);
+			r.setId(directory+fname);
+			nseries=r.getSeriesCount();
+			if(series>=nseries)
+				series=0;
+			r.setSeries(series);
+			int num=r.getImageCount(); //IJ.log("n images = "+num);
+			int width=r.getSizeX();
+			int height=r.getSizeY();
+			int channels=r.getSizeC();
+			int slices=r.getSizeZ();
+			int frames=r.getSizeT();
+			String order=r.getDimensionOrder();
+			int[] chsizes=null;
+			if(refchan>=0){
+				//here the slices is actually max slices
+				//int totslices=channels*slices*frames;
+				//int framesize=slices*(channels-1)+1;
+				chsizes=new int[channels];
+				for(int i=0;i<channels;i++) chsizes[i]=slices;
+				chsizes[refchan]=1;
+				//float newframes=(float)num/(float)framesize;
+				//frames=(int)(newframes+0.0001f);
+			}
+
+			if(outmeta&&!nometa){
+				Hashtable<String,Object> globalMeta=r.getGlobalMetadata();
+				if(globalMeta!=null)
+					dumpMetaData(globalMeta);
+				Hashtable<String,Object> seriesMeta=r.getSeriesMetadata();
+				if(seriesMeta!=null)
+					dumpMetaData(seriesMeta);
+			}
+			String name=""+fname;
+			if(nseries>1&&!nometa)
+				name=omexmlMetadata.getImageName(series);
+			else if(nseries>1)
+				name=name+series;
+			float psize=1.0f;
+			float zsize=1.0f;
+			float tsize=1.0f;
+			if(!nometa){
+				//Length temp=new Length(1.0,UNITS.MICROM);
+				if(omexmlMetadata.getPixelsPhysicalSizeX(series)!=null)
+					psize=omexmlMetadata.getPixelsPhysicalSizeX(series).value().floatValue();
+				if(omexmlMetadata.getPixelsPhysicalSizeZ(series)!=null)
+					zsize=omexmlMetadata.getPixelsPhysicalSizeZ(series).value().floatValue();
+				if(omexmlMetadata.getPixelsTimeIncrement(series)!=null)
+					tsize=omexmlMetadata.getPixelsTimeIncrement(series).value().floatValue();
+			}
+			if(limits[0]<0) limits[0]=0;
+			if(limits[1]<0 || limits[1]>=channels) limits[1]=channels-1;
+			if(limits[2]<0) limits[2]=0;
+			if(limits[3]<0 || limits[3]>=slices) limits[3]=slices-1;
+			if(limits[4]<0) limits[4]=0;
+			if(limits[5]<0 || limits[5]>=frames) limits[5]=frames-1;
+			int tempslices=limits[3]-limits[2]+1;
+			int tempframes=limits[5]-limits[4]+1;
+			int tempchannels=limits[1]-limits[0]+1;
+			ImageStack stack=new ImageStack(width,height);
+			if(proj){
+				int counter=0;
+				for(int i=limits[4];i<=limits[5];i++){
+					for(int j=limits[0];j<=limits[1];j++){
+						Object[] tempzstack=new Object[slices];
+						for(int k=limits[2];k<=limits[3];k++){
+							int index=get_stack_index(j,k,i,channels,slices,frames,order,chsizes);
+							ImageProcessor ip=r.openProcessors(index)[0];
+							tempzstack[k]=ip.getPixels();
+						}
+						Object projslice=algutils.get_stack_proj_stat(projstat,tempzstack,width,height,tempslices,null);
+						stack.addSlice("",projslice);
+						IJ.showProgress(counter,tempframes*tempchannels);
+						counter++;
+					}
+				}
+				slices=1;
+			}else{
+				int counter=0;
+				for(int i=limits[4];i<=limits[5];i++){
+					for(int j=limits[2];j<=limits[3];j++){
+						for(int k=limits[0];k<=limits[1];k++){
+							int index=get_stack_index(k,j,i,channels,slices,frames,order,chsizes);
+							//IJ.log(""+k+"\t "+j+"\t "+i+"\t "+index);
+							ImageProcessor ip=r.openProcessors(index)[0];
+							stack.addSlice(ip);
+							IJ.showProgress(counter,tempframes*tempslices*tempchannels);
+							counter++;
+						}
+					}
+				}
+			}
+			r.close();
+			// shuffle(stack,channels,slices,frames,order);
+			ImagePlus imp=new ImagePlus(name,stack);
+			if(!nometa){
+				jutils.set_psize(imp,psize);
+				jutils.set_pdepth(imp,zsize);
+				jutils.set_pinterval(imp,tsize);
+			}
+			imp.setOpenAsHyperStack(true);
+			imp.setDimensions(tempchannels,tempslices,tempframes);
+			if(tempchannels>1){
+				return new CompositeImage(imp,CompositeImage.COLOR);
+			}else{
+				return imp;
+			}
+		}catch(FormatException e){
+			return null;
+		}catch(IOException e){
+			return null;
+		}
+	}
 
 	public ImagePlus get_loci_imp(String directory,String fname,boolean outmeta,int series,boolean proj,String projstat){
 		return get_loci_imp(directory,fname,outmeta,series,proj,projstat,-1);

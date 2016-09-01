@@ -14,6 +14,7 @@ import ij.gui.GenericDialog;
 import ij.gui.ImageWindow;
 import ij.io.SaveDialog;
 import ij.measure.Calibration;
+import ij.plugin.frame.Recorder;
 import ij.process.ColorProcessor;
 import ij.text.TextWindow;
 import ij.util.Tools;
@@ -524,18 +525,30 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 		if(gd.wasCanceled()){
 			return;
 		}
-		limits[0]=(float)gd.getNextNumber();
-		limits[1]=(float)gd.getNextNumber();
-		limits[2]=(float)gd.getNextNumber();
-		limits[3]=(float)gd.getNextNumber();
-		p3.setLimits(limits);
-		logs[0]=gd.getNextBoolean();
-		logs[1]=gd.getNextBoolean();
-		p3.setLogAxes(logs[0],logs[1]);
-		p3.setxLabel(gd.getNextString());
-		p3.setyLabel(gd.getNextString());
+		float[] newlims={(float)gd.getNextNumber(),(float)gd.getNextNumber(),(float)gd.getNextNumber(),(float)gd.getNextNumber()};
+		if(limits[0]!=newlims[0] || limits[1]!=newlims[1] || limits[2]!=newlims[2] || limits[3]!=newlims[3]){
+			p3.setLimits(newlims);
+			if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.setLimits",""+newlims[0]+","+newlims[1]+","+newlims[2]+","+newlims[3]);
+		}
+		boolean[] newlogs={gd.getNextBoolean(),gd.getNextBoolean()};
+		if(p3.getLogAxes()[0]!=newlogs[0] || p3.getLogAxes()[1]!=newlogs[1]){
+			p3.setLogAxes(newlogs[0],newlogs[1]);
+			if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.setLogAxes",""+newlogs[0]+","+newlogs[1]);
+		}
+		String[] newlabs={gd.getNextString(),gd.getNextString()};
+		if(!newlabs[0].equals(p3.getxLabel()) || !newlabs[1].equals(p3.getyLabel())){
+			p3.setxLabel(newlabs[0]);
+			p3.setyLabel(newlabs[1]);
+			if(Recorder.record && !IJ.isMacro()){
+				Recorder.record("Ext.setXLabel",newlabs[0]);
+				Recorder.record("Ext.setYLabel",newlabs[1]);
+			}
+		}
 		int temp=(int)gd.getNextNumber();
-		p3.setGridWhiteness(temp);
+		if(temp!=p3.gridColor.getRed()){
+			p3.setGridWhiteness(temp);
+			if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.setGridWhiteness",temp);
+		}
 		delsel=gd.getNextBoolean();
 		ascalex=gd.getNextBoolean();
 		ascaley=gd.getNextBoolean();
@@ -549,18 +562,22 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 		if(delsel){
 			delsel=false;
 			p3.deleteSeries(p3.getSelected(),false);
+			Recorder.record("Ext.deleteSelected");
 		}
 		if(ascalex){
 			ascalex=false;
 			p3.xautoscale();
+			if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.autoscaleX");
 		}
 		if(ascaley){
 			ascaley=false;
 			p3.yautoscale();
+			if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.autoscaleY");
 		}
 		if(doscaleroi){
 			doscaleroi=false;
 			scaleroi();
+			if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.scaleROI");
 		}
 		updatePlot();
 	}
@@ -632,12 +649,14 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 							String annot="";
 							if(p3.getAnnotations()!=null) annot=":"+(p3.getAnnotations())[p3.getSelected()];
 							IJ.showStatus("Series "+(p3.getSelected()+1)+" of "+p3.getNSeries()+" Selected"+annot);
+							if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.selectSeries",p3.getSelected());
 							updatePlot();
 						}else{
 							p3.selectSeries(p3.getSelected()-1);
 							String annot="";
 							if(p3.getAnnotations()!=null) annot=":"+(p3.getAnnotations())[p3.getSelected()];
 							IJ.showStatus("Series "+(p3.getSelected()+1)+" of "+p3.getNSeries()+" Selected"+annot);
+							if(Recorder.record && !IJ.isMacro()) Recorder.record("Ext.selectSeries",p3.getSelected());
 							updatePlot();
 						}
 					}
