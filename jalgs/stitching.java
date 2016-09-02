@@ -223,6 +223,66 @@ public class stitching{
 		return pairs2;
 	}
 	
+	public static float[][] getPairs(float[][] coords,int width,int height,boolean diagonal){
+		//here we retroactively get the pairs and their distances from a set of coordinates
+		List<float[]> pairs=new ArrayList<float[]>();
+		//if we do this right, we should never get redundant pairs
+		for(int i=0;i<coords.length;i++){
+			for(int j=(i+1);j<coords.length;j++){
+				float xshift=coords[j][0]-coords[i][0];
+				float yshift=coords[j][1]-coords[i][1];
+				float absxshift=Math.abs(xshift);
+				float absyshift=Math.abs(yshift);
+				float relabsxshift=absxshift/(float)width;
+				float relabsyshift=absyshift/(float)height;
+				int rndxshift=0; if(relabsxshift>0.5f && relabsxshift<1.0f) rndxshift=1;
+				int rndyshift=0; if(relabsyshift>0.5f && relabsyshift<1.0f) rndyshift=1;
+				if(rndxshift==1 || rndyshift==1){
+					//we have a neighbor, now where is it?
+    				if(rndxshift==1 && rndyshift==0){
+    					//horizontal pairs
+    					pairs.add(new float[]{i,j,xshift,yshift});
+    				}
+    				if(rndxshift==0 && rndyshift==1){
+    					//vertical pairs
+    					pairs.add(new float[]{i,j,xshift,yshift});
+    				}
+    				if(diagonal){
+        				if(rndxshift==1 && rndyshift==1){
+        					//diagonal
+        					pairs.add(new float[]{i,j,xshift,yshift});
+        				}
+    				}
+				}
+			}
+		}
+		float[][] pairs2=new float[pairs.size()][];
+		for(int i=0;i<pairs.size();i++) pairs2[i]=pairs.get(i);
+		return pairs2;
+	}
+	
+	public static float[] getAvgOverlap(float[][] coords,int width,int height){
+		float hover=0.0f; int nhpairs=0;
+		float vover=0.0f; int nvpairs=0;
+		float halfwidth=0.5f*(float)width;
+		float halfheight=0.5f*(float)height;
+		for(int i=0;i<coords[0].length;i++){
+			for(int j=(i+1);j<coords[0].length;j++){
+				float xdist=Math.abs(coords[0][j]-coords[0][i]);
+				float ydist=Math.abs(coords[1][j]-coords[1][i]);
+				if(xdist>halfwidth && xdist<(float)width && ydist<halfheight){
+					hover+=xdist; nhpairs++;
+				}
+				if(xdist<halfwidth && ydist>halfheight && ydist<(float)height){
+					vover+=ydist; nvpairs++;
+				}
+			}
+		}
+		hover/=(float)nhpairs;
+		vover/=(float)nvpairs;
+		return new float[]{(float)width-hover,(float)height-vover};
+	}
+	
 	public static float[][] getTileCoordsRaster(int ximgs,int yimgs,int width,int height,float overlap,int startxpos,int startypos,int startxdir,int startydir){
 		//assume order is raster by rows
 		float[][] coords=new float[2][ximgs*yimgs];

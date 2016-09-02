@@ -138,6 +138,29 @@ public class algutils{
 		return null;
 	}
 	
+	/************************************
+	 * this version doesn't make a copy if its not necessary
+	 * @param oldarr
+	 * @param type
+	 * @return
+	 */
+	public static Object convert_array2(Object oldarr,int type){
+		// can convert from and to byte, short, or float
+		switch(type){
+		case 0:
+			return convert_arr_byte2(oldarr);
+		case 1:
+			return convert_arr_short2(oldarr);
+		case 2:
+			return convert_arr_float2(oldarr);
+		case 3:
+			return convert_arr_double2(oldarr);
+		case 4:
+			return convert_arr_int2(oldarr);
+		}
+		return null;
+	}
+	
 	/******************
 	 * this converts an array to a specific type, making a copy.  See above for types
 	 * @param oldarr
