@@ -32,7 +32,7 @@ public class combine_all_tables_jru_v1 implements PlugIn {
 		int ncols=0;
 		String[] col_labels=null;
 		for(int i=0;i<niframes.length;i++){
-			if(niframes[i] instanceof TextWindow){
+			if(niframes[i] instanceof TextWindow && !niframes[i].getTitle().equals("Log")){
 				TextWindow tw=(TextWindow)niframes[i];
 				TextPanel tp=tw.getTextPanel();
 				List<List<String>> listtable=table_tools.table2listtable(tp);

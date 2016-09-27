@@ -75,13 +75,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=j-(linewidth)/2.0f;
-					distance*=tempoutsign;
+					distance=(float)j-0.5f*(float)linewidth+0.5f;
+					distance*=(float)tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=tempoutsign*j;
+						distance=(float)tempoutsign*(float)j;
 					}else{
-						distance=-tempoutsign*j;
+						distance=-(float)tempoutsign*(float)j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -103,13 +103,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=j-(linewidth)/2.0f;
-					distance*=tempoutsign;
+					distance=(float)j-0.5f*(float)linewidth;
+					distance*=(float)tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=tempoutsign*j;
+						distance=(float)tempoutsign*(float)j;
 					}else{
-						distance=-tempoutsign*j;
+						distance=-(float)tempoutsign*(float)j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -152,13 +152,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=j-(linewidth)/2.0f;
-					distance*=tempoutsign;
+					distance=(float)j-0.5f*(float)linewidth+0.5f;
+					distance*=(float)tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=tempoutsign*j;
+						distance=(float)tempoutsign*(float)j;
 					}else{
-						distance=-tempoutsign*j;
+						distance=-(float)tempoutsign*(float)j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -182,13 +182,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=j-(linewidth)/2.0f;
-					distance*=tempoutsign;
+					distance=(float)j-0.5f*(float)linewidth;
+					distance*=(float)tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=tempoutsign*j;
+						distance=(float)tempoutsign*(float)j;
 					}else{
-						distance=-tempoutsign*j;
+						distance=-(float)tempoutsign*(float)j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -228,13 +228,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=j-(linewidth)/2.0f;
-					distance*=tempoutsign;
+					distance=(float)j-0.5f*(float)linewidth;
+					distance*=(float)tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=tempoutsign*j;
+						distance=(float)tempoutsign*(float)j;
 					}else{
-						distance=-tempoutsign*j;
+						distance=-(float)tempoutsign*(float)j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -257,13 +257,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=j-(linewidth)/2.0f;
-					distance*=tempoutsign;
+					distance=(float)j-0.5f*(float)linewidth;
+					distance*=(float)tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=tempoutsign*j;
+						distance=(float)tempoutsign*(float)j;
 					}else{
-						distance=-tempoutsign*j;
+						distance=-(float)tempoutsign*(float)j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -289,13 +289,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=j-(linewidth)/2.0f;
-					distance*=tempoutsign;
+					distance=(float)j-0.5f*(float)linewidth;
+					distance*=(float)tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=tempoutsign*j;
+						distance=(float)tempoutsign*(float)j;
 					}else{
-						distance=-tempoutsign*j;
+						distance=-(float)tempoutsign*(float)j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -319,13 +319,13 @@ public class profiler{
 			for(int j=0;j<linewidth;j++){
 				float distance=0.0f;
 				if(or_index==0){
-					distance=j-(linewidth)/2.0f;
-					distance*=tempoutsign;
+					distance=(float)j-0.5f*(float)linewidth;
+					distance*=(float)tempoutsign;
 				}else{
 					if(or_index==1){
-						distance=tempoutsign*j;
+						distance=(float)tempoutsign*(float)j;
 					}else{
-						distance=-tempoutsign*j;
+						distance=-(float)tempoutsign*(float)j;
 					}
 				}
 				float[] newcoords=getParallelLine(coords,distance);
@@ -383,13 +383,13 @@ public class profiler{
 		for(int j=0;j<linewidth;j++){
 			float distance=0.0f;
 			if(or_index==0){
-				distance=j-(linewidth)/2.0f;
-				distance*=outsign;
+				distance=(float)j-0.5f*(float)linewidth;
+				distance*=(float)outsign;
 			}else{
 				if(or_index==1){
-					distance=outsign*j;
+					distance=(float)outsign*(float)j;
 				}else{
-					distance=-outsign*j;
+					distance=-(float)outsign*(float)j;
 				}
 			}
 			float[] newcoords=getParallelLine(coords,distance);

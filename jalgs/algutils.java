@@ -1313,24 +1313,21 @@ public class algutils{
 
 	public static float[] get_region_pad(float[] image,int x,int y,int rwidth,int rheight,int width,int height){
 		// here we return the rectangular region centered on x and y
-		if(!inbounds(x,y,width,height))
-			return null;
+		//padding is done by shifting to the nearest edge pixel
 		int startx=x-rwidth/2;
 		int starty=y-rheight/2;
 		int endx=startx+rwidth-1;
 		int endy=starty+rheight-1;
-		if(startx<0)
-			startx=0;
-		if(starty<0)
-			starty=0;
-		if(endx>(width-1))
-			endx=width-1;
-		if(endy>(height-1))
-			endy=height-1;
 		float[] output=new float[rwidth*rheight];
 		for(int i=starty;i<=endy;i++){
+			int ypos=i;
+			if(ypos<0) ypos=0;
+			if(ypos>=height) ypos=height-1;
 			for(int j=startx;j<=endx;j++){
-				output[j-startx+(i-starty)+rwidth]=image[j+i*width];
+				int xpos=j;
+				if(xpos<0) xpos=0;
+				if(xpos>=width) xpos=width-1;
+				output[j-startx+(i-starty)*rwidth]=image[xpos+ypos*width];
 			}
 		}
 		return output;

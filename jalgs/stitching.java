@@ -261,7 +261,7 @@ public class stitching{
 		return pairs2;
 	}
 	
-	public static float[] getAvgOverlap(float[][] coords,int width,int height){
+	public static float[] getAvgOverlap(float[][] coords,float width,float height){
 		float hover=0.0f; int nhpairs=0;
 		float vover=0.0f; int nvpairs=0;
 		float halfwidth=0.5f*(float)width;

@@ -83,7 +83,7 @@ public class gridfit{
 	}
 
 	public double search_param(int paramid,int numfit,double[] params,int[] fixes,double[][] constraints,float[] data,double[] weights){
-		// this method recursively searches over parameter space and returns the
+		// this method recursively searches over parameter space starting with paramid and returns the
 		// minimum parameter and chi squared
 		if(paramid==(params.length-1)){
 			if(fixes[paramid]==1){

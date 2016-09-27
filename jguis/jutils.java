@@ -1501,23 +1501,26 @@ public class jutils{
 
 	public static Object[] getTableWindowList(boolean addnull){
 		Frame[] niframes=WindowManager.getNonImageWindows();
-		String[] titles=null;
-		if(addnull){
-			titles=new String[niframes.length+1];
-		}else{
-			titles=new String[niframes.length];
-		}
+		String[] titles=new String[niframes.length];
+		Frame[] niframes2=new Frame[niframes.length];
+		int counter=0;
 		for(int i=0;i<niframes.length;i++){
-			if(niframes[i] instanceof TextWindow){
-				titles[i]=niframes[i].getTitle();
-			}else{
-				titles[i]="NA";
+			if(niframes[i] instanceof TextWindow && !niframes[i].getTitle().equals("Log")){
+				titles[counter]=niframes[i].getTitle();
+				niframes2[counter]=niframes[i];
+				counter++;
 			}
 		}
+		int ntitles=counter;
+		if(addnull) ntitles++;
+		String[] titles2=new String[ntitles];
+		Frame[] niframes3=new Frame[ntitles];
+		for(int i=0;i<counter;i++){titles2[i]=titles[i]; niframes3[i]=niframes2[i];}
 		if(addnull){
-			titles[niframes.length]="null";
+			titles[counter]="null";
+			niframes3[counter]=null;
 		}
-		Object[] retvals={niframes,titles};
+		Object[] retvals={niframes3,titles2};
 		return retvals;
 	}
 

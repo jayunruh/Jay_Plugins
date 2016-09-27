@@ -891,6 +891,11 @@ public class jdataio{
 		return true;
 	}
 
+	/************
+	 * this reads a string "record" i.e. an integer length with a string afterwards
+	 * @param instream
+	 * @return
+	 */
 	public String readstring(InputStream instream){
 		int length=readintelint(instream);
 		byte[] data=null;
@@ -910,6 +915,12 @@ public class jdataio{
 		}
 	}
 
+	/********************
+	 * this reads a string of specified length
+	 * @param instream
+	 * @param length
+	 * @return
+	 */
 	public String readstring(InputStream instream,int length){
 		byte[] data=null;
 		if(length>=0){

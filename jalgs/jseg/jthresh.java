@@ -67,7 +67,7 @@ public class jthresh{
 		float[] thresh=new float[newwidth*newheight];
 		for(int i=0;i<newheight;i++){
 			for(int j=0;j<newwidth;j++){
-				float[] subregion=algutils.get_region(image,j*skip+skip/2,i*skip+skip/2,size,size,width,height);
+				float[] subregion=algutils.get_region_pad(image,j*skip+skip/2,i*skip+skip/2,size,size,width,height);
 				thresh[j+i*newwidth]=tf.calcthresh(subregion);
 			}
 		}
