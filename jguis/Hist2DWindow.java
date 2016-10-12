@@ -12,6 +12,8 @@ import ij.IJ;
 import ij.ImagePlus;
 import ij.ImageStack;
 import ij.gui.GenericDialog;
+import ij.gui.ImageRoi;
+import ij.gui.Overlay;
 import ij.gui.Roi;
 import ij.measure.Calibration;
 import ij.process.ColorProcessor;
@@ -1163,7 +1165,8 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 			float[] outhistypix2=new float[counter];
 			System.arraycopy(outhistxpix,0,outhistxpix2,0,counter);
 			System.arraycopy(outhistypix,0,outhistypix2,0,counter);
-			PlotWindow2DHist pw=new PlotWindow2DHist("2D N B Histogram","I/S","B/S",outhistxpix2,outhistypix2,null);
+			PlotWindow2DHist pw=new PlotWindow2DHist("2D Histogram","x","y",outhistxpix2,outhistypix2,null);
+			pw.draw();
 			float[] limits=pw.getLimits();
 			limits[0]=xmin;
 			limits[1]=xmax;
@@ -1171,7 +1174,7 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 			limits[3]=ymax;
 			pw.setLimits(limits);
 			pw.intautoscale();
-			pw.draw();
+			//pw.draw();
 		}
 	}
 
@@ -1210,6 +1213,8 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 
 	void save_masked_image(){
 		int[] color_pixels=new int[width*height];
+		float[] float_pix=new float[width*height];
+		System.arraycopy(disppix,currslice*width*height,float_pix,0,width*height);
 		int dumint;
 		for(int i=0;i<width*height;i++){
 			dumint=(int)(((disppix[i+currslice*width*height]-dispmin)/(dispmax-dispmin))*256.0);
@@ -1230,18 +1235,21 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 			}
 			if(disppix[i+currslice*width*height]>=dispmin){
 				if(mask[i]==0){
-					color_pixels[i]=0xff000000+(dumint<<16)+(dumint<<8)+dumint;
+					//color_pixels[i]=0xff000000+(dumint<<16)+(dumint<<8)+dumint; //grayscale image
+					color_pixels[i]=0xff000000; //black
 				}else{
-					color_pixels[i]=0xffff0000;
+					color_pixels[i]=0xffff0000; //red
 				}
 			}else{
-				color_pixels[i]=0xff000000;
+				color_pixels[i]=0xff000000; //black
 			}
 		}
-		ColorProcessor cp=new ColorProcessor(width,height,color_pixels);
-		ImagePlus imp2=new ImagePlus("Masked Image",cp);
+		ImagePlus imp2=new ImagePlus("Masked Image",new FloatProcessor(width,height,float_pix,null));
+		ImageRoi maskroi=new ImageRoi(0,0,new ColorProcessor(width,height,color_pixels));
+		maskroi.setZeroTransparent(true);
 		imp2.setCalibration(cal);
 		imp2.show();
+		imp2.setOverlay(new Overlay(maskroi));
 	}
 
 	void save_histypix(){

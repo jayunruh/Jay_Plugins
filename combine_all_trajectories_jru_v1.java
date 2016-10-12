@@ -17,13 +17,13 @@ public class combine_all_trajectories_jru_v1 implements PlugIn {
 	public void run(String arg) {
 		GenericDialog gd=new GenericDialog("Options");
 		gd.addCheckbox("Combine_all_series",true);
-		gd.addNumericField("Series_to_combine",0,0);
+		gd.addNumericField("Series_to_combine",1,0);
 		gd.addCheckbox("Delete_Originals",false);
 		gd.addCheckbox("Select_Plots",false);
 		gd.addNumericField("Number_of_Plots (if selecting)",2,0);
 		gd.showDialog(); if(gd.wasCanceled()){return;}
 		boolean combineall=gd.getNextBoolean();
-		int combseries=(int)gd.getNextNumber();
+		int combseries=(int)gd.getNextNumber()-1;
 		boolean delor=gd.getNextBoolean();
 		boolean selplots=gd.getNextBoolean();
 		int nplots=(int)gd.getNextNumber();
