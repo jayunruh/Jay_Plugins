@@ -1,0 +1,340 @@
+Location	Name	Class	Description
+Jay_Plugins	first plugins jar	Jay_Plugins.jar	First plugins file
+Plugins>Stowers>Jay_Unruh>Detrend Tools	carpet detrend linear jru v1	carpet_detrend_linear_jru_v1	Fits each vertical line of a carpet to segmented lines and subtracts the lines from the carpet.  There are options for retaining average vertical (for temporal correlation) or horizontal (for spatial correlation) line intensities.
+Plugins>Stowers>Jay_Unruh>Detrend Tools	carpet sub mov avg jru v1	carpet_sub_mov_avg_jru_v1	Subtracts a temporal moving average from a carpet.
+Plugins>Stowers>Jay_Unruh>Detrend Tools	divide line from carpet jru v1	divide_line_from_carpet_jru_v1	Divides a plot window line from the vertical axis of a carpet.
+Plugins>Stowers>Jay_Unruh>Detrend Tools	divide line from stack jru v1	divide_line_from_stack_jru_v1	Divides each frame in a stack by its corresponding data point in a line profile.
+Plugins>Stowers>Jay_Unruh>Detrend Tools	roi average divide jru v1	roi_average_divide_jru_v1	Divides each frame in a stack by the average of a selected roi (rectangle only).
+Plugins>Stowers>Jay_Unruh>Detrend Tools	roi average subtract jru v1	roi_average_subtract_jru_v1	Subtracts the average of a selected roi from each frame in a stack (rectangle only).
+Plugins>Stowers>Jay_Unruh>Detrend Tools	roi outside fill avg jru v1	roi_outside_fill_avg_jru_v1	Fills everything outside an roi with the average of the roi (any shape).
+Plugins>Stowers>Jay_Unruh>Detrend Tools	stack detrend linear jru v1	stack_detrend_linear_jru_v1	Fits each pixel of a stack to a segmented line and subtracts those lines from the stack.  See carpet detrend linear.
+Plugins>Stowers>Jay_Unruh>Detrend Tools	stack subtract moving average jru v2	stack_subtract_moving_average_jru_v2	Subtracts a moving or static average from a stack.
+Plugins>Stowers>Jay_Unruh>Detrend Tools	subtract line from carpet jru v1	subtract_line_from_carpet_jru_v1	Subtracts a plot window line from a carpet.
+Plugins>Stowers>Jay_Unruh>File Tools	cat hyperstacks jru v1	cat_hyperstacks_jru_v1	Concatenates multiple hyperstacks in a virtual manner.  Files can be sorted numerically or by creation date.  Each stack must have the same number of channels and z slices but can have a different number of frames (or a single frame).
+Plugins>Stowers>Jay_Unruh>File Tools	Xuggler encoder jru v1	Xuggler_encoder_jru_v1	"Uses Xuggler (www.xuggle.com/xuggler) which is a java port of ffmpeg to encode multimedia files.  Xuggler must be installed to use this plugin.  For now, encoding simply follows the default behavior for the extension provided by the user.  I have only tried this on windows."
+Plugins>Stowers>Jay_Unruh>File Tools	Xuggler file reader jru v1	Xuggler_file_reader_jru_v1	"See above.  I have yet to find a movie format that this cannot open, but I haven't really tried very hard.  There is no virtual stack support because Xuggler and ffmpeg do not fully support seeking.  Obviously this is a big limitation.  The only consolation I can give is that you can resample on input to reduce the size.  Eventually I will create a simple tiff converter so you can reopen with the tiff virtual stack reader."
+Plugins>Stowers>Jay_Unruh>FLIM Tools	fit lifetime jru v1	fit_lifetime_jru_v1	Fits a single point lifetime trace along with a instrument response function.
+Plugins>Stowers>Jay_Unruh>FLIM Tools	flim S G stack jru v1	flim_S_G_stack_jru_v1	Calculates real (G) and imaginary (S) components of different harmonics of the fourier transform for FLIM images.
+Plugins>Stowers>Jay_Unruh>FLIM Tools	GS 2 phasemod jru v1	GS_2_phasemod_jru_v1	Converts G and S images to phase and modulation (given the appropriate modulation frequencies.
+Plugins>Stowers>Jay_Unruh>FLIM Tools	histogram 2D phasor jru v1	histogram_2D_phasor_jru_v1	"A 2D phasor histogram which takes either FLIM stacks or G, S, and Intensity images.  See Enrico Gratton and Bob Clegg's publications for more details.  Selected components of the phasor histogram can have their time profiles saved (Save Decay) for further analysis.  Can also be used to detect spectral components as was recently pointed out by Bob."
+Plugins>Stowers>Jay_Unruh>FLIM Tools	read BH sdt jru v1	read_BH_sdt_jru_v1	Reads Becker and Hickl sdt files.  Has some issues due to issues in the B&H format specification.  Some files have multiple memory blocks saved in them and are read as images when they are really only single point measurements or kinetics meaurements.  Select force kinetics to force these files to be read as single point or kinetics files.
+Plugins>Stowers>Jay_Unruh>FLIM Tools	traj S G jru v1	traj_S_G_jru_v1	Calculate real (G) and imaginary (S) components of the fourier transform at a specified harmonic for phasor analysis.
+Plugins>Stowers>Jay_Unruh>ICS Tools	fit RICS jru v1	fit_RICS_jru_v1	Fits a spatial RICS distribution to a simple two component diffusion model.  Use stack FFT IC(C)S to calculate the RICS image.
+Plugins>Stowers>Jay_Unruh>ICS Tools	fit RICS line jru v1	fit_RICS_line_jru_v1	Fits the vertical or horizontal line of a RICS image.
+Plugins>Stowers>Jay_Unruh>ICS Tools	histogram 2D N B jru v1	histogram_2D_N_B_jru_v1	N&B analysis program.  Takes a temporal stack or average and variance images.  Use the latter with a covariance image to do two color N&B.  The average and variance (or covariance) images can be calculated with stack statistics jru v1.
+Plugins>Stowers>Jay_Unruh>ICS Tools	stack FFT ICCS jru v1	stack_FFT_ICCS_jru_v1	Calculates the spatial cross correlation of two stacks (or a hyperstack) using an FFT.  Images must be power of 2 size.
+Plugins>Stowers>Jay_Unruh>ICS Tools	stack FFT ICS jru v1	stack_FFT_ICS_jru_v1	Calculates the average spatial autocorrelation of a stack using an FFT.  Images must be power of 2 size.
+Plugins>Stowers>Jay_Unruh>ICS Tools	STICS map jru v2	STICS_map_jru_v2	Used for flow mapping a single color time series.
+Plugins>Stowers>Jay_Unruh>Image Tools	avg profile jru v1	avg_profile_jru_v1	Calculated the average vertical or horizontal profile of an image or selection (rectangular roi only).
+Plugins>Stowers>Jay_Unruh>Image Tools	bin image jru v1	bin_image_jru_v1	Bins a hyperstack spatially or along hyperstack dimensions
+Plugins>Stowers>Jay_Unruh>Image Tools	circular avg jru v1	circular_avg_jru_v1	Calculates the circular average of an image from the center point.  Useful for fitting symmetrical spatial correlation functions.
+Plugins>Stowers>Jay_Unruh>Image Tools	create hs profile jru v1	create_hs_profile_jru_v1	Creates a profile of a hyperstack projection for an roi (rectangular) or the entire image.  The projection can be performed in T or Z.  Both projection and profile statistics can be adjusted independently.
+Plugins>Stowers>Jay_Unruh>Image Tools	create spectrum jru v1	create_spectrum_jru_v1	Creates a simple stack profile.  Used for obtaining spectral contributions from multispectral images.
+Plugins>Stowers>Jay_Unruh>Image Tools	delete hs slice jru v1	delete_hs_slice_jru_v1	"Deletes a current hyperstack slice.  For example, the current time point can be deleted from all channels and Z slices."
+Plugins>Stowers>Jay_Unruh>Image Tools	duplicate hs slice jru v1	duplicate_hs_slice_jru_v1	Duplicates a current hyperstack slice.
+Plugins>Stowers>Jay_Unruh>Image Tools	dynamic spectrum jru v1	dynamic_spectrum_jru_v1	Updates a dynamic z profile (spectrum) for a rectangular roi.  Used to find specific spectral signatures in a multispectral image.
+Plugins>Stowers>Jay_Unruh>Image Tools	fit roi gaussian gridsearch jru v1	fit_roi_gaussian_gridsearch_jru_v1	Fits a rectangular region of interest to a gaussian using a gridsearch algorithm (robust but slow)
+Plugins>Stowers>Jay_Unruh>Image Tools	fit roi gaussian jru v1	fit_roi_gaussian_jru_v1	Fits a rectangular region of interest to a gaussian using non-linear least squares (fast but not robust)
+Plugins>Stowers>Jay_Unruh>Image Tools	float 3D depthcode jru v1	float_3D_depthcode_jru_v1	Color depthcode's a Z stack.  Depthcoding is performed from pure blue to pure red.  You can use negative numbers as the minimum depth to start coding in a different color region.
+Plugins>Stowers>Jay_Unruh>Image Tools	float 3D project jru v1	float_3D_project_jru_v1	Simple 3D image projection but with more options than the built in ImageJ version.
+Plugins>Stowers>Jay_Unruh>Image Tools	linear unmixing jru v1	linear_unmixing_jru_v1	Performs simple linear unmixing from a saved set of reference spectra or an existing plot window with multiple spectra.  The algorithm is simple linear least squares with equal weighting for all spectral channels.  Note that all reference spectra must have have the same starting and ending point and number of data points.  Reference and Backgound spectra can be saved using the appropriate menu selections.  Reference spectra are kept in a file called linear_unmixing_jru_v1.jrn in the user.home\ImageJ_defaults directory.  See Plugins--Utilities--ImageJ Properties... for the user.home location.
+Plugins>Stowers>Jay_Unruh>Image Tools	mask hist jru v1	mask_hist_jru_v1	Takes a single mask image and a stack and calculates a histogram over a single image or stack.  Can be used with a null mask to create a dynamic histogram of a stack.  Also creates a histogram of pixels outside the mask.
+Plugins>Stowers>Jay_Unruh>Image Tools	mask stack jru v1	mask_stack_jru_v1	Masks a stack with either a single mask or a stack of masks.  Sets all pixels outside of the mask to zero.  Leaves all pixels inside of the mask.
+Plugins>Stowers>Jay_Unruh>Image Tools	mask stats jru v1	mask_stats_jru_v1	"Calculates statistics for a mask or a stack of masks.  Calculates stats for both the regions inside the mask and outside.  If a stack is used, the statistics are output as a profile."
+Plugins>Stowers>Jay_Unruh>Image Tools	nnmf spectral unmixing jru v1	nnmf_spectral_unmixing_jru_v1	"Blind unmixing of a multispectral image using non-negative matrix factorization as referenced by Neher et al. Biophys. J. 2009 Vol. 96, p. 3791"
+Plugins>Stowers>Jay_Unruh>Image Tools	pca spectral unmixing jru v1	pca_spectral_unmixing_jru_v1	"Uses principle component analysis to find unknown spectra in a spectral image.  Raw found spectra can be negative, so reported spectra are typically the average of several pixels that lie closest to the found spectra (Get Spectra from Data)."
+Plugins>Stowers>Jay_Unruh>Image Tools	plot line profile jru v1	plot_line_profile_jru_v1	Plots a single vertical or horizontal line profile (easier than drawing an roi if you want an exact line).
+Plugins>Stowers>Jay_Unruh>Image Tools	plot line profiles jru v1	plot_line_profiles_jru_v1	Plots all of the line profiles for an image or rectangular roi.  A plot stack returns a scrollable profile.
+Plugins>Stowers>Jay_Unruh>Image Tools	polyline kymograph jru v1	polyline_kymograph_jru_v1	Plots a kymograph (stack) or profile (single image) for a line or polyline.  The line thickness to average (or sum) over is initialized to the ImageJ line thickness (adjusted by double clicking the line tool)
+Plugins>Stowers>Jay_Unruh>Image Tools	stack editor jru v1	stack_editor_jru_v1	"Range deletion editor for simple stacks.  Can delete slices above a slice number, below a slice number, or within a range."
+Plugins>Stowers>Jay_Unruh>Image Tools	stack statistics jru v1	stack_statistics_jru_v1	Calculates stack average and variance statistics for N and B analysis.
+Plugins>Stowers>Jay_Unruh>Image Tools	stack statistics jru v2	stack_statistics_jru_v2	Calculates simple stack statistics.
+Plugins>Stowers>Jay_Unruh>Image Tools	subtract min jru v1	subtract_min_jru_v1	Subtracts a value from every pixel and truncates negative values at 0.  The value is initialized to the lower level of the brightness and contrast display.
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	edit objects jru v1	edit_objects_jru_v1	"This plugin provides manual editing of segmentation maskes from outline objects jru v1.  There are options to separate, combine, dilate, erode, etc either allowing merging of objects or not.  The gui provides a running tally of the object count as well as some simple stats on the object under the cursor.  Can be used for karyotyping."
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	filter objects jru v1	filter_objects_jru_v1	"Filters an binary mask based on area, circularity, and removed edge objects."
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	gray morphology jru v1	gray_morphology_jru_v1	Standard gray morphology filters.
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	make edge connected jru v1	make_edge_connected_jru_v1	Makes outlines edge connected (masked pixels cannot have a diagonal black line running through them).  This can be usefull for filling holes on thinnly outlined objects.
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	outline objects jru v1	outline_objects_jru_v1	This is an interactive thresholding tool that provides outlines of the objects.  The output is a two channel image with the second channel giving the mask.  The result can feed directly into the edit_objects plugin.
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	realign movie jru v1	realign_movie_jru_v1	Takes a tracking trajectory and laterally shifts a movie to correct for tracked motion.
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	thresh 3D fraction max jru v1	thresh_3D_fraction_max_jru_v1	Performs thresholding using a fraction of the 3D maximum at each time point for the threshold.
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	track centroid jru v1	track_centroid_jru_v1	Tracks the centroid of a mask over time (must be the only mask).
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	track maximum jru v1	track_maximum_jru_v1	Tracks the maximum of an image over time.
+Plugins>Stowers>Jay_Unruh>Sim Tools	simfluc scanning jru v2	simfluc_scanning_jru_v2	Simulates FCS and Image Correlation data.
+Plugins>Stowers>Jay_Unruh>Table Tools	add table column jru v1	add_table_column_jru_v1	Add a new numeric column to a table using a javascript function and other column values.
+Plugins>Stowers>Jay_Unruh>Table Tools	combine all tables jru v1	combine_all_tables_jru_v1	Combine all open tables.
+Plugins>Stowers>Jay_Unruh>Table Tools	hist columns jru v1	hist_columns_jru_v1	Histogram a table column.
+Plugins>Stowers>Jay_Unruh>Table Tools	new clipboard table jru v1	new_clipboard_table_jru_v1	Imports a copied tab delimited table from the clipboard (can be from excel).
+Plugins>Stowers>Jay_Unruh>Table Tools	plot columns jru v1	plot_columns_jru_v1	Plot a table column.
+Plugins>Stowers>Jay_Unruh>Table Tools	search table jru v1	search_table_jru_v1	Search for a series of text strings in a table column.  The result is a new table with rows that match the search strings in the selected column.
+Plugins>Stowers>Jay_Unruh>Table Tools	sort table jru v1	sort_table_jru_v1	Sort the table by a specific column.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	analysis auto corr v2	analysis_auto_corr_v2	Program for analysis of FCS autocorrelation data.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	analysis cross corr v2	analysis_cross_corr_v2	Program for analysis of FCS crosscorrelation data.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	analysis pch 2D	analysis_pch_2D	Program for dual color PCH analysis.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	analysis pch	analysis_pch	Program for PCH analysis.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	average trajectories jru v1	average_trajectories_jru_v1	Average (or other stats) all of the plots in a plot window.  Can calculate errors if desired.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	batch FRAP fit jru v1	batch_FRAP_fit_jru_v1	Fit multiple FRAP recovery curves in a plot window to a single exponential recovery curve.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	combine all trajectories jru v1	combine_all_trajectories_jru_v1	Combine all open plot windows.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	combine trajectories jru v1	combine_trajectories_jru_v1	Combine selected plot windows.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	copy yvals jru v1	copy_yvals_jru_v1	Copy only the y values from a plot window.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	export plot jru v1	export_plot_jru_v1	Save a plot window as a pw file.  Can be imported using import plot jru v1.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	extract selected jru v1	extract_selected_jru_v1	Extract the selected plot into its own plot window.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	fit custom function jru v1	fit_custom_function_jru_v1	Fits the selected plot window to a script function.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	fit multi gaussian jru v1	fit_multi_gaussian_jru_v1	Fits a plot to multiple gaussians.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	fit poly jru v1	fit_poly_jru_v1	Fits a plot to a polynomial.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	function generator jru v1	function_generator_jru_v1	Generates a script function.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	import plot jru v1	import_plot_jru_v1	Imports a plot from a pw file.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	import t3r trajectory jru v1	import_t3r_trajectory_jru_v1	Imports a picoquant t3r trajectory.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	import trajectory jru v1	import_trajectory_jru_v1	Imports a binary trajectory.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	normalize trajectories jru v1	normalize_trajectories_jru_v1	Normalize plots to their maximum or integral.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	separate trajectories jru v1	separate_trajectories_jru_v1	Separate trajectories into multiple plot windows.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	smooth trajectory jru v1	smooth_trajectory_jru_v1	Smooth the trajectory using a simple 3 point boxcar function.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	text2plot jru v1	text2plot_jru_v1	"Convert text to a plot.  The text can be from a file, the clipboard, results window, or text window."
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj 2 roi jru v1	traj_2_roi_jru_v1	Converts a trajectory plot to an ROI.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj avg velocity jru v1	traj_avg_velocity_jru_v1	Calculates the average velocity of a trajectory over a specified time interval.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj calculator jru v1	traj_calculator_jru_v1	Simple arithmetic from two plots similar to the ImageJ image calculator.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj crop jru v1	traj_crop_jru_v1	Crop a trajectory from min to max x values.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj MAD jru v1	traj_MAD_jru_v1	Calculate the mean squared angular displacement as a function of time shift.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj MSD jru v1	traj_MSD_jru_v1	Calculate the mean squared displacement as a function of time shift.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj rescale x jru v1	traj_rescale_x_jru_v1	Rescale the x axis of plot using simple linear interpolation between minimum and maximum values.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	trajectory statistics jru v1	trajectory_statistics_jru_v1	Average and variance or covariance statistics for N&B analysis.
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	trajectory statistics jru v2	trajectory_statistics_jru_v2	Simple plot statistics.
+Jay_Plugins2	second plugins jar	Jay_Plugins2.jar	Second plugins file
+Plugins>Stowers>Jay_Unruh>Carpet Tools	carpet ICCS jru v1	carpet_ICCS_jru_v1	calculates the spatial cross correlation for a carpet (power of 2 width)
+Plugins>Stowers>Jay_Unruh>Carpet Tools	carpet ICCS pearson jru v1	carpet_ICCS_pearson_jru_v1	"as above, but calculates the pearson correlation"
+Plugins>Stowers>Jay_Unruh>Carpet Tools	carpet ICS jru v1	carpet_ICS_jru_v1	calculates the spatial correlation for a carpet
+Plugins>Stowers>Jay_Unruh>Carpet Tools	carpet stics jru v1	carpet_stics_jru_v1	calculates the spatio-temporal correlation for a carpet
+Plugins>Stowers>Jay_Unruh>Carpet Tools	fit carpet stics jru v1	fit_carpet_stics_jru_v1	fits a STICS carpet to gaussians (center is fixed)--basically just a multiple gaussian profile fitting plugin
+Plugins>Stowers>Jay_Unruh>Carpet Tools	get line traj jru v1	get_line_traj_jru_v1	Uses a thick polyline drawn down a binned carpet to create a trajectory integrating over the same thickness on an unbinned carpet.
+Plugins>Stowers>Jay_Unruh>Detrend Tools	carpet sub avg jru v1	carpet_sub_avg_jru_v1	Subtracts the average profile from a carpet
+Plugins>Stowers>Jay_Unruh>File Tools	" ""batch LOCI converter jru v1"""	 batch_LOCI_converter_jru_v1	batch converts a multifile format like leica or perkin elmer to ImageJ tiffs--can use avoid metadata to fix LOCI crash issues
+Plugins>Stowers>Jay_Unruh>File Tools	DV file reader jru v1	DV_file_reader_jru_v1	reads deltavision dv and otf files
+Plugins>Stowers>Jay_Unruh>File Tools	" ""LOCI file reader jru v1"""	 LOCI_file_reader_jru_v1	opens files using the LOCI library--can use avoid metadata to fix LOCI crash issues
+Plugins>Stowers>Jay_Unruh>File Tools	generate jru luts jru v1	generate_jru_luts_jru_v1	generates my lookup tables
+Plugins>Stowers>Jay_Unruh>File Tools	get imaris spot traj jru v1	get_imaris_spot_traj_jru_v1	gets as series of spots from Imaris via ImarisXT and the ImarisBridge
+Plugins>Stowers>Jay_Unruh>File Tools	HEFT shortcut window jru v1	HEFT_shortcut_window_jru_v1	"provides a drag-n-drop window for a HandleExtraFileTypesjru class.  If it is not found, uses the default HandleExtraFileTypes class.  In the future will provide an interactive interface for adding file import plugins."
+Plugins>Stowers>Jay_Unruh>File Tools	import KISS jru v1	import_KISS_jru_v1	imports a .kiss file containing spectral karyotyping data
+Plugins>Stowers>Jay_Unruh>File Tools	import toa trajectory jru v1	import_toa_trajectory_jru_v1	imports a time of arrival trajectory as little endian integers; checking photon mode imports the photon arrival interval in clock units
+Plugins>Stowers>Jay_Unruh>File Tools	register Jay_Unruh readers jru v1	register_Jay_Unruh_readers_jru_v1	called via my autorun macro to register my loci readers
+Plugins>Stowers>Jay_Unruh>File Tools	set imaris dataset jru v1	set_imaris_dataset_jru_v1	sends a the current image to Imaris vis ImarisXT and ImarisBridge
+Plugins>Stowers>Jay_Unruh>File Tools	set imaris spot traj jru v1	set_imaris_spot_traj_jru_v1	sends a 3D trajectory to Imaris via ImarisXT and the ImarisBridge as a series of spots
+Plugins>Stowers>Jay_Unruh>ICS Tools	complex amp jru v1	complex_amp_jru_v1	computes the amplitude of an interlaced complex stack (amp=sqrt(real*real+im*im))
+Plugins>Stowers>Jay_Unruh>ICS Tools	complex phase jru v1	complex_phase_jru_v1	"computes the phase of an interlaced complex stack (phase=atan2(im,real))"
+Plugins>Stowers>Jay_Unruh>ICS Tools	fit ICS jru v1	fit_ICS_jru_v1	fits the 2D image correlation for the stdev of the underlying objects (or PSF) (not the standard devation of the correlation function)
+Plugins>Stowers>Jay_Unruh>ICS Tools	fft3D jru v1	fft3D_jru_v1	"calculates the forward or inverse 3D fft, image will be truncated to best size (usually power of 2)"
+Plugins>Stowers>Jay_Unruh>ICS Tools	fft2D jru v1	fft2D_jru_v1	"calculates the forward or inverse 2D fft, image will be truncated to best size (usually power of 2)"
+Plugins>Stowers>Jay_Unruh>ICS Tools	stack FFT STICS jru v1	stack_FFT_STICS_jru_v1	calculates the spatial cross correlation of images in a stack with different temporal shifts
+Plugins>Stowers>Jay_Unruh>ICS Tools	stack temporal fft jru v1	stack_temporal_fft_jru_v1	does an fft down a stack--data are truncated to best length
+Plugins>Stowers>Jay_Unruh>ICS Tools	stack FFT TICS jru v1	stack_FFT_TICS_jru_v1	calculates the temporal correlation at each pixel
+Plugins>Stowers>Jay_Unruh>ICS Tools	stack FFT TICCS jru v1	stack_FFT_TICCS_jru_v1	calculates the temporal cross-correlation at each pixel of a hyperstack
+Plugins>Stowers>Jay_Unruh>ICS Tools	STICS map jru v3	STICS_map_jru_v3	computes flow maps using STICS as with v2 (Jay_Unruh_Plugins) but allows for time lapse flow maps
+Plugins>Stowers>Jay_Unruh>ICS Tools	traj pearson spatial cc jru v1	traj_pearson_spatial_cc_jru_v1	calculates the spatial pearson cross correlation of two trajectories (in the same window) for colocalization
+Plugins>Stowers>Jay_Unruh>Image Tools	autoscale hyperstack jru v1	autoscale_hyperstack_jru_v1	autoscales a hyperstack to the max intensity and puts the current slice at the max in the current channel
+Plugins>Stowers>Jay_Unruh>Image Tools	combine stacks jru v1	combine_stacks_jru_v1	"combines hyperstacks either in c, z, or t dimensions--pads incomplete hyperstacks to match"
+Plugins>Stowers>Jay_Unruh>Image Tools	difference movie jru v1	difference_movie_jru_v1	calculates the time derivative for each pixel (t2-t1) and corrects for overall bleaching if desired
+Plugins>Stowers>Jay_Unruh>Image Tools	dynamic hs profile jru v1	dynamic_hs_profile_jru_v1	"calculates real time plot profiles of background subtracted profiles, can do ratio profiles, can do multiple profiles via the roi manager"
+Plugins>Stowers>Jay_Unruh>Image Tools	FRET heat map jru v2	FRET_heat_map_jru_v2	2D histogramming software for acceptor photobleaching FRET analysis with smoothing and heatmap generation
+Plugins>Stowers>Jay_Unruh>Image Tools	fit 3D multi gaussian jru v1	fit_3D_multi_gaussian_jru_v1	Fits a small 2D or 3D image to a combination of gaussians.  Initial positions are selected with point roi's
+Plugins>Stowers>Jay_Unruh>Image Tools	image hist2D jru v1	image_hist2D_jru_v1	creates an interactive 2D histogram of two selected image channels
+Plugins>Stowers>Jay_Unruh>Image Tools	interactive 3D viewer jru v1	interactive_3D_viewer_jru_v1	"interactive program for viewing and analyzing 3D data sets, can create 3D straightened profiles"
+Plugins>Stowers>Jay_Unruh>Image Tools	set lut colors jru v1	set_lut_colors_jru_v1	sets channel colors from pull down menus for macros and so that they are saved with the file
+Plugins>Stowers>Jay_Unruh>Image Tools	StackRegJ_	StackRegJ_	modified version of StackReg that aligns hyperstacks based on the current channel and slice and outputs a translation trajectory
+Plugins>Stowers>Jay_Unruh>Image Tools	KISS unmixing jru v1	KISS_unmixing_jru_v1	"Unmixes a set of three karyotype images (488, 561, and 633 nm excitation) with three spectral plots created by get KISS spectra jru v1"
+Plugins>Stowers>Jay_Unruh>Image Tools	Time Stamper jru v1	Time_Stamper_jru_v1	"my modified version of the original in ImageJ, implements interactive positioning and bold text"
+Plugins>Stowers>Jay_Unruh>Misc Tools	fit custom tub4 jru v1	fit_custom_tub4_jru_v1	Custom 3D fitting implementation for tub4-like objects at the yeast spindle pole body
+Plugins>Stowers>Jay_Unruh>Misc Tools	flip roi mirror right jru v1	flip_roi_mirror_right_jru_v1	Measures the intensity in the current channel in an roi and its horizontal mirror.  Flips all channels so that the roi is higher than its mirror.
+Plugins>Stowers>Jay_Unruh>Misc Tools	line radial angle measure jru v1	line_radial_angle_measure_jru_v1	Measures the angles of line rois relative to a point or oval roi in the roi manager
+Plugins>Stowers>Jay_Unruh>PALM Tools	filtered BALM3D jru v1	filtered_BALM3D_jru_v1	"calculates a difference image series with non-linear filtering to produce a super-res image, related to Munck et al. Nature Methods 2012"
+Plugins>Stowers>Jay_Unruh>PALM Tools	palm display jru v1	palm_display_jru_v1	Analyzes molecule data (image carpet) output by palm fit3 jru v1
+Plugins>Stowers>Jay_Unruh>PALM Tools	palm fit3 jru v1	palm_fit3_jru_v1	PALM analysis program
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	batch object measure jru v2	batch_object_measure_jru_v2	Recursively analyzes a folder and subfolder of images for intensity inside a nuclear mask and in a circular 4 pixel thick region outside the nucleus.  Thresholding is the default ImageJ threshholding.  Edit the code to change the default file name format for measurement and DAPI images.
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	cell quadrant profile jru v1	cell_quadrant_profile_jru_v1	Measures the sum of intensity for a specified number of pie slices centered around the middle of a line roi.  The center of the line should be in the middle of the measured object.  The pie slices start at the line and move counter clockwise around the circle.
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	edit KISS codes jru v1	edit_KISS_codes_jru_v1	Edit's the dye combination codes corresponding to a mouse or human KISS (Spectral Karyotyping) experiment
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	hist 2 overlay jru v1	hist_2_overlay_jru_v1	Creates an overlay on a selected image from a selected 1D or 2D histogram regiom
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	KISS analysis jru v1	KISS_analysis_jru_v1	Performs spectral karyotyping analysis.  Requires a DAPI objects image created by outline objects jru v1 and edit objects jru v1 as well as an unmixed karyotype image created by KISS unmixing jru v1
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	man track jru v1	man_track_jru_v1	Manual tracking plugin.
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	objects 2 rois jru v1	objects_2_rois_jru_v1	Converts binary or indexed images to rois
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	plate analysis jru v1	plate_analysis_jru_v1	analyzes a yeast growth plate and outputs a large table. Start by selecting the corners of the plate with the polygon tool.
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	quadrant profile jru v1	quadrant_profile_jru_v1	measures numbers of red green and yellow cells as a function of time for a mask movie and a red/green composite
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	spb partition analysis jru v2	spb_partition_analysis_jru_v2	Measures the ratio of yeast spb intensity to the entire nuclear intensity from a 3D image.  A second channel must be present with an SPB marker
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	thick 3D polyline profile jru v1	thick_3D_polyline_profile_jru_v1	creates a thick 3D polyline profile from a stack and a 3D trajectory plot
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	thresh color image jru v1	thresh_color_image_jru_v1	thresholds color images based on the white signal region (selected roi or autoselected as highest transmission) and the minimum intensity
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	track max not mask jru v1	track_max_not_mask_jru_v1	"tracks peaks by finding the maximum intensity above threshold, masking a region around it, finding the next maximum and so on until no maxim are above threshold"
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	track objects jru v2	track_objects_jru_v2	"tracks objects, measuring ellipse parameters"
+Plugins>Stowers>Jay_Unruh>Sim Tools	frap sim jru v1	frap_sim_jru_v1	"simulates FRAP and iFRAP recovery with non-uniform diffusion as described in Slaughter et al, Nature Communications, 2013, need to edit code to change parameters"
+Plugins>Stowers>Jay_Unruh>Sim Tools	sim exo endo jru v2	sim_exo_endo_jru_v2	"simulates stochastic exo and endocytosis with internal and external membranes as described in Slaughter et al, Nature Communications, 2013, need to edit code to change parameters"
+Plugins>Stowers>Jay_Unruh>Sim Tools	sim FLIM jru v1	sim_FLIM_jru_v1	simulates FLIM data with a gaussian instrument response function
+Plugins>Stowers>Jay_Unruh>Sim Tools	simfluc point jru v2	simfluc_point_jru_v2	simulates single point fcs and fccs data with triplet and channel specific bleaching
+Plugins>Stowers>Jay_Unruh>Table Tools	cell hist stack jru v1	cell_hist_stack_jru_v1	creates a stack of histograms (or separate ones) for all the cells (see above) in a table
+Plugins>Stowers>Jay_Unruh>Table Tools	col to uppercase jru v1	col_to_uppercase_jru_v1	converts the letters in a column to uppercase
+Plugins>Stowers>Jay_Unruh>Table Tools	filter table jru v1	filter_table_jru_v1	filters a table according to numeric gates
+Plugins>Stowers>Jay_Unruh>Table Tools	filtered cell stats jru v1	filtered_cell_stats_jru_v1	"finds ""cells"" (rows with the same unique string in the ""cell"" column) and calculates their statistics with numeric filtering"
+Plugins>Stowers>Jay_Unruh>Table Tools	filtered cell stats jru v2	filtered_cell_stats_jru_v2	same as above but callable from a macro
+Plugins>Stowers>Jay_Unruh>Table Tools	parse col string jru v1	parse_col_string_jru_v1	finds a substring in a column string based on delimiters or specified string positions
+Plugins>Stowers>Jay_Unruh>Table Tools	search table jru v2	search_table_jru_v1	searches for substrings in a specified search column
+Plugins>Stowers>Jay_Unruh>Table Tools	table2image jru v1	table2image_jru_v1	converts a table to an image
+Plugins>Stowers>Jay_Unruh>Table Tools 	batch import table jru v1	batch_import_table_jru_v1	imports all .xls (tab delimited) tables in a folder and its subfolders
+Plugins>Stowers>Jay_Unruh>Table Tools 	import table jru v1	import_table_jru_v1	imports multiple selected tables with custom delimiters
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	calc c3 wlswitch freq jru v1	calc_c3_wlswitch_freq_jru_v1	calculates the switching frequency for FCCS-ALEX data
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	copy errors jru v1	copy_errors_jru_v1	copies the error bar values for a PlotWindow trajectory
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	copy as emf jru v1	copy_as_emf_jru_v1	
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	copy as eps jru v1	copy_as_eps_jru_v1	
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	copy as pdf jru v1	copy_as_pdf_jru_v1	
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	copy as svg jru v1	copy_as_svg_jru_v1	
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	edit plot colors jru v1	edit_plot_colors_jru_v1	edits the colors for the different plot series'
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	edit plot sizes jru v1	edit_plot_sizes_jru_v1	edits the text and symbol sizes for plot windows
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	export EMF jru v1	export_EMF_jru_v1	"exports a plot as an enhanced metafile (emf) or postscript (ps, eps).  Need to have ps or eps extension to save as these files."
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	fit gaussian jru v1	fit_gaussian_jru_v1	fits a plot to a gaussian function
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	fit multi gaussian jru v3	fit_multi_gaussian_jru_v3	uses points from the roi manager to initialize a multi-gaussian fit
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	get KISS spectra jru v1	get_KISS_spectra_jru_v1	"assembles reference spectra images for spectral karyotyping analysis, uses roi if present"
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	histogram traj jru v1	histogram_traj_jru_v1	histograms a PlotWindow trajectory
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	histogram2D traj jru v1	histogram2D_traj_jru_v1	histograms a PlotWindow trajectory (containing multiple trajectories) with a 2D histogram
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	import confocor3 trajectory jru v1	import_confocor3_trajectory_jru_v1	imports a Zeiss .raw fcs file as either time mode (photons per time bin) or photon mode (clocks between photons) data
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	import c3 wlswitch trajectory jru v1	import_c3_wlswitch_trajectory_jru_v1	imports and unmixes FCCS-ALEX trajectories
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	import iss trajectory jru v1	import_iss_trajectory_jru_v1	imports iss trajectory files
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	import pt2 trajectory jru v1	import_pt2_trajectory_jru_v1	imports picoquant pt2 trajectory files
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	PlotWindow Extensions jru v1	PlotWindow_Extensions_jru_v1	implements the PlotWindow macro extensions
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	resample plot jru v1	resample_plot_jru_v1	resamples a plot by linear interpolation from a starting point to an ending point with a specified x axis spacing--assumes current spacing is constant
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj fft 2corr jru v1	traj_fft_2corr_jru_v1	"performs auto, cross, and higher order correlations on single or dual trajectories"
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj math jru v1	traj_math_jru_v1	performs simple math on x or y components of a plot window trajectory
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj crop jru v2	traj_crop_jru_v2	crops a trajectory
+Jay_Plugins3	third plugins jar	Jay_Plugins3.jar	Third plugins file
+Plugins>Stowers>Jay_Unruh>Misc Tools	adjust color balance jru v1	adjust_color_balance_jru_v1	simple plugin to adjust color offset and balance for single color images
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	measure trajectories jru v1	measure_trajectories_jru_v1	measures a certain radius around each trajectory point
+Plugins>Stowers>Jay_Unruh>Misc Tools	id mother lineage jru v1	id_mother_lineage_jru_v1	"takes a table with cell_id, x, y, intensity, start frame, and relative frame and finds mother-daughter pairs by distance, intensity drop, and velocity change"
+Plugins>Stowers>Jay_Unruh>Misc Tools	dna damage analysis jru v1	dna_damage_analysis_jru_v1	"aligns dna damage intensity plots with data sets in the order stripe, off-stripe, whole cell and reports rt values and smoothed max rt values"
+Plugins>Stowers>Jay_Unruh>Misc Tools	dna damage FRET analysis jru v2	dna_damage_FRET_analysis_jru_v2	"aligns dna damage intensity plots with fret and data sets in the order stripe, off-stripe, whole cell and reports rt values and smoothed max rt values"
+Plugins>Stowers>Jay_Unruh>Misc Tools	dna damage analysis multicolor jru v1	dna_damage_analysis_multicolor_jru_v1	two color version of dna damage analysis
+Plugins>Stowers>Jay_Unruh>Image Tools	linear unmixing jru v2	linear_unmixing_jru_v2	a linear unmixing version which doesn't use a spectra library: must have spectra open as plot windows to run
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	trajectories 2 flowmap jru v1	trajectories_2_flowmap_jru_v1	calculates average flow velocity (magnitude and direction) for overlapping regions in a set of trajectories and makes a flowmap
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	count max not mask jru v1	count_max_not_mask_jru_v1	counts spots in a similar way to track max not mask jru v1
+Plugins>Stowers>Jay_Unruh>Misc Tools	Create Plugin jru v1	Create_Plugin_jru_v1	creates a plugin with the old style editor
+Plugins>Stowers>Jay_Unruh>Image Tools	overlay image jru v1	overlay_image_jru_v1	overlay's an image on a color image
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	set multi plot offsets jru v1	set_multi_plot_offsets_jru_v1	subtracts an offset from each plot in a multiplot window
+Plugins>Stowers>Jay_Unruh>Image Tools	make inset jru v1	make_inset_jru_v1	interactively places an inset on a stack
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	filter 3D objects jru v1	filter_3D_objects_jru_v1	filters 3D objects (binary 3D mask) based on area and whether they touch the edge
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	object measure 3D jru v1	object_measure_3D_jru_v1	measures 3D objects (binary 3D mask) in a secondary image as well as areas and centroids
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	convert to mask jru v1	convert_to_mask_jru_v1	converts an image to an 8-bit mask
+Plugins>Stowers>Jay_Unruh>ICS Tools	fit RICS jru v2	fit_RICS_jru_v2	updated RICS fitting with better gui
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	check track alignment jru v1	check_track_alignment_jru_v1	check a trajectory overlayed on an image and correct it if necessary
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	duplicate trajectory jru v1	duplicate_trajectory_jru_v1	duplicated a selected trajectory trace
+Plugins>Stowers>Jay_Unruh>Sim Tools	propagate errors jru v1	propagate_errors_jru_v1	simulate the result of a simple algebraic formula with component errors and get errors in the resulting value
+Plugins>Stowers>Jay_Unruh>Misc Tools	filter channel contributions jru v1	filter_channel_contributions_jru_v1	deletes the pixels of a selected channel when they are below the threshold fraction of the total channel sum
+Plugins>Stowers>Jay_Unruh>Misc Tools	get window class info jru v1	get_window_class_info_jru_v1	gets the name of the java class behind the selected window and lists that class's public methods
+Plugins>Stowers>Jay_Unruh>Image Tools	merge all stacks jru v1	merge_all_stacks_jru_v1	"merges all open stacks together, centers and pads images, if they all have same channels, slices, appends to the frame dimension"
+Plugins>Stowers>Jay_Unruh>Batch Tools	search slice labels jru v1	search_slice_labels_jru_v1	"selects images out of a hyperstack with the listed names, can paste names from column in excel"
+Plugins>Stowers>Jay_Unruh>Table Tools	close table jru v1	close_table_jru_v1	close a table by name (other than the results table)
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	jay stitching plugin jru v1	jay_stitching_plugin_jru_v1	"stitches a set of 2D images and outputs the coordinates as a plot window, the image must be in a 2D stack in order of acquisition"
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	stitch mosaic image jru v1	stitch_mosaic_image_jru_v1	"stitches a hyperstack from a set of coordinates (from a plot window), uses the time dimension as the tile dimension"
+Plugins>Stowers>Jay_Unruh>Image Tools	divide by blurred jru v1	divide_by_blurred_jru_v1	divides the image by a blurred version with a minimum ratio (to avoid infinite values)
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	adaptive threshold jru v2	adaptive_threshold_jru_v2	performs an adaptive threshold with the imagej autothreshold tools
+Plugins>Stowers>Jay_Unruh>File Tools	batch file open jru v1	batch_file_open_jru_v1	batch opens a set of files from a folder with a common substring and extension
+Plugins>Stowers>Jay_Unruh>Image Tools	set min max all chan jru v1	set_min_max_all_chan_jru_v1	propagates the range settings to all channels: fixes a bug in the ImageJ lut manager
+Plugins>Stowers>Jay_Unruh>Image Tools	set lut ranges jru v1	set_lut_ranges_jru_v1	Single dialog to set all lut ranges for an image
+Plugins>Stowers>Jay_Unruh>Misc Tools	add random rois jru v1	add_random_rois_jru_v1	"places random point rois in the roi manager in x, y, and z"
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	object area centroid surface 3D jru v1	object_area_centroid_surface_3D_jru_v1	"measures areas, centroids, and surface voxel counts for 3D objects"
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	fit traj gaussian gridsearch jru v1	fit_traj_gaussian_gridsearch_jru_v1	fits the points corresponding to a trajectory to gaussian functions using the gridsearch algorithm
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	auto roll ball back sub jru v1	auto_roll_ball_back_sub_jru_v1	subtracts the minimum of the rolling ball smoothed image from an image (should correspond to background minimum if there is a background region larger than the rolling ball radius)
+Plugins>Stowers>Jay_Unruh>Misc Tools	remove dark pixels jru v1	remove_dark_pixels_jru_v1	replaces dark or bright pixels with 0 or the average of their surrounding border
+Plugins>Stowers>Jay_Unruh>Table Tools	rename table jru v1	rename_table_jru_v1	renames a table window
+Plugins>Stowers>Jay_Unruh>Table Tools	export table jru v1	export_table_jru_v1	exports a table as different text file types
+Plugins>Stowers>Jay_Unruh>Image Tools	channel math jru v1	channel_math_jru_v1	performs math operations on different channels independently
+Plugins>Stowers>Jay_Unruh>File Tools	stitch pe library jru v2	stitch_pe_library_jru_v2	stitches a perkin elmer raw tiles data set with either the metadata positions (from open pe library tiles) or a plot window coordinate set
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	loess smooth jru v1	loess_smooth_jru_v1	smooths a trajectory by fitting a sliding window with a line or cubic polynomial
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	fit traj double gaus jru v1	fit_traj_double_gaus_jru_v1	fits a trajectory with a double gaussian function
+Plugins>Stowers>Jay_Unruh>Misc Tools	histogram 2D spectral phasor jru v1	histogram_2D_spectral_phasor_jru_v1	uses a fourier phasor histogram to interpret linear combinations of spectral components and get their profiles
+Plugins>Stowers>Jay_Unruh>ImageStream	flowsight custom converter jru v1	flowsight_custom_converter_jru_v1	custom conversion of imagestream cif file format to a table of measurements
+Plugins>Stowers>Jay_Unruh>ImageStream	flowsight fret map jru v1	flowsight_fret_map_jru_v1	generates a fret map from an imagestream cif file
+Plugins>Stowers>Jay_Unruh>ImageStream	flowsight outside puncta conc jru v1	flowsight_outside_puncta_conc_jru_v1	more imagestream measurements
+Plugins>Stowers>Jay_Unruh>ImageStream	flowsight stack importer jru v1	flowsight_stack_importer_jru_v1	imports an imagestream cif file as a multichannel stack
+Plugins>Stowers>Jay_Unruh>File Tools	export flowcyte jru v1	export_flowcyte_jru_v1	exports a table as a .fcs flow cytometry file
+Plugins>Stowers>Jay_Unruh>File Tools	import flowcyte jru v1	import_flowcyte_jru_v1	imports a .fcs flow cytometry file
+Plugins>Stowers>Jay_Unruh>File Tools	dump tiff tags jru v1	dump_tiff_tags_jru_v1	dumps the tiff tags in an image as tables or xml windows
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	object measure jru v1	object_measure_jru_v1	"measures the intensity of a set of objects (binary, roi, or indexed) across a number of slices"
+Plugins>Stowers>Jay_Unruh>Table Tools	add table column string jru v1	add_table_column_string_jru_v1	does string logic on a column to create a new column (in javascript)
+Plugins>Stowers>Jay_Unruh>Table Tools	delete table column jru v1	delete_table_column_jru_v1	removes a table column
+Plugins>Stowers>Jay_Unruh>Table Tools	combine tables jru v1	combine_tables_jru_v1	
+Plugins>Stowers>Jay_Unruh>File Tools	get metadata tag jru v1	get_metadata_tag_jru_v1	get a metadata tag by name from a set of files
+Plugins>Stowers>Jay_Unruh>Misc Tools	custom yeast nuclear table jru v2	custom_yeast_nuclear_table_jru_v2	custom concatenation of multiple tables for a yeast inm localisation problem
+Plugins>Stowers>Jay_Unruh>Batch Tools	heatmap jru v1	heatmap_jru_v1	creates a heatmap from a table given x and y columns and a value column
+Plugins>Stowers>Jay_Unruh>Image Tools	autoscale stack jru v1	autoscale_stack_jru_v1	converts a stack to RGB using a set percentile lut range
+Plugins>Stowers>Jay_Unruh>Misc Tools	create montages from table jru v1	create_montages_from_table_jru_v1	creates a montage out of two columns of images from a table where all of the images come from a specified folder
+Plugins>Stowers>Jay_Unruh>Image Tools	flatten shifted labels jru v1	flatten_shifted_labels_jru_v1	flattens the rois with shifted labels so they don't overlap things in the center of the roi
+Plugins>Stowers>Jay_Unruh>Misc Tools	segment nucleoli jru v1	segment_nucleoli_jru_v1	segments nucleoli with a nuclear (e.g. DAPI) channel present
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	track max not mask 3D jru v1	track_max_not_mask_3D_jru_v1	3D version of track max not mask
+Plugins>Stowers>Jay_Unruh>Misc Tools	test sedt jru v1	test_sedt_jru_v1	a version of signed euclidian distance transform where the z spacing is different than the xy spacing
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	roi 2 traj jru v1	roi_2_traj_jru_v1	converts a set of point rois to a plotwindow trajectory
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	roi 2 traj3D jru v1	roi_2_traj3D_jru_v1	converts a set of point rois to a 3D plotwindow trajectory
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	set 3D shapes jru v1	set_3D_shapes_jru_v1	sets the shapes of a 3D plotwindow trajectory
+Plugins>Stowers>Jay_Unruh>Misc Tools	fit custom ring jru v1	fit_custom_ring_jru_v1	"fits a 3D ring in the selected channel, four point rois must be in the roi manager moving clockwise around the ring at 12, 3, 6, and 9 o'clock positions, four profiles are fit going counter clockwise and finally the image is realigned so that the ring is in the center and flat, the ring is not allowed to tilt more than 45 degrees"
+Plugins>Stowers>Jay_Unruh>Misc Tools	coord transformation jru v1	coord_transformation_jru_v1	"finds the rigid body or affine transformation between two tables containing paired x,y, and z coordinates"
+Plugins>Stowers>Jay_Unruh>Misc Tools	custom image transformation jru v1	custom_image_transformation_jru_v1	"takes a centroid table, a rotation matrix table, and a scaling factor and transforms one image into another's coordinate system"
+Plugins>Stowers>Jay_Unruh>File Tools	batch LOCI converter jru v2	batch_LOCI_converter_jru_v2	batch exports a multiseries file into a selected folder without loading it into memory
+Plugins>Stowers>Jay_Unruh>Image Tools	channel alignment jru v1	channel_alignment_jru_v1	interactive arbitrary relative shift of different channels in xy
+Plugins>Stowers>Jay_Unruh>Image Tools	channel alignment z jru v1	channel_alignment_z_jru_v1	allows for arbitrary relative shift of different channels in z
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	find circular background jru v1	find_circular_background_jru_v1	searches all channels inside a border for the minimum circular background region
+Help>About Plugins	show plugins list jru v1	show_plugins_list_jru_v1	shows this list
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	fit FRAP jru v1	fit_FRAP_jru_v1	manual fit of frap data
+Plugins>Stowers>Jay_Unruh>Misc Tools	contour selection jru v1	contour_selection_jru_v1	draws a contour at the indicated fraction of max intensity and adds it to the roi manager
+Plugins>Stowers>Jay_Unruh>File Tools	export emf image rois jru v1	export_emf_image_rois_jru_v1	exports the drawn rois on an image along with the image as an emf vector graphics file which can be edited in adobe illustrator
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	rois 2 objects jru v1	rois_2_objects_jru_v1	"converts rois to binary or indexed objects, points are converted to squares"
+Plugins>Stowers>Jay_Unruh>Table Tools	filter table spatial rois jru v1	filter_table_spatial_rois_jru_v1	filters a table with x and y columns (in pixels) according to a set of rois in the RoiManager--can add an roi index column to the table
+Plugins>Stowers>Jay_Unruh>Misc Tools	multi point roi 2 roimanager jru v1	multi_point_roi_2_roimanager_jru_v1	converts a multi point roi to multi single rois in the roi manager
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	stitch stics jru v1	stitch_stics_jru_v1	uses a set of small images along the common seam of each image (like stics or optic flow) to stitch a set of images (configured as a time lapse)
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	kernel density est jru v1	kernel_density_est_jru_v1	uses kernel density estimation to smooth a 1D histogram or create a smoothed 1D histogram of a trajectory
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	track max not mask jru v2	track_max_not_mask_jru_v2	slightly faster tracking plugin that uses a slightly different algorithm (sorts image intensities above threshold to speed search)
+Plugins>Stowers>Jay_Unruh>Table Tools	make subtable jru v1	make_subtable_jru_v1	makes a subtable out of selected columns of a table
+Plugins>Stowers>Jay_Unruh>Misc Tools	custom yeast nuclear table jru v4	custom_yeast_nuclear_table_jru_v4	custom transformation of a table of yeast nuclear localization data
+Plugins>Stowers>Jay_Unruh>Misc Tools	custom yeast nuclear table jru v5	custom_yeast_nuclear_table_jru_v5	custom transformation of a table of yeast nuclear localization data
+Plugins>Stowers>Jay_Unruh>Sim Tools	sim kt tracking jru v1	sim_kt_tracking_jru_v1	runs many simulations of kinetochore loss from a sleeve
+Plugins>Stowers>Jay_Unruh>Misc Tools	find single double spots jru v1	find_single_double_spots_jru_v1	finds single and double spots in the selected channel of a z stack and adds them to the roi manager
+Plugins>Stowers>Jay_Unruh>Image Tools	merge channels jru v1	merge_channels_jru_v1	merges multiple single or multichannel images together
+Plugins>Stowers>Jay_Unruh>File Tools	open pe library tiles jru v1	open_pe_library_tiles_jru_v1	opens a set of pe library tiles as a time series as well as the metadata position information
+Plugins>Stowers>Jay_Unruh>Table Tools	duplicate table jru v1	duplicate_table_jru_v1	duplicates a table and appends _1 to the name
+Plugins>Stowers>Jay_Unruh>Table Tools	filter table jru v2	filter_table_jru_v2	filters a table in a macro recordable fashion
+Plugins>Stowers>Jay_Unruh>Table Tools	new table jru v1	new_table_jru_v1	creates a new empty table with the specified number of columns and column labels
+Plugins>Stowers>Jay_Unruh>Table Tools	add table row jru v1	add_table_row_jru_v1	adds a row to a table
+Plugins>Stowers>Jay_Unruh>Misc Tools	get crypt xz profile jru v1	get_crypt_xz_profile_jru_v1	cryptic description of a plugin
+Plugins>Stowers>Jay_Unruh>Image Tools	separate all frames jru v1	separate_all_frames_jru_v1	"separates all of the frames of a hyperstack, naming them according to their slice labels"
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	fit multi gaussian jru v4	fit_multi_gaussian_jru_v4	multigaussian trajectory fitting with an unlimited number of peaks and monte carlo error analysis
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	copy plot custom jru v1	copy_plot_custom_jru_v1	copy's a custom combination of x and y values and errors from a plot
+Plugins>Stowers>Jay_Unruh>Image Tools	transmission 2 absorbance jru v1	transmission_2_absorbance_jru_v1	converts grayscale transmitted light images to absorbance (optical density).  Select a 100% transmission area before running.  Assumes that black is 0% transmission corresponding to the specified maximum OD.
+Plugins>Stowers>Jay_Unruh>File Tools	import jfcs jru v1	import_jfcs_jru_v1	"imports a jfcs file containing all of an fcs data set analysis (supports analysis autocorr v2 for now, will eventually add analysis crosscorr)"
+Plugins>Stowers>Jay_Unruh>Carpet Tools	find carpet max column jru v1	find_carpet_max_column_jru_v1	finds the maximum column for each row of a carpet
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	realign movie z jru v1	realign_movie_z_jru_v1	realigns a movie in z according to a plot window trajectory (in slice units)
+Plugins>Stowers>Jay_Unruh>Batch Tools	batch plate analysis jru v1	batch_plate_analysis_jru_v1	runs a batch colony growth plate analysis on a folder--see plate analysis jru v1 for details
+Plugins>Stowers>Jay_Unruh>Table Tools	add row numbers jru v1	add_row_numbers_jru_v1	adds a row numbers column to a table
+Plugins>Stowers>Jay_Unruh>Table Tools	close all tables jru v1	close_all_tables_jru_v1	closes all currently open tables
+Plugins>Stowers>Jay_Unruh>Table Tools	edit column labels jru v1	edit_column_labels_jru_v1	edit table column labels
+Plugins>Stowers>Jay_Unruh>Misc Tools	hist 2D 2 1D gated jru v1	hist_2D_2_1D_gated_jru_v1	use an roi to create a 1D histogram from a 2D histogram
+Plugins>Stowers>Jay_Unruh>Binding Analysis	fit stretched exp jru v1	fit_stretched_exp_jru_v1	fits a plot to a stretched exponential
+Plugins>Stowers>Jay_Unruh>Misc Tools	generate hist image gate jru v1	generate_hist_image_gate_jru_v1	generates a gate from a 2D histogram image for flow cytometry histogram analysis
+Plugins>Stowers>Jay_Unruh>Misc Tools	get hist image jru v1	get_hist_image_jru_v1	gets a floating point density image correponding to a histogram
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	fill roi float jru v1	fill_roi_float_jru_v1	fills an roi on a 32 bit image with a floating point number
+Plugins>Stowers>Jay_Unruh>Image Tools	dilate color jru v1	dilate_color_jru_v1	dilates a color image: each black pixel neighboring a colored pixel is set to that color
+Plugins>Stowers>Jay_Unruh>Misc Tools	pair correlation function jru v1	pair_correlation_function_jru_v1	does a pair autocorrelation function on a 2D or 3D point or trajectory data set
+Plugins>Stowers>Jay_Unruh>Misc Tools	get crypt xz profile jru v2	get_crypt_xz_profile_jru_v2	cryptic description of a plugin
+Plugins>Stowers>Jay_Unruh>Sim Tools	simulate npcs jru v1	simulate_npcs_jru_v1	simulates randomly distributed diffraction limited points on the surface of a sphere
+Plugins>Stowers>Jay_Unruh>File Tools	get imaris dataset jru v1	get_imaris_dataset_jru_v1	pulls a data set from imaris (only the data)
+Plugins>Stowers>Jay_Unruh>Misc Tools	custom amfret analysis jru v1	custom_amfret_analysis_jru_v1	does custom amfret analysis
+Plugins>Stowers>Jay_Unruh>Table Tools	dump table 2 stdout jru v1	dump_table_2_stdout_jru_v1	dumps a table to System.out.prinln
+Plugins>Stowers>Jay_Unruh>Misc Tools	custom amfret gate generation jru v1	custom_amfret_gate_generation_jru_v1	does custom amfret gate generation
+Plugins>Stowers>Jay_Unruh>Misc Tools	realign npcs jru v1	realign_npcs_jru_v1	realigns spots on the surface of a sphere
+Plugins>Stowers>Jay_Unruh>File Tools	get loci objective info jru v1	get_loci_objective_info_jru_v1	puts selected metadata objective info from a file into a table
+Plugins>Stowers>Jay_Unruh>Misc Tools	wrap angle profile jru v1	wrap_angle_profile_jru_v1	takes an angle profile with the x axis in degrees and wraps values so that they lie between -179 and +180
+Plugins>Stowers>Jay_Unruh>Misc Tools	segment nucleoli jru v2	segment_nucleoli_jru_v2	runs multithreaded batch segmentation of nucleoli with intensity and shape parameters
+Plugins>Stowers>Jay_Unruh>Misc Tools	segment nucleoli jru v3	segment_nucleoli_jru_v3	nucleolar segmentation plugin
+Plugins>Stowers>Jay_Unruh>Misc Tools	custom amfret gate generation jru v2	custom_amfret_gate_generation_jru_v2	does custom amfret gate generation for imagestream data
+Plugins>Stowers>Jay_Unruh>Misc Tools	custom amfret analysis jru v2	custom_amfret_analysis_jru_v2	does custom amfret analysis for imagestream data
+Plugins>Stowers>Jay_Unruh>Misc Tools	set white balance jru v1	set_white_balance_jru_v1	sets the white balance of an image using an offset and a selected white region
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	filter largest objects jru v1	filter_largest_objects_jru_v1	filters the n largest objects in an image or movie
+Plugins>Stowers>Jay_Unruh>ImageStream	get 2D hist roi coords jru v1	get_2D_hist_roi_coords_jru_v1	gets the histogram coordinates for an roi on a 2D histogram
+Plugins>Stowers>Jay_Unruh>Image Tools	apply gamma jru v1	apply_gamma_jru_v1	interactively adjusts gamma for an 8-bit image
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	search plot annotations jru v1	search_plot_annotations_jru_v1	searches plot annotations (or series numbers) and creates a new plot with the matches
+Plugins>Stowers>Jay_Unruh>Deconvolution Tools	convolve 3D	convolve_3D	convolves two 3D images with the same dimensions (requires power of 2 size in all dimensions)
+Plugins>Stowers>Jay_Unruh>Deconvolution Tools	generate rings	generate_rings	generates 2 rings in the xz plane
+Plugins>Stowers>Jay_Unruh>ICS Tools	stack real FFT jru v1	stack_real_FFT_jru_v1	does a real 2D FFT of every slice in a stack
+Plugins>Stowers>Jay_Unruh>ICS Tools	complex iFFT jru v1	complex_iFFT_jru_v1	"does a complex 2D FFT of every pair of slices in a stack (real, im, real, im, …)"
+Plugins>Stowers>Jay_Unruh>ICS Tools	stack real 3D FFT jru v1	stack_real_3D_FFT_jru_v1	does a real 3D FFT of a stack
+Plugins>Stowers>Jay_Unruh>ICS Tools	stack real 3D iFFT jru v1	stack_real_3D_iFFT_jru_v1	"does a real 3D iFFT of a stack, data is alternating real and im"
+Plugins>Stowers>Jay_Unruh>Image Tools	edf jru v1	edf_jru_v1	creates an extended depth of field image
+Plugins>Stowers>Jay_Unruh>Misc Tools	segment nucleoli jru v4	segment_nucleoli_jru_v4	high throughput nucleolar measurement with better minimum detection and measurement in a 3rd channel
