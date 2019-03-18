@@ -1950,7 +1950,7 @@ public class algutils{
 
 	public static float[] pad_2D(float[] image,int width,int height,int newwidth,int newheight,int padindex){
 		// here we pad an image to newwidth,newheight with 0, the avg, or the
-		// edge avg
+		// edge avg (padindex is 0,1, or 2, respectively
 		// if newwidth or newheight is less than width or height, we crop
 		float[] newimg=new float[newwidth*newheight];
 		float avg=0.0f;

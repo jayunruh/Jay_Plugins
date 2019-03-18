@@ -338,3 +338,12 @@ Plugins>Stowers>Jay_Unruh>ICS Tools	stack real 3D FFT jru v1	stack_real_3D_FFT_j
 Plugins>Stowers>Jay_Unruh>ICS Tools	stack real 3D iFFT jru v1	stack_real_3D_iFFT_jru_v1	"does a real 3D iFFT of a stack, data is alternating real and im"
 Plugins>Stowers>Jay_Unruh>Image Tools	edf jru v1	edf_jru_v1	creates an extended depth of field image
 Plugins>Stowers>Jay_Unruh>Misc Tools	segment nucleoli jru v4	segment_nucleoli_jru_v4	high throughput nucleolar measurement with better minimum detection and measurement in a 3rd channel
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	filter point pairs jru v1	filter_point_pairs_jru_v1	filters pairs of points (with a distance cutoff) from two trajectories
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	filter point triples jru v1	filter_point_triples_jru_v1	filters triplets of points (with a distance cutoff) from three trajectories
+Plugins>Stowers>Jay_Unruh>Batch Tools	table listener jru v1	table_listener_jru_v1	"listens to the selected row of a table and places a point roi on a 2D or 3D image (table must have x,y,z coordinate columns)"
+Plugins>Stowers>Jay_Unruh>File Tools	batch convert flowcyte jru v1	batch_convert_flowcyte_jru_v1	batch convert flow cytometry files
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	track cells phase jru v1	track_cells_phase_jru_v1	attempts to segment phase contrast images of cells with canny hysteresis and dilations and erosions
+Plugins>Stowers>Jay_Unruh>Sim Tools	random number generator jru v1	random_number_generator_jru_v1	generates different kinds of random number sets as plots
+Plugins>Stowers>Jay_Unruh>Image Tools	measure 3D jru v1	measure_3D_jru_v1	asks for two points and measures the 3D distance between them
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	track max not mask fast jru v1	track_max_not_mask_fast_jru_v1	"faster version of track max not mask, uses tiling and then reconciles points at boundaries"
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	track max not mask 3D fast jru v1	track_max_not_mask_3D_fast_jru_v1	"faster version of track max not mask 3D, uses 2D tiling and then reconciles points at boundaries"

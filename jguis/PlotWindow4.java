@@ -142,6 +142,10 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 	public float getmagratio(){
 		return p3.getmagratio();
 	}
+	
+	public void setAllShapeSizes(int shapesize) {
+		p3.setShapeSize(shapesize);
+	}
 
 	static ImagePlus createImage(String title1){
 		int width=Plot4.WIDTH+Plot4.LEFT_MARGIN+Plot4.RIGHT_MARGIN;

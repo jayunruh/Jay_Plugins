@@ -31,6 +31,7 @@ public class traj_2_roi_jru_v1 implements PlugIn {
 		int swidth=(int)gd.getNextNumber();
 		zratio=(float)gd.getNextNumber();
 		//ImageWindow iw=WindowManager.getCurrentWindow();
+		WindowManager.setCurrentWindow(imps[0].getWindow());
 		ImageWindow iw=imps[1].getWindow();
 		float[][] xvals=(float[][])jutils.runPW4VoidMethod(iw,"getXValues");
 		float[][] yvals=(float[][])jutils.runPW4VoidMethod(iw,"getYValues");
@@ -120,7 +121,7 @@ public class traj_2_roi_jru_v1 implements PlugIn {
 		}
 	}
 
-	public PolygonRoi traj2roi(float[] xvals,float[] yvals,int npts){
+	public Roi traj2roi(float[] xvals,float[] yvals,int npts){
 		int[] xvals2=new int[npts];
 		int[] yvals2=new int[npts];
 		for(int i=0;i<npts;i++){
@@ -131,9 +132,15 @@ public class traj_2_roi_jru_v1 implements PlugIn {
 		else return new PolygonRoi(xvals2,yvals2,npts,Roi.POLYLINE);
 	}
 
-	public PolygonRoi traj2roi(float[] xvals,float[] yvals,float[] zvals,int npts){
-		PolygonRoi roi=traj2roi(xvals,yvals,npts);
+	public Roi traj2roi(float[] xvals,float[] yvals,float[] zvals,int npts){
+		Roi roi=null;
+		if(npts==1){
+			roi=new PointRoi((int)xvals[0],(int)yvals[0]);
+		} else {
+			roi=traj2roi(xvals,yvals,npts);
+		}
 		roi.setPosition((int)(1.5+zvals[0]/zratio));
+		IJ.log(""+(int)(1.5+zvals[0]/zratio));
 		return roi;
 	}
 
