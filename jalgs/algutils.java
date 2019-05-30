@@ -83,21 +83,53 @@ public class algutils{
 	
 	/*********************************
 	 * this returns my own array type index: 0 for byte, 1 for short, 2 for float, 3 for double, and 4 for int
-	 * @param arr
+	 * @param arr: an array up to 3 dimensions
 	 * @return
 	 */
 	public static int get_array_type(Object arr){
-		if(arr instanceof byte[])
+		if(arr instanceof byte[] || arr instanceof byte[][] || arr instanceof byte[][][])
 			return 0;
-		if(arr instanceof short[])
+		if(arr instanceof short[] || arr instanceof short[][] || arr instanceof short[][][])
 			return 1;
-		if(arr instanceof float[])
+		if(arr instanceof float[] || arr instanceof float[][] || arr instanceof float[][][])
 			return 2;
-		if(arr instanceof double[])
+		if(arr instanceof double[] || arr instanceof double[][] || arr instanceof double[][][])
 			return 3;
-		if(arr instanceof int[])
+		if(arr instanceof int[] || arr instanceof int[][] || arr instanceof int[][][])
 			return 4;
 		return -1;
+	}
+	
+	/*******************
+	 * this returns an array shape for up to a 3 dimensional array (dtype is from get_array_type)
+	 * @param arr
+	 * @param dtype
+	 * @return
+	 */
+	public static int[] getArrayShape(Object arr,int dtype) {
+		//gets the shape of an array up to 3 dimensions
+		if(dtype==0) {
+			if(arr instanceof byte[]) return new int[] {((byte[])arr).length};
+			else if(arr instanceof byte[][]) return new int[] {((byte[][])arr).length,((byte[][])arr)[0].length};
+			else if(arr instanceof byte[][][]) return new int[] {((byte[][][])arr).length,((byte[][][])arr)[0].length,((byte[][][])arr)[0][0].length};
+		} else if(dtype==1) {
+			if(arr instanceof short[]) return new int[] {((short[])arr).length};
+			else if(arr instanceof short[][]) return new int[] {((short[][])arr).length,((short[][])arr)[0].length};
+			else if(arr instanceof short[][][]) return new int[] {((short[][][])arr).length,((short[][][])arr)[0].length,((short[][][])arr)[0][0].length};
+		} else if(dtype==2) {
+			if(arr instanceof float[]) return new int[] {((float[])arr).length};
+			else if(arr instanceof float[][]) return new int[] {((float[][])arr).length,((float[][])arr)[0].length};
+			else if(arr instanceof float[][][]) return new int[] {((float[][][])arr).length,((float[][][])arr)[0].length,((float[][][])arr)[0][0].length};
+		} else if(dtype==3) {
+			if(arr instanceof double[]) return new int[] {((double[])arr).length};
+			else if(arr instanceof double[][]) return new int[] {((double[][])arr).length,((double[][])arr)[0].length};
+			else if(arr instanceof double[][][]) return new int[] {((double[][][])arr).length,((double[][][])arr)[0].length,((double[][][])arr)[0][0].length};
+		} else if(dtype==4) {
+			if(arr instanceof int[]) return new int[] {((int[])arr).length};
+			else if(arr instanceof int[][]) return new int[] {((int[][])arr).length,((int[][])arr)[0].length};
+			else if(arr instanceof int[][][]) return new int[] {((int[][][])arr).length,((int[][][])arr)[0].length,((int[][][])arr)[0][0].length};
+		}
+		return null;
 	}
 	
 	public static int get_number_type(Number val) {
@@ -1544,6 +1576,121 @@ public class algutils{
 				}
 			}
 		}
+	}
+	
+	public static Object reshape(Object arr,int[] shape) {
+		//takes a 1D array and reshapes it up to 3 dimensions
+		if(arr instanceof byte[]) return reshape((byte[])arr,shape);
+		if(arr instanceof short[]) return reshape((short[])arr,shape);
+		if(arr instanceof float[]) return reshape((float[])arr,shape);
+		if(arr instanceof double[]) return reshape((double[])arr,shape);
+		if(arr instanceof int[]) return reshape((int[])arr,shape);
+		return null;
+	}
+	
+	public static Object reshape(byte[] arr,int[] shape) {
+		//reshapes arr up to 3 dimensions
+		if(shape.length==1) {return arr;}
+		else if(shape.length==2) {
+			byte[][] arr2=new byte[shape[0]][];
+			for(int i=0;i<shape[0];i++) {
+				arr2[i]=(byte[])algutils.get_subarray(arr,i*shape[1],shape[1]);
+			}
+			return arr2;
+		} else if(shape.length==3) {
+			byte[][][] arr2=new byte[shape[0]][shape[1]][];
+			for(int i=0;i<shape[0];i++) {
+				for(int j=0;j<shape[1];j++) {
+					arr2[i][j]=(byte[])algutils.get_subarray(arr,i*shape[1]*shape[2]+j*shape[2],shape[2]);
+				}
+			}
+			return arr2;
+		}
+		return null;
+	}
+	
+	public static Object reshape(short[] arr,int[] shape) {
+		//reshapes arr up to 3 dimensions
+		if(shape.length==1) {return arr;}
+		else if(shape.length==2) {
+			short[][] arr2=new short[shape[0]][];
+			for(int i=0;i<shape[0];i++) {
+				arr2[i]=(short[])algutils.get_subarray(arr,i*shape[1],shape[1]);
+			}
+			return arr2;
+		} else if(shape.length==3) {
+			short[][][] arr2=new short[shape[0]][shape[1]][];
+			for(int i=0;i<shape[0];i++) {
+				for(int j=0;j<shape[1];j++) {
+					arr2[i][j]=(short[])algutils.get_subarray(arr,i*shape[1]*shape[2]+j*shape[2],shape[2]);
+				}
+			}
+			return arr2;
+		}
+		return null;
+	}
+	
+	public static Object reshape(float[] arr,int[] shape) {
+		//reshapes arr up to 3 dimensions
+		if(shape.length==1) {return arr;}
+		else if(shape.length==2) {
+			float[][] arr2=new float[shape[0]][];
+			for(int i=0;i<shape[0];i++) {
+				arr2[i]=(float[])algutils.get_subarray(arr,i*shape[1],shape[1]);
+			}
+			return arr2;
+		} else if(shape.length==3) {
+			float[][][] arr2=new float[shape[0]][shape[1]][];
+			for(int i=0;i<shape[0];i++) {
+				for(int j=0;j<shape[1];j++) {
+					arr2[i][j]=(float[])algutils.get_subarray(arr,i*shape[1]*shape[2]+j*shape[2],shape[2]);
+				}
+			}
+			return arr2;
+		}
+		return null;
+	}
+	
+	public static Object reshape(double[] arr,int[] shape) {
+		//reshapes arr up to 3 dimensions
+		if(shape.length==1) {return arr;}
+		else if(shape.length==2) {
+			double[][] arr2=new double[shape[0]][];
+			for(int i=0;i<shape[0];i++) {
+				arr2[i]=(double[])algutils.get_subarray(arr,i*shape[1],shape[1]);
+			}
+			return arr2;
+		} else if(shape.length==3) {
+			double[][][] arr2=new double[shape[0]][shape[1]][];
+			for(int i=0;i<shape[0];i++) {
+				for(int j=0;j<shape[1];j++) {
+					arr2[i][j]=(double[])algutils.get_subarray(arr,i*shape[1]*shape[2]+j*shape[2],shape[2]);
+				}
+			}
+			return arr2;
+		}
+		return null;
+	}
+	
+	public static Object reshape(int[] arr,int[] shape) {
+		//reshapes arr up to 3 dimensions
+		if(shape.length==1) {return arr;}
+		else if(shape.length==2) {
+			int[][] arr2=new int[shape[0]][];
+			for(int i=0;i<shape[0];i++) {
+				arr2[i]=(int[])algutils.get_subarray(arr,i*shape[1],shape[1]);
+			}
+			return arr2;
+		} else if(shape.length==3) {
+			int[][][] arr2=new int[shape[0]][shape[1]][];
+			for(int i=0;i<shape[0];i++) {
+				for(int j=0;j<shape[1];j++) {
+					arr2[i][j]=(int[])algutils.get_subarray(arr,i*shape[1]*shape[2]+j*shape[2],shape[2]);
+				}
+			}
+			return arr2;
+		}
+		return null;
 	}
 	
 	public static Object expand_array(Object source,int length){

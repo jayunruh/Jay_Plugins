@@ -347,3 +347,9 @@ Plugins>Stowers>Jay_Unruh>Sim Tools	random number generator jru v1	random_number
 Plugins>Stowers>Jay_Unruh>Image Tools	measure 3D jru v1	measure_3D_jru_v1	asks for two points and measures the 3D distance between them
 Plugins>Stowers>Jay_Unruh>Segmentation Tools	track max not mask fast jru v1	track_max_not_mask_fast_jru_v1	"faster version of track max not mask, uses tiling and then reconciles points at boundaries"
 Plugins>Stowers>Jay_Unruh>Segmentation Tools	track max not mask 3D fast jru v1	track_max_not_mask_3D_fast_jru_v1	"faster version of track max not mask 3D, uses 2D tiling and then reconciles points at boundaries"
+Plugins>Stowers>Jay_Unruh>Detrend Tools	stack divide moving average jru v2	stack_divide_moving_average_jru_v2	similar to subtract moving average but uses division
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	get traj lengths jru v1	get_traj_lengths_jru_v1	measures the length of a 2D or 3D trajectory
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	set multi plot xspacing jru v1	set_multi_plot_xspacing_jru_v1	sets the x spacing of plot data points for multiple series
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	batch segmentation jru v1	batch_segmentation_jru_v1	performs batch segmentation of nuclear images with the default imagej threshold--needs specific file naming
+Plugins>Stowers>Jay_Unruh>Table Tools	parama table summarize	parama_table_summarize	custom table analysis for Paul et al 2019
+Plugins>Stowers>Jay_Unruh>File Tools	test tiff writer jru v1	test_tiff_writer_jru_v1	my hacked tiff writer plugin

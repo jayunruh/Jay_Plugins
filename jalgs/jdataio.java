@@ -315,6 +315,33 @@ public class jdataio{
 	public boolean writeinteldouble(OutputStream outstream,double data) {
 		return writeintellong(outstream,Double.doubleToLongBits(data));
 	}
+	
+	public boolean writeinteldoublearray(OutputStream outstream,double[] data){
+		for(int i=0;i<data.length;i++){
+			if(!writeinteldouble(outstream,data[i])){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean writeinteldoublearray(OutputStream outstream,double[][] data) {
+		for(int i=0;i<data.length;i++){
+			if(!writeinteldoublearray(outstream,data[i])){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean writeinteldoublearray(OutputStream outstream,double[][][] data) {
+		for(int i=0;i<data.length;i++){
+			if(!writeinteldoublearray(outstream,data[i])){
+				return false;
+			}
+		}
+		return true;
+	}
 
 	public boolean writeintelintarray(OutputStream outstream,int[] data){
 		for(int i=0;i<data.length;i++){
@@ -351,6 +378,15 @@ public class jdataio{
 		}
 		return true;
 	}
+	
+	public boolean writeintelintarray(OutputStream outstream,int[][][] data){
+		for(int i=0;i<data.length;i++){
+			if(!writeintelintarray(outstream,data[i])){
+				return false;
+			}
+		}
+		return true;
+	}
 
 	public boolean writeintelintarray(OutputStream outstream,int[] data,int length){
 		for(int i=0;i<length;i++){
@@ -366,6 +402,24 @@ public class jdataio{
 			outstream.write(data);
 		}catch(IOException e){
 			return false;
+		}
+		return true;
+	}
+	
+	public boolean writebytearray(OutputStream outstream,byte[][] data) {
+		for(int i=0;i<data.length;i++){
+			if(!writebytearray(outstream,data[i])){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean writebytearray(OutputStream outstream,byte[][][] data) {
+		for(int i=0;i<data.length;i++){
+			if(!writebytearray(outstream,data[i])){
+				return false;
+			}
 		}
 		return true;
 	}
@@ -393,6 +447,24 @@ public class jdataio{
 	public boolean writeintelshortarray(OutputStream outstream,short[] data){
 		for(int i=0;i<data.length;i++){
 			if(!writeintelshort(outstream,data[i])){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean writeintelshortarray(OutputStream outstream,short[][] data){
+		for(int i=0;i<data.length;i++){
+			if(!writeintelshortarray(outstream,data[i])){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean writeintelshortarray(OutputStream outstream,short[][][] data){
+		for(int i=0;i<data.length;i++){
+			if(!writeintelshortarray(outstream,data[i])){
 				return false;
 			}
 		}

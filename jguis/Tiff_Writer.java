@@ -41,6 +41,7 @@ public class Tiff_Writer{
 	byte[] description;
 	public BufferedOutputStream outg;
 	public long nextIFDg;
+	public int bufferSize=2097152;
 
 	private ImagePlus imp;
 	private ImageProcessor ip;
@@ -88,7 +89,7 @@ public class Tiff_Writer{
 		cal=imp.getCalibration();
 		saveSizes();
 		try{
-			DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path)));
+			DataOutputStream out=new DataOutputStream(new BufferedOutputStream(new FileOutputStream(path),bufferSize));
 			byte[] hdr={73,73,42,0,8,0,0,0};
 			// write the header
 			out.write(hdr);
@@ -130,7 +131,7 @@ public class Tiff_Writer{
 		}
 		saveSizes();
 		try{
-			BufferedOutputStream out=new BufferedOutputStream(new FileOutputStream(path));
+			BufferedOutputStream out=new BufferedOutputStream(new FileOutputStream(path),bufferSize);
 			byte[] hdr={73,73,42,0,8,0,0,0};
 			// write the header
 			out.write(hdr);
@@ -197,7 +198,7 @@ public class Tiff_Writer{
 		}
 		saveSizes();
 		try{
-			outg=new BufferedOutputStream(new FileOutputStream(path));
+			outg=new BufferedOutputStream(new FileOutputStream(path),bufferSize);
 			byte[] hdr={73,73,42,0,8,0,0,0};
 			// write the header
 			outg.write(hdr);

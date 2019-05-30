@@ -1634,6 +1634,7 @@ public class jutils{
 		for(int i=0;i<niframes.length;i++){
 			if(niframes[i] instanceof TextWindow && !niframes[i].getTitle().equals("Log")){
 				titles[counter]=niframes[i].getTitle();
+				if(titles[counter]==null) titles[counter]="null_title";
 				niframes2[counter]=niframes[i];
 				counter++;
 			}
@@ -1644,7 +1645,7 @@ public class jutils{
 		Frame[] niframes3=new Frame[ntitles];
 		for(int i=0;i<counter;i++){titles2[i]=titles[i]; niframes3[i]=niframes2[i];}
 		if(addnull){
-			titles[counter]="null";
+			titles2[counter]="null";
 			niframes3[counter]=null;
 		}
 		Object[] retvals={niframes3,titles2};
