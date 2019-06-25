@@ -353,3 +353,5 @@ Plugins>Stowers>Jay_Unruh>Trajectory Tools	set multi plot xspacing jru v1	set_mu
 Plugins>Stowers>Jay_Unruh>Segmentation Tools	batch segmentation jru v1	batch_segmentation_jru_v1	performs batch segmentation of nuclear images with the default imagej threshold--needs specific file naming
 Plugins>Stowers>Jay_Unruh>Table Tools	parama table summarize	parama_table_summarize	custom table analysis for Paul et al 2019
 Plugins>Stowers>Jay_Unruh>File Tools	test tiff writer jru v1	test_tiff_writer_jru_v1	my hacked tiff writer plugin
+Plugins>Stowers>Jay_Unruh>Batch Tools	kai gfp loc screen jru v1	kai_gfp_loc_screen_jru_v1	"performs gfp localization analysis of tiff images of yeast with GFP, FM4-64 (membrane), and Hoechst stains"
+Plugins>Stowers>Jay_Unruh>Misc Tools	kai gfp loc table analysis jru v2	kai_gfp_loc_table_analysis_jru_v2	aggregates well data produced by the kai_gfp_loc_screen_jru_v1

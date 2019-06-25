@@ -53,6 +53,27 @@ public class sim_sequences{
 		return new Object[] {peparr,new Integer(seqlen)};
 	}
 	
+	public byte[] padSequence(byte[] seq,int padlen,int padflag){
+		byte[] peparr=new byte[padlen];
+		int offset=(padlen-seq.length)/2;
+		System.arraycopy(seq,0,peparr,offset,seq.length);
+		if(padflag==1){
+			//this is random padding
+			for(int i=0;i<offset;i++) {
+				peparr[i]=(byte)random.unidev((double)basisSize,0.0);
+				peparr[padlen-i-1]=(byte)random.unidev((double)basisSize,0.0);
+			}
+		}
+		if(padflag==2) {
+			//this is mirror image padding
+			for(int i=0;i<offset;i++) {
+				peparr[i]=peparr[2*offset-i];
+				peparr[padlen-i-1]=peparr[seq.length+i];
+			}
+		}
+		return peparr;
+	}
+	
 	/***************
 	 * here we simulate many sequences
 	 * @param avglength
