@@ -20,6 +20,7 @@ import jguis.CrossCorrFitWindow;
 import jguis.table_tools;
 import jguis.PlotStack4;
 import jguis.PlotWindow4;
+import jguis.Plot4;
 import java.awt.event.*;
 import ij.io.*;
 import java.text.*;
@@ -39,7 +40,7 @@ public class analysis_cross_corr_v2 implements PlugIn {
 		gd.addNumericField("Sampling Frequency?",sfreq,1,10,null);
 		String[] psfchoice={"3D Gaussian","2D Gaussian","2Dxz_Gaussian"};
 		gd.addChoice("PSF Type?",psfchoice,psfchoice[0]);
-		String[] filetypechoice={"Confocor 3 raw","Short binary trajectory","PlotWindow trajectory","Confocor 3 ALEX"};
+		String[] filetypechoice={"Confocor 3 raw","Short binary trajectory","PlotWindow file","PlotWindow trajectory","Confocor 3 ALEX"};
 		gd.addChoice("File Type?",filetypechoice,filetypechoice[0]);
 		boolean ch2green=true;
 		gd.addCheckbox("Ch2 is green?",ch2green);
@@ -93,7 +94,7 @@ public class analysis_cross_corr_v2 implements PlugIn {
 		trajlength=0;
 		binmultilog bml=new binmultilog();
 		kstats kstatsfunc=new kstats();
-		if(fileflag!=2){
+		if(fileflag!=3){
 			jdataio ioclass=new jdataio();
 			File[] filearray=ioclass.openfiles(OpenDialog.getDefaultDirectory(),IJ.getInstance());
 			if(filearray.length==0){return;}
@@ -102,20 +103,29 @@ public class analysis_cross_corr_v2 implements PlugIn {
 			String newdir=dir.substring(0,sepindex+1);
 			OpenDialog.setDefaultDirectory(newdir);
 			nfiles=filearray.length/2;
+			if(fileflag==2) nfiles=filearray.length;
 			correlations=new Object[nfiles];
 			avg=new float[3][nfiles];
 			var=new float[3][nfiles];
-			names=organize_c3_files(filearray);
+			if(fileflag!=2) names=organize_c3_files(filearray);
+			else{
+				names=new String[nfiles];
+				for(int i=0;i<nfiles;i++) names[i]=filearray[i].getName();
+			}
 			for(int i=0;i<nfiles;i++){
 				try{
-					int length1=(int)(((double)filearray[2*i].length()-128.0)/4.0);
-					int length2=(int)(((double)filearray[2*i+1].length()-128.0)/4.0);
-					int length3=(int)(((double)filearray[2*i].length())/2.0);
-					int length4=(int)(((double)filearray[2*i+1].length())/2.0);
-					InputStream instream=new BufferedInputStream(new FileInputStream(filearray[2*i]));
-					InputStream instream2=new BufferedInputStream(new FileInputStream(filearray[2*i+1]));
+					int length1=0,length2=0,length3=0,length4=0;
+					InputStream instream=null,instream2=null;
+					if(fileflag!=2){
+						length1=(int)(((double)filearray[2*i].length()-128.0)/4.0);
+						length2=(int)(((double)filearray[2*i+1].length()-128.0)/4.0);
+						length3=(int)(((double)filearray[2*i].length())/2.0);
+						length4=(int)(((double)filearray[2*i+1].length())/2.0);
+						instream=new BufferedInputStream(new FileInputStream(filearray[2*i]));
+						instream2=new BufferedInputStream(new FileInputStream(filearray[2*i+1]));
+					}
 					float[] tmdata,tmdata2;
-					if(fileflag==0 || fileflag==3){
+					if(fileflag==0 || fileflag==4){
 						int[] pmdata,pmdata2;
 						if(!ioclass.skipstreambytes(instream,128)){showioerror(); instream.close(); return;}
 						if(!ioclass.skipstreambytes(instream2,128)){showioerror(); instream2.close(); return;}
@@ -130,7 +140,7 @@ public class analysis_cross_corr_v2 implements PlugIn {
 							if(!ioclass.readintelintfile(instream,length1,pmdata)){showioerror(); instream.close(); return;}
 							if(!ioclass.readintelintfile(instream2,length2,pmdata2)){showioerror(); instream2.close(); return;}
 						}
-						if(fileflag==3){
+						if(fileflag==4){
 							double swfreq=20000000.0/1000.0111;
 							double divider=20000.0/sfreq;
 							swfreq/=divider;
@@ -144,14 +154,20 @@ public class analysis_cross_corr_v2 implements PlugIn {
 							tmdata2=(new pmodeconvert()).pm2tm(pmdata2,sfreq,pmfreq);
 						}
 					} else {
-						if(ch2green){
-							tmdata=new float[length4]; tmdata2=new float[length3];
-							if(!ioclass.readintelshortfile(instream,length3,tmdata2)){showioerror(); instream.close(); return;}
-							if(!ioclass.readintelshortfile(instream2,length4,tmdata)){showioerror(); instream2.close(); return;}
+						if(fileflag==1){
+							if(ch2green){
+								tmdata=new float[length4]; tmdata2=new float[length3];
+								if(!ioclass.readintelshortfile(instream,length3,tmdata2)){showioerror(); instream.close(); return;}
+								if(!ioclass.readintelshortfile(instream2,length4,tmdata)){showioerror(); instream2.close(); return;}
+							} else {
+								tmdata=new float[length3]; tmdata2=new float[length4];
+								if(!ioclass.readintelshortfile(instream,length3,tmdata)){showioerror(); instream.close(); return;}
+								if(!ioclass.readintelshortfile(instream2,length4,tmdata2)){showioerror(); instream2.close(); return;}
+							}
 						} else {
-							tmdata=new float[length3]; tmdata2=new float[length4];
-							if(!ioclass.readintelshortfile(instream,length3,tmdata)){showioerror(); instream.close(); return;}
-							if(!ioclass.readintelshortfile(instream2,length4,tmdata2)){showioerror(); instream2.close(); return;}
+							Plot4 p4=new Plot4(filearray[i].getPath());
+							tmdata=p4.getYValues()[0];
+							tmdata2=p4.getYValues()[1];
 						}
 					}
 					if(first){
@@ -196,8 +212,7 @@ public class analysis_cross_corr_v2 implements PlugIn {
 						}
 					}
 					correlations[i]=tempcorr;
-					instream.close();
-					instream2.close();
+					if(fileflag!=2){instream.close(); instream2.close();}
 					IJ.showProgress(i,nfiles);
 				} catch(IOException e){
 					showioerror();

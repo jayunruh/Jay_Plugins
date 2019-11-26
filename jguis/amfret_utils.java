@@ -1240,6 +1240,29 @@ public class amfret_utils implements gui_interface{
 		}
 		return newmeta2;
 	}
+	
+	public static float[][] getAmFRETProfile(float[] histpix,int histwidth,int histheight,float minamfret,float maxamfret,Roi roi){
+		float[] amfretprofile=new float[histwidth];
+		float[] gateamfretprofile=new float[histwidth];
+		float[] gatecells=new float[histwidth];
+		float[] totcells=new float[histwidth];
+		for(int i=0;i<histwidth;i++){
+			for(int j=0;j<histheight;j++){
+				float amfretval=((float)(histheight-j-1)/(float)histheight)*(maxamfret-minamfret)+minamfret;
+				totcells[i]+=(float)histpix[i+j*histwidth];
+				amfretprofile[i]+=histpix[i+j*histwidth]*amfretval;
+				if(!roi.contains(i,j)) {
+					gatecells[i]+=(float)histpix[i+j*histwidth];
+					gateamfretprofile[i]+=histpix[i+j*histwidth]*amfretval;
+				}
+			}
+			if(totcells[i]>1) amfretprofile[i]/=totcells[i];
+			else amfretprofile[i]=Float.NaN;
+			if(gatecells[i]>1) gateamfretprofile[i]/=gatecells[i];
+			else gateamfretprofile[i]=Float.NaN;
+		}
+		return new float[][]{amfretprofile,totcells,gateamfretprofile,gatecells};
+	}
 
 	public void showMessage(String message){
 		IJ.log(message);

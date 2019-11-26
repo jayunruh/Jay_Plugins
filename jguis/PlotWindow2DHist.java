@@ -215,6 +215,7 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 		// pack();
 		// this.setSize(364,326);
 		updatePlot();
+		ic.requestFocus();
 	}
 
 	/**
@@ -403,6 +404,7 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 		gd.addNumericField("Magnification",p3.getmagnification(),5,10,null);
 		gd.addNumericField("Bin Size",p3.getBinSize(),0,10,null);
 		gd.addChoice("LUT",Plot2DHist.lutnames,Plot2DHist.lutnames[p3.getLut()]);
+		gd.addCheckbox("Interpolate?",p3.interpolate);
 		gd.addCheckbox("Save Histogram?",savehist);
 		gd.addCheckbox("Pearson?",pearson);
 		gd.addCheckbox("Pearson_Analysis?",false);
@@ -430,6 +432,7 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 		p3.setmagnification((float)gd.getNextNumber());
 		p3.setBinSize((int)gd.getNextNumber());
 		p3.setLut(gd.getNextChoiceIndex());
+		p3.interpolate=gd.getNextBoolean();
 		savehist=gd.getNextBoolean();
 		pearson=gd.getNextBoolean();
 		if(gd.getNextBoolean()){
@@ -558,6 +561,7 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 				}
 			}
 		}
+		ic.requestFocus();
 	}
 
 	public float[] getXValues(){

@@ -211,6 +211,7 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 		// coordinates.setText("");
 		updatePlot();
 		IJ.register(this.getClass());
+		ic.requestFocus();
 	}
 	
 	/**
@@ -548,6 +549,7 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 				}
 			}
 		}
+		ic.requestFocus();
 	}
 
 	public void selectSeries(int series){

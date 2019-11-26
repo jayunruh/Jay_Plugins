@@ -76,6 +76,7 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 	private line3D[] lines;
 	private renderer r,r2;
 	private long starttime;
+	public long timeout=5L;
 
 	public static Frame launch_frame(maxproj3D_panel_v2 panel){
 		final Frame f=new Frame("3D Viewer");
@@ -1042,7 +1043,7 @@ public class maxproj3D_panel_v2 extends JPanel implements ActionListener,ItemLis
 				else executor.shutdown();
 				// Wait until all threads are finished
 				try{
-					boolean success=executor.awaitTermination(5L,TimeUnit.SECONDS);
+					boolean success=executor.awaitTermination(timeout,TimeUnit.SECONDS);
 					if(!success) IJ.showStatus("3D Rendering Timeout");
 				}catch(InterruptedException e){}
 			}

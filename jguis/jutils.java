@@ -27,6 +27,7 @@ import ij.process.FloatProcessor;
 import ij.process.ImageProcessor;
 import ij.process.LUT;
 import ij.process.ShortProcessor;
+import ij.text.TextPanel;
 import ij.text.TextWindow;
 import jalgs.algutils;
 import jalgs.interpolation;
@@ -1319,6 +1320,16 @@ public class jutils{
 		}
 		return retmask;
 	}
+	
+	public static int[][] getRoiPoints(Roi roi){
+		Polygon poly=roi.getPolygon();
+		int[][] points=new int[poly.npoints][2];
+		for(int i=0;i<poly.npoints;i++){
+			points[i][0]=poly.xpoints[i];
+			points[i][1]=poly.ypoints[i];
+		}
+		return points;
+	}
 
 	public static ImageProcessor custom_8_bit(ColorProcessor cp){
 		// here we convert an RGB image to 8 bit using 17 gray levels and 15
@@ -1731,6 +1742,17 @@ public class jutils{
 			}
 		}
 		return null;
+	}
+	
+	public static List<List<String>> getTableAsList(String title){
+		TextWindow tw=selectTable(title);
+		if(tw==null) return null;
+		TextPanel tp=tw.getTextPanel();
+		String[] col_labels=table_tools.getcollabels(tp);
+		List<String> collist=table_tools.stringarray2list(col_labels);
+		List<List<String>> listtable=table_tools.table2listtable(tp);
+		listtable.add(0,collist);
+		return listtable;
 	}
 	
 	public static String getUniqueTableName(String title){

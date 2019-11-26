@@ -171,8 +171,7 @@ public class gauss_convolution{
 	public int getmaxprofilesize(){
 		int maxsize=0;
 		for(int i=0;i<profiles.length;i++){
-			if(sizes[i]>maxsize)
-				maxsize=sizes[i];
+			if(sizes[i]>maxsize) maxsize=sizes[i];
 		}
 		return 2*maxsize+1;
 	}
@@ -182,11 +181,21 @@ public class gauss_convolution{
 		float[][] output=new float[profiles.length][maxsize*maxsize];
 		for(int i=0;i<profiles.length;i++){
 			if(profiles[i]!=null&&sizes[i]>0){
-				float[] profile=(float[])profiles[i];
 				int tempsize=2*sizes[i]+1;
-				for(int j=0;j<tempsize;j++){
-					for(int k=0;k<tempsize;k++){
-						output[i][k+j*tempsize]=profile[k+j*tempsize];
+				int offset=(maxsize-tempsize)/2;
+				if(profiles[i] instanceof float[]){
+					float[] profile=(float[])profiles[i];
+					for(int j=0;j<tempsize;j++){
+						for(int k=0;k<tempsize;k++){
+							output[i][k+offset+(j+offset)*maxsize]=profile[k+j*tempsize];
+						}
+					}
+				} else {
+					float[][] profile=(float[][])profiles[i];
+					for(int j=0;j<tempsize;j++){
+						for(int k=0;k<tempsize;k++){
+							output[i][k+offset+(j+offset)*maxsize]=profile[j][k];
+						}
 					}
 				}
 			}
@@ -214,28 +223,20 @@ public class gauss_convolution{
 				int start=i-sizes[index];
 				int end=i+sizes[index];
 				if(boundarycond>1){
-					if(start<0)
-						start=0;
-					if(start>=width)
-						start=width-1;
-					if(end<0)
-						end=0;
-					if(end>=width)
-						end=width-1;
+					if(start<0) start=0;
+					if(start>=width) start=width-1;
+					if(end<0) end=0;
+					if(end>=width) end=width-1;
 				}
 				for(int j=start;j<=end;j++){
 					int index2=j;
 					if(index2<0){
-						if(boundarycond==0)
-							index2+=width;
-						if(boundarycond==1)
-							index2=-index2;
+						if(boundarycond==0) index2+=width;
+						if(boundarycond==1) index2=-index2;
 					}
 					if(index2>=width){
-						if(boundarycond==0)
-							index2-=width;
-						if(boundarycond==1)
-							index2=width+width-index2;
+						if(boundarycond==0) index2-=width;
+						if(boundarycond==1) index2=width+width-index2;
 					}
 					temp[index2]+=profile[i]*((float[])profiles[index])[j-i+sizes[index]];
 				}
@@ -262,50 +263,34 @@ public class gauss_convolution{
 					int starty=i-sizes[index];
 					int endy=i+sizes[index];
 					if(boundarycond>1){
-						if(startx<0)
-							startx=0;
-						if(startx>=width)
-							startx=width-1;
-						if(endx<0)
-							endx=0;
-						if(endx>=width)
-							endx=width-1;
-						if(starty<0)
-							starty=0;
-						if(starty>=height)
-							starty=height-1;
-						if(endy<0)
-							endy=0;
-						if(endy>=height)
-							endy=height-1;
+						if(startx<0) startx=0;
+						if(startx>=width) startx=width-1;
+						if(endx<0) endx=0;
+						if(endx>=width) endx=width-1;
+						if(starty<0) starty=0;
+						if(starty>=height) starty=height-1;
+						if(endy<0) endy=0;
+						if(endy>=height) endy=height-1;
 					}
 					for(int j=starty;j<=endy;j++){
 						int index2=j;
 						if(index2<0){
-							if(boundarycond==0)
-								index2+=height;
-							if(boundarycond==1)
-								index2=-index2;
+							if(boundarycond==0) index2+=height;
+							if(boundarycond==1) index2=-index2;
 						}
 						if(index2>=height){
-							if(boundarycond==0)
-								index2-=height;
-							if(boundarycond==1)
-								index2=height+height-index2;
+							if(boundarycond==0) index2-=height;
+							if(boundarycond==1) index2=height+height-index2-1;
 						}
 						for(int l=startx;l<=endx;l++){
 							int index3=l;
 							if(index3<0){
-								if(boundarycond==0)
-									index3+=width;
-								if(boundarycond==1)
-									index3=-index3;
+								if(boundarycond==0) index3+=width;
+								if(boundarycond==1) index3=-index3;
 							}
 							if(index3>=width){
-								if(boundarycond==0)
-									index3-=width;
-								if(boundarycond==1)
-									index3=width+width-index3;
+								if(boundarycond==0) index3-=width;
+								if(boundarycond==1) index3=width+width-index3-1;
 							}
 							temp[index2][index3]+=profile[i][k]*((float[][])profiles[index])[j-i+sizes[index]][l-k+sizes[index]];
 						}
@@ -336,62 +321,42 @@ public class gauss_convolution{
 				int index=Dmap[i][k];
 				if(sizes[index]>0){
 					int startx=k-sizes[index];
-					int endx=k+sizes[index];
+					int endx=startx+2*sizes[index];
 					int starty=i-sizes[index];
-					int endy=i+sizes[index];
+					int endy=starty+2*sizes[index];
 					if(boundarycond>2){
-						if(startx<0)
-							startx=0;
-						if(startx>=width)
-							startx=width-1;
-						if(endx<0)
-							endx=0;
-						if(endx>=width)
-							endx=width-1;
-						if(starty<0)
-							starty=0;
-						if(starty>=height)
-							starty=height-1;
-						if(endy<0)
-							endy=0;
-						if(endy>=height)
-							endy=height-1;
+						if(startx<0) startx=0;
+						if(startx>=width) startx=width-1;
+						if(endx<0) endx=0;
+						if(endx>=width) endx=width-1;
+						if(starty<0) starty=0;
+						if(starty>=height) starty=height-1;
+						if(endy<0) endy=0;
+						if(endy>=height) endy=height-1;
 					}
 					for(int j=starty;j<=endy;j++){
 						int index2=j;
 						if(index2<0){
-							if(boundarycond==0)
-								index2+=height;
-							if(boundarycond==1)
-								index2=-index2;
-							if(boundarycond==2)
-								index2+=height;
+							if(boundarycond==0) index2+=height;
+							if(boundarycond==1) index2=-index2;
+							if(boundarycond==2) index2+=height;
 						}
 						if(index2>=height){
-							if(boundarycond==0)
-								index2-=height;
-							if(boundarycond==1)
-								index2=height+height-index2;
-							if(boundarycond==2)
-								index2-=height;
+							if(boundarycond==0) index2-=height;
+							if(boundarycond==1) index2=height+height-index2-1;
+							if(boundarycond==2) index2-=height;
 						}
 						for(int l=startx;l<=endx;l++){
 							int index3=l;
 							if(index3<0){
-								if(boundarycond==0)
-									index3+=width;
-								if(boundarycond==1)
-									index3=-index2;
-								if(boundarycond==2)
-									index3+=width;
+								if(boundarycond==0) index3+=width;
+								if(boundarycond==1) index3=-index3;
+								if(boundarycond==2) index3+=width;
 							}
 							if(index3>=width){
-								if(boundarycond==0)
-									index3-=width;
-								if(boundarycond==1)
-									index3=width+width-index3;
-								if(boundarycond==2)
-									index3-=width;
+								if(boundarycond==0) index3-=width;
+								if(boundarycond==1) index3=width+width-index3-1;
+								if(boundarycond==2) index3-=width;
 							}
 							temp[index2*width+index3]+=profile[pos]*((float[][])profiles[index])[j-i+sizes[index]][l-k+sizes[index]];
 						}

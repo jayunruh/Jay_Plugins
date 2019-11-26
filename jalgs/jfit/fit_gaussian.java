@@ -565,6 +565,40 @@ public class fit_gaussian{
 		return params;
 	}
 	
+	/************
+	 * this guesses parameters for a 1D data set with two peaks, xvals1 can be null, returns base, ampavg, ampratio, xc, d, sdavg, sdratio
+	 * @param xvals
+	 * @param yvals
+	 * @param length
+	 * @return
+	 */
+	public static double[] guess1D2GParams(float[] xvals1,float[] yvals,float stdevguess,int length){
+		float[] xvals=new float[length];
+		if(xvals1!=null) xvals=xvals1;
+		else for(int i=0;i<length;i++) xvals[i]=(float)i;
+		float min=yvals[0];
+		int maxloc=0;
+		float max=yvals[0];
+		for(int i=1;i<length;i++){
+			if(yvals[i]<min){min=yvals[i];}
+			if(yvals[i]>max){max=yvals[i]; maxloc=i;}
+		}
+		float x1=xvals[maxloc];
+		//find the highest value 1.5 stdevguess units away from the first one
+		float maxaway=min;
+		float x2=xvals[0]-1.0f;
+		for(int i=0;i<xvals.length;i++){
+			if((float)Math.abs(x1-xvals[i])>2.0f*stdevguess){
+				if(yvals[i]>maxaway){maxaway=yvals[i]; x2=xvals[i];}
+			}
+		}
+		float dguess=(float)Math.abs(x2-x1);
+		float xcguess=0.5f*(x2-x1);
+		//parameters are base, ampavg, ampratio, xc, d, sdavg, sdratio
+		double[] params={(double)min,(double)max-min,1.0,xcguess,dguess,stdevguess,1.0};
+		return params;
+	}
+	
 	/*****************
 	 * generates constraints for the 1D data set, xvals1 can be null
 	 * @param xvals1
@@ -677,10 +711,10 @@ public class fit_gaussian{
 	}
 	
 	/****************
-	 * a 1D gaussian fitting function with no user intervention
+	 * a 1D gaussian fitting function with no user intervention for two peaks
 	 * @param xvals1: can be null
 	 * @param yvals
-	 * @param params: base, xc, stdev,amp
+	 * @param params: base, ampavg, ampratio, xc, d, sdavg, sdratio
 	 * @param stats
 	 * @param constraints
 	 * @param fixes
@@ -696,6 +730,7 @@ public class fit_gaussian{
 		if(sumparams==0.0) params=guess1DParams(tempx,yvals,yvals.length);
 		double[][] constraints=constraints1;
 		if(constraints1==null) constraints=get1DConstraints(tempx,params,yvals.length);
+		
 		int maxiter=10;
 		float[] fit=new float[yvals.length];
 		for(int i=0;i<yvals.length;i++) fit[i]=(float)gf.getinterpgaus(Math.abs(tempx[i]-params[1]),params[2])*(float)params[3]+(float)params[0];

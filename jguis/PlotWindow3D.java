@@ -221,6 +221,7 @@ public class PlotWindow3D extends ImageWindow implements ActionListener,Clipboar
 		pack();
 		// coordinates.setText("");
 		updatePlot();
+		ic.requestFocus();
 	}
 
 	/**
@@ -605,6 +606,7 @@ public class PlotWindow3D extends ImageWindow implements ActionListener,Clipboar
 				}
 			}
 		}
+		ic.requestFocus();
 	}
 
 	public void selectSeries(int series){

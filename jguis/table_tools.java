@@ -808,6 +808,24 @@ public class table_tools{
 		new TextWindow(title2,print_string_array(labels),print_listtable(list),400,200);
 	}
 	
+	public static void create_table(String title,List<List<String>> list,List<String> collabels){
+		int ncolumns=0;
+		if(list.size()>0) ncolumns=list.get(0).size();
+		if(ncolumns==0 && collabels!=null) ncolumns=collabels.size(); //blank table
+		List<String> labels=collabels;
+		if(collabels==null){
+			if(ncolumns==0) return; //empty file
+			labels=new ArrayList<String>();
+			for(int i=0;i<ncolumns;i++)
+				labels.add("col"+(i+1));
+		}
+		String title2=title;
+		if(title==null){
+			title2="Table";
+		}
+		new TextWindow(title2,print_string_array(labels),print_listtable(list),400,200);
+	}
+	
 	public static void create_table(String title,List<List<String>> list){
 		//here the column labels are in the first row
 		//warning: the first row is removed by this subroutine

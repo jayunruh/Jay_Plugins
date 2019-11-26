@@ -114,12 +114,12 @@ public class import_flowcyte{
 			InputStream instream=new BufferedInputStream(new FileInputStream(path));
 			String label=jdio.readstring(instream,6);
 			jdio.skipstreambytes(instream,4);
-			String toff=jdio.readstring(instream,8); int textoff=Integer.parseInt(toff.trim()); //start of TEXT segment
-			String teoff=jdio.readstring(instream,8); int texteoff=Integer.parseInt(teoff.trim()); //end of TEXT segment
-			String doff=jdio.readstring(instream,8); int dataoff=Integer.parseInt(doff.trim()); //start of DATA segment
-			String deoff=jdio.readstring(instream,8); int dataeoff=Integer.parseInt(deoff.trim()); //end of DATA segment
-			String aoff=jdio.readstring(instream,8); int analoff=Integer.parseInt(aoff.trim()); //start of ANALYSIS segment
-			String aeoff=jdio.readstring(instream,8); int analeoff=Integer.parseInt(aeoff.trim()); //end of ANALYSIS segment
+			String toff=jdio.readstring(instream,8); int textoff=parseNumber(toff.trim()); //start of TEXT segment
+			String teoff=jdio.readstring(instream,8); int texteoff=parseNumber(teoff.trim()); //end of TEXT segment
+			String doff=jdio.readstring(instream,8); int dataoff=parseNumber(doff.trim()); //start of DATA segment
+			String deoff=jdio.readstring(instream,8); int dataeoff=parseNumber(deoff.trim()); //end of DATA segment
+			String aoff=jdio.readstring(instream,8); int analoff=parseNumber(aoff.trim()); //start of ANALYSIS segment
+			String aeoff=jdio.readstring(instream,8); int analeoff=parseNumber(aeoff.trim()); //end of ANALYSIS segment
 			//IJ.log(""+textoff+" , "+texteoff+" , "+dataoff+" , "+dataeoff+" , "+analoff+" , "+analeoff);
 			instream.close();
 			instream=new BufferedInputStream(new FileInputStream(path));
@@ -231,6 +231,18 @@ public class import_flowcyte{
 		} catch(IOException e){
 			IJ.log(e.getMessage());
 			return null;
+		}
+	}
+	
+	private int parseNumber(String numb){
+		try{
+			int temp=Integer.parseInt(numb);
+			return temp;
+		} catch(NumberFormatException e){
+			//sometimes FCS files list integers as xe+y
+			//parse as double and round to nearest integer
+			double temp=Double.parseDouble(numb);
+			return (int)Math.round(temp);
 		}
 	}
 

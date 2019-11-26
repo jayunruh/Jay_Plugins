@@ -10,6 +10,7 @@ package jalgs;
 
 import java.awt.Component;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -17,6 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -766,7 +768,7 @@ public class jdataio{
 	public byte[] readentirebytefile(File f){
 		int length=(int)f.length();
 		try{
-			InputStream is=new BufferedInputStream(new FileInputStream(f));
+			InputStream is=new BufferedInputStream(new FileInputStream(f),2097152);
 			int n=0;
 			byte[] data=new byte[length];
 			while(n<length){
@@ -781,6 +783,17 @@ public class jdataio{
 			return data;
 		}catch(IOException e){
 			return null;
+		}
+	}
+	
+	public boolean writeFile(byte[] contents,String fname){
+		try{
+			OutputStream os=new BufferedOutputStream(new FileOutputStream(fname),2097152);
+			boolean worked=(new jdataio()).writebytearray(os,contents);
+			os.close();
+			return worked;
+		}catch(IOException e){
+			return false;
 		}
 	}
 

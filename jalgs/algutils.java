@@ -8,7 +8,9 @@
 
 package jalgs;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class algutils{
 
@@ -305,6 +307,15 @@ public class algutils{
 			}
 			return newarr;
 		}
+		if(oldarr instanceof ArrayList){
+			//this arraylist should be of numeric type
+			List<Number> tlist=(ArrayList<Number>)oldarr;
+			int len=tlist.size();
+			byte[] temparr=new byte[len];
+			for(int i=0;i<temparr.length;i++){
+				temparr[i]=tlist.get(i).byteValue();
+			}
+		}
 		return null;
 	}
 	
@@ -370,6 +381,16 @@ public class algutils{
 			}
 			return newarr;
 		}
+		if(oldarr instanceof ArrayList){
+			//this arraylist should be of numeric type
+			List<Number> tlist=(ArrayList<Number>)oldarr;
+			int len=tlist.size();
+			float[] temparr=new float[len];
+			for(int i=0;i<temparr.length;i++){
+				temparr[i]=tlist.get(i).floatValue();
+			}
+			return temparr;
+		}
 		return null;
 	}
 	
@@ -433,6 +454,16 @@ public class algutils{
 			System.arraycopy(temparr,0,newarr,0,temparr.length);
 			return newarr;
 		}
+		if(oldarr instanceof ArrayList){
+			//this arraylist should be of numeric type
+			List<Number> tlist=(ArrayList<Number>)oldarr;
+			int len=tlist.size();
+			int[] temparr=new int[len];
+			for(int i=0;i<temparr.length;i++){
+				temparr[i]=tlist.get(i).intValue();
+			}
+			return temparr;
+		}
 		return null;
 	}
 	
@@ -489,6 +520,16 @@ public class algutils{
 				newarr[i]=temp;
 			}
 			return newarr;
+		}
+		if(oldarr instanceof ArrayList){
+			//this arraylist should be of numeric type
+			List<Number> tlist=(ArrayList<Number>)oldarr;
+			int len=tlist.size();
+			double[] temparr=new double[len];
+			for(int i=0;i<temparr.length;i++){
+				temparr[i]=tlist.get(i).doubleValue();
+			}
+			return temparr;
 		}
 		return null;
 	}
@@ -572,6 +613,16 @@ public class algutils{
 				newarr[i]=(short)temp;
 			}
 			return newarr;
+		}
+		if(oldarr instanceof ArrayList){
+			//this arraylist should be of numeric type
+			List<Number> tlist=(ArrayList<Number>)oldarr;
+			int len=tlist.size();
+			short[] temparr=new short[len];
+			for(int i=0;i<temparr.length;i++){
+				temparr[i]=tlist.get(i).shortValue();
+			}
+			return temparr;
 		}
 		return null;
 	}

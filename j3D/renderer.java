@@ -23,7 +23,7 @@ public class renderer implements Cloneable{
 	// lines
 	public element3D[] elements;
 	public int[] order;
-	public int width,height,centerx,centery,centerz;
+	public int width,height,depth,centerx,centery,centerz;
 	public double degx,degy,degz,horizon_dist;
 	public Color background;
 
@@ -261,6 +261,26 @@ public class renderer implements Cloneable{
 		}
 		return retimage;
 	}
+	
+	/*public Image[] render3D(){
+		//this renders the entire 3D volume as an array of images
+		if(depth==0) depth=32;
+		Image[] stack=new Image[depth];
+		for(int i=0;i<depth;i++) stack[i]=new BufferedImage(width,height,BufferedImage.TYPE_INT_ARGB);
+		Graphics[] g=new Graphics[depth];
+		for(int i=0;i<depth;i++){
+			g[i]=stack[i].getGraphics();
+			Color tempcolor=g[i].getColor();
+			g[i].setColor(background);
+			g[i].fillRect(0,0,width,height);
+			g[i].setColor(tempcolor);
+			setyorder();
+		}
+		for(int i=0;i<elements.length;i++){
+			elements[order[i]].draw3Delement(g);
+		}
+		return stack;
+	}*/
 
 	public byte[] renderEMF(){
 		RenderVector rv=new RenderVector(width,height,background,0);

@@ -355,3 +355,10 @@ Plugins>Stowers>Jay_Unruh>Table Tools	parama table summarize	parama_table_summar
 Plugins>Stowers>Jay_Unruh>File Tools	test tiff writer jru v1	test_tiff_writer_jru_v1	my hacked tiff writer plugin
 Plugins>Stowers>Jay_Unruh>Batch Tools	kai gfp loc screen jru v1	kai_gfp_loc_screen_jru_v1	"performs gfp localization analysis of tiff images of yeast with GFP, FM4-64 (membrane), and Hoechst stains"
 Plugins>Stowers>Jay_Unruh>Misc Tools	kai gfp loc table analysis jru v2	kai_gfp_loc_table_analysis_jru_v2	aggregates well data produced by the kai_gfp_loc_screen_jru_v1
+Plugins>Stowers>Jay_Unruh>File Tools	list files date mod jru v1	list_files_date_mod_jru_v1	lists the files in a selected folder with options to filter and sort--names are put in a table
+Plugins>Stowers>Jay_Unruh>File Tools	copy table files jru v1	copy_table_files_jru_v1	copies a list of files from a table from a selected source to a selected destination folder 
+Plugins>Stowers>Jay_Unruh>ICS Tools	STICS map3D jru v1	STICS_map3D_jru_v1	calculates 3D STICS maps for generating 3D flow maps (like particle image velocimetry)
+Plugins>Stowers>Jay_Unruh>ImageStream	amfret profile jru v1	amfret_profile_jru_v1	calculates profiles of amfret values both overall and inside the gate (roi in roi manager)
+Plugins>Stowers>Jay_Unruh>Misc Tools	manual transform 3D images jru v1	manual_transform_3D_images_jru_v1	"uses alternating rois in the roi manager to tranform one 3D image into the coordinates of another, must have z calibration set"
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	export plot jru v2	export_plot_jru_v2	exports a plot to a text file
+Plugins>Stowers>Jay_Unruh>Misc Tools	normalize stack jru v1	normalize_stack_jru_v1	normalizes each channel and frame of a z stack to the maximum or sum of that stack
