@@ -230,7 +230,8 @@ public class amfret_utils implements gui_interface{
 		float[] gatestats=getStats(acceptor,amfret,plotindices,gateindices);
 
 		//now get the acceptor histogram 99.9th percentile
-		float uplim=jstatistics.getstatistic("Percentile",acceptor,new float[]{99.9f});
+		float[] accpercentiles={99.9f,25.0f,50.0f,75.0f};
+		float uplim=jstatistics.getstatistic("Percentile",acceptor,accpercentiles);
 		if(showplots) IJ.log("fitting upper limit = "+uplim);
 		
 		//now get the grayscale AmFRET image and gate it
@@ -365,6 +366,11 @@ public class amfret_utils implements gui_interface{
 		ImagePlus overviewimp=new ImagePlus("Overview",overviewcp);
 		String overviewname=name.substring(0,name.length()-4)+"_overview.png";
 		IJ.save(overviewimp,outdir+overviewname);
+		//(new LOCI_file_writer()).save_imp_as_png(overviewimp,outdir+overviewname);
+		//note that this is triggering an x windows headless error
+		//might try using BMPWriterJ or another png writer
+		//String overviewname=name.substring(0,name.length()-4)+"_overview.bmp";
+		//BMPWriterJ.writeBMP32((int[])overviewcp.getPixels(),overviewcp.getWidth(),overviewcp.getHeight(),outdir+overviewname);
 		return output;
 	}
 
@@ -486,7 +492,8 @@ public class amfret_utils implements gui_interface{
 			float[] gatestats=getStats(acceptor,amfret,plotindices,gateindices);
 
 			//now get the acceptor histogram 99.9th percentile
-			float uplim=jstatistics.getstatistic("Percentile",acceptor,new float[]{99.9f});
+			float[] accpercentiles={99.9f,25.0f,50.0f,75.0f};
+			float uplim=jstatistics.getstatistic("Percentile",acceptor,accpercentiles);
 			if(showplots) IJ.log("fitting upper limit = "+uplim);
 			
 			//now get the grayscale AmFRET image and gate it
@@ -746,6 +753,12 @@ public class amfret_utils implements gui_interface{
 	 */
 	public void getGate(String directory,String name,String outdir,String roiname,float minconc,float maxconc,float minamfret,float maxamfret,
 			float startcrop,float uppercentile,float gateper,int gateshift,boolean showplots) {
+		if(name.endsWith(".roi")){
+			//this is already a gate, copy it named as roiname in the outdir folder and exit
+			Roi roi=multi_roi_writer.readRoi(directory+name);
+			multi_roi_writer.writeRoi(roi,outdir+roiname);
+			return;
+		}
 		//now load the fcs data
 		Object[] data=(new import_flowcyte()).getFCSFile(directory+name);
 		//now calculate the acceptor and amfret data sets
@@ -904,6 +917,12 @@ public class amfret_utils implements gui_interface{
 	 */
 	public void getGate2(String directory,String name,String outdir,String roiname,float minconc,float maxconc,float minamfret,float maxamfret,
 			float startcrop,float uppercentile,float gateper,int gateshift,boolean showplots) {
+		if(name.endsWith(".roi")){
+			//this is already a gate, copy it named as roiname in the outdir folder and exit
+			Roi roi=multi_roi_writer.readRoi(directory+name);
+			multi_roi_writer.writeRoi(roi,outdir+roiname);
+			return;
+		}
 		//now load the fcs data
 		Object[] data=(new import_flowcyte()).getFCSFile(directory+name);
 		//now calculate the acceptor and amfret data sets

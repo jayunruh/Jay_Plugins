@@ -41,9 +41,9 @@ public class FindBlobsFast{
 		//work our way through the image creating subsize x subsize thumbnails, searching them, and then merging them
 		//will enforce the edge buffer retroactively after searching
 		int overlap=1+(int)minsep;
-		int nwide=(int)((float)width/(float)(subsize-overlap)); //this is the number of full images in x
+		int nwide=(int)((float)width/(float)(subsize-overlap)); //this is the number of full images (minus overlap) in x
 		int xextra=width-nwide*(subsize-overlap);
-		int nhigh=(int)((float)height/(float)(subsize-overlap)); //this is the number of full images in y
+		int nhigh=(int)((float)height/(float)(subsize-overlap)); //this is the number of full images (minus overlap) in y
 		int yextra=height-nhigh*(subsize-overlap);
 		if(thresh!=fb.thresh) fb.thresh=thresh;
 		List<float[]> points=new ArrayList<float[]>();
@@ -52,7 +52,8 @@ public class FindBlobsFast{
 			for(int j=0;j<nwide;j++) {
 				int xpos=j*(subsize-overlap);
 				//get the subregion
-				float[] subdata=algutils.get_region2(data,xpos,ypos,subsize,subsize,width,height);
+				//float[] subdata=algutils.get_region2(data,xpos,ypos,subsize,subsize,width,height);
+				float[] subdata=getRegionPad(data,xpos,ypos,subsize,subsize,width,height);
 				//find the maxima in that subregion
 				float[][] temppts=fb.dofindblobs3(subdata,new float[subsize*subsize]);
 				//now corect those values based on our position
@@ -68,8 +69,9 @@ public class FindBlobsFast{
 			//at the end of each row, need to add the extra partial image, pad it to keep the size the same
 			if(xextra>minsep) {
 				int xpos=nwide*(subsize-overlap);
-				float[] subdata=algutils.get_region2(data,xpos,ypos,xextra,subsize,width,height);
-				subdata=padImage(subdata,xextra,subsize,subsize,subsize);
+				//float[] subdata=algutils.get_region2(data,xpos,ypos,xextra,subsize,width,height);
+				//subdata=padImage(subdata,xextra,subsize,subsize,subsize);
+				float[] subdata=getRegionPad(data,xpos,ypos,subsize,subsize,width,height);
 				float[][] temppts=fb.dofindblobs3(subdata,new float[subsize*subsize]);
 				for(int k=0;k<temppts.length;k++) {
 					temppts[k][0]+=(float)xpos;
@@ -85,8 +87,9 @@ public class FindBlobsFast{
 			int ypos=nhigh*(subsize-overlap);
 			for(int j=0;j<nwide;j++) {
 				int xpos=j*(subsize-overlap);
-				float[] subdata=algutils.get_region2(data,xpos,ypos,subsize,yextra,width,height);
-				subdata=padImage(subdata,subsize,yextra,subsize,subsize);
+				//float[] subdata=algutils.get_region2(data,xpos,ypos,subsize,yextra,width,height);
+				//subdata=padImage(subdata,subsize,yextra,subsize,subsize);
+				float[] subdata=getRegionPad(data,xpos,ypos,subsize,subsize,width,height);
 				float[][] temppts=fb.dofindblobs3(subdata,new float[subsize*subsize]);
 				for(int k=0;k<temppts.length;k++) {
 					temppts[k][0]+=(float)xpos;
@@ -99,8 +102,9 @@ public class FindBlobsFast{
 			//finally the corner right image
 			if(xextra>minsep) {
 				int xpos=nwide*(subsize-overlap);
-				float[] subdata=algutils.get_region2(data,xpos,ypos,xextra,yextra,width,height);
-				subdata=padImage(subdata,xextra,yextra,subsize,subsize);
+				float[] subdata=getRegionPad(data,xpos,ypos,subsize,subsize,width,height);
+				//float[] subdata=algutils.get_region2(data,xpos,ypos,xextra,yextra,width,height);
+				//subdata=padImage(subdata,xextra,yextra,subsize,subsize);
 				float[][] temppts=fb.dofindblobs3(subdata,new float[subsize*subsize]);
 				for(int k=0;k<temppts.length;k++) {
 					temppts[k][0]+=(float)xpos;
@@ -167,9 +171,9 @@ public class FindBlobsFast{
 		float zratio=searchrz/(float)searchr;
 		int overlap=1+(int)minsep;
 		//int zoverlap=1+(int)searchrz;
-		int nwide=(int)((float)width/(float)(subsize-overlap)); //this is the number of full images in x
+		int nwide=(int)((float)width/(float)(subsize-overlap)); //this is the number of full images (minus overlap) in x
 		int xextra=width-nwide*(subsize-overlap);
-		int nhigh=(int)((float)height/(float)(subsize-overlap)); //this is the number of full images in y
+		int nhigh=(int)((float)height/(float)(subsize-overlap)); //this is the number of full images (minus overlap) in y
 		int yextra=height-nhigh*(subsize-overlap);
 		if(thresh!=fb.thresh) fb.thresh=thresh;
 		List<float[]> points=new ArrayList<float[]>();
@@ -178,7 +182,8 @@ public class FindBlobsFast{
 			for(int j=0;j<nwide;j++) {
 				int xpos=j*(subsize-overlap);
 				//get the subregion
-				float[][] subdata=algutils.get_region2(data,xpos,ypos,subsize,subsize,width,height);
+				float[][] subdata=getRegionPad(data,xpos,ypos,subsize,subsize,width,height);
+				//float[][] subdata=algutils.get_region2(data,xpos,ypos,subsize,subsize,width,height);
 				//find the maxima in that subregion
 				float[][] temppts=fb.dofindblobs3D(subdata,null,searchrz,0);
 				//now corect those values based on our position
@@ -194,8 +199,9 @@ public class FindBlobsFast{
 			//at the end of each row, need to add the extra partial image, pad it to keep the size the same
 			if(xextra>minsep) {
 				int xpos=nwide*(subsize-overlap);
-				float[][] subdata=algutils.get_region2(data,xpos,ypos,xextra,subsize,width,height);
-				subdata=padImage(subdata,xextra,subsize,subsize,subsize);
+				float[][] subdata=getRegionPad(data,xpos,ypos,subsize,subsize,width,height);
+				//float[][] subdata=algutils.get_region2(data,xpos,ypos,xextra,subsize,width,height);
+				//subdata=padImage(subdata,xextra,subsize,subsize,subsize);
 				float[][] temppts=fb.dofindblobs3D(subdata,null,searchrz,0);
 				for(int k=0;k<temppts.length;k++) {
 					temppts[k][0]+=(float)xpos;
@@ -211,8 +217,9 @@ public class FindBlobsFast{
 			int ypos=nhigh*(subsize-overlap);
 			for(int j=0;j<nwide;j++) {
 				int xpos=j*(subsize-overlap);
-				float[][] subdata=algutils.get_region2(data,xpos,ypos,subsize,yextra,width,height);
-				subdata=padImage(subdata,subsize,yextra,subsize,subsize);
+				float[][] subdata=getRegionPad(data,xpos,ypos,subsize,subsize,width,height);
+				//float[][] subdata=algutils.get_region2(data,xpos,ypos,subsize,yextra,width,height);
+				//subdata=padImage(subdata,subsize,yextra,subsize,subsize);
 				float[][] temppts=fb.dofindblobs3D(subdata,null,searchrz,0);
 				for(int k=0;k<temppts.length;k++) {
 					temppts[k][0]+=(float)xpos;
@@ -225,8 +232,9 @@ public class FindBlobsFast{
 			//finally the corner right image
 			if(xextra>minsep) {
 				int xpos=nwide*(subsize-overlap);
-				float[][] subdata=algutils.get_region2(data,xpos,ypos,xextra,yextra,width,height);
-				subdata=padImage(subdata,xextra,yextra,subsize,subsize);
+				float[][] subdata=getRegionPad(data,xpos,ypos,subsize,subsize,width,height);
+				//float[][] subdata=algutils.get_region2(data,xpos,ypos,xextra,yextra,width,height);
+				//subdata=padImage(subdata,xextra,yextra,subsize,subsize);
 				float[][] temppts=fb.dofindblobs3D(subdata,null,searchrz,0);
 				for(int k=0;k<temppts.length;k++) {
 					temppts[k][0]+=(float)xpos;
@@ -286,6 +294,52 @@ public class FindBlobsFast{
 		return;
 	}
 	
+	public float[] getRegionPad(Object image,int xpos,int ypos,int rwidth,int rheight,int width,int height){
+		//this method gets a region of a image and pads it if it is clipped
+		if(xpos>=width) return null;
+		if(ypos>=height) return null;
+		if(xpos<-rwidth) return null;
+		if(ypos<-rheight) return null;
+		int xstart=xpos;
+		if(xstart<0) xstart=0;
+		int xend=xpos+rwidth-1;
+		if(xend>=width) xend=width-1;
+		int trwidth=xend-xstart+1;
+		int ystart=ypos;
+		if(ystart<0) ystart=0;
+		int yend=ypos+rheight-1;
+		if(yend>=height) yend=height-1;
+		int trheight=yend-ystart+1;
+		float[] temp=algutils.get_region2(image,xstart,ystart,trwidth,trheight,width,height);
+		//this is technically not quite right because we pad down and to the right but it works for this code
+		return padImage(temp,trwidth,trheight,rwidth,rheight);
+	}
+	
+	public float[][] getRegionPad(Object[] image,int xpos,int ypos,int rwidth,int rheight,int width,int height){
+		//this method gets a region of a image and pads it if it is clipped
+		if(xpos>=width) return null;
+		if(ypos>=height) return null;
+		if(xpos<-rwidth) return null;
+		if(ypos<-rheight) return null;
+		int xstart=xpos;
+		if(xstart<0) xstart=0;
+		int xend=xpos+rwidth-1;
+		if(xend>=width) xend=width-1;
+		int trwidth=xend-xstart+1;
+		int ystart=ypos;
+		if(ystart<0) ystart=0;
+		int yend=ypos+rheight-1;
+		if(yend>=height) yend=height-1;
+		int trheight=yend-ystart+1;
+		float[][] padded=new float[image.length][];
+		for(int i=0;i<image.length;i++){
+			float[] temp=algutils.get_region2(image[i],xstart,ystart,trwidth,trheight,width,height);
+			//this is technically not quite right because we pad down and to the right but it works for this code
+			padded[i]=padImage(temp,trwidth,trheight,rwidth,rheight);
+		}
+		return padded;
+	}
+	
 	public float[] padImage(float[] image,int width,int height,int newwidth,int newheight) {
 		//this method pads simply by copying the image into the upper left hand corner of a blank image
 		//make sure newwidth and newheight are greater than the old ones
@@ -299,7 +353,7 @@ public class FindBlobsFast{
 	public float[][] padImage(float[][] image,int width,int height,int newwidth,int newheight) {
 		//this method pads simply by copying the image into the upper left hand corner of a blank image
 		//make sure newwidth and newheight are greater than the old ones
-		float[][] newimage=new float[image.length][newwidth*newheight];
+		float[][] newimage=new float[image.length][];
 		for(int i=0;i<image.length;i++) newimage[i]=padImage(image[i],width,height,newwidth,newheight);
 		return newimage;
 	}

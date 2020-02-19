@@ -157,6 +157,51 @@ public class algutils{
 		if(atype==4) return ((int[])arr).length;
 		return -1;
 	}
+	
+	/*******************************
+	 * converts a nested list to multidimensional array (max depth = 3, dimensions other than last must be constant)
+	 * @param list
+	 * @return
+	 */
+	public static Object list2array(List<?> list){
+		List<Integer> dims=new ArrayList<Integer>();
+		dims.add(list.size());
+		int dtype=-1;
+		if(list.get(0) instanceof List<?>){
+			List<?> list2=(List<?>)list.get(0);
+			dims.add(list2.size());
+			if(list2.get(0) instanceof List<?>){
+				List<?> list3=(List<?>)list2.get(0);
+				dims.add(list3.size());
+				dtype=get_number_type((Number)list3.get(0));
+			} else {
+				dtype=get_number_type((Number)list2.get(0));
+			}
+		} else {
+			dtype=get_number_type((Number)list.get(0));
+		}
+		if(dims.size()==1){
+			return convert_array(list,dtype);
+		} else if(dims.size()==2){
+			Object[] temp=new Object[dims.get(0)];
+			for(int i=0;i<dims.get(0);i++){
+				List<?> list2=(List<?>)list.get(0);
+				temp[i]=convert_array(list2,dtype);
+			}
+			return temp;
+		} else if(dims.size()==3){
+			Object[][] temp=new Object[dims.get(0)][dims.get(1)];
+			for(int i=0;i<dims.get(0);i++){
+				List<?> list2=(List<?>)list.get(0);
+				for(int j=0;j<dims.get(1);j++){
+					List<?> list3=(List<?>)list2.get(0);
+					temp[i][j]=convert_array(list3,dtype);
+				}
+			}
+			return temp;
+		}
+		return null;
+	}
 
 	/************************************
 	 * this converts an array to a specific type, making a copy.  See above for types
@@ -319,6 +364,14 @@ public class algutils{
 		return null;
 	}
 	
+	public static byte[][] convert_arr_byte(List<List<Number>> input){
+		byte[][] output=new byte[input.size()][];
+		for(int i=0;i<input.size();i++){
+			output[i]=convert_arr_byte(input.get(i));
+		}
+		return output;
+	}
+	
 	public static byte[][] convert_arr_byte(Object[] input){
 		byte[][] out=new byte[input.length][];
 		for(int i=0;i<input.length;i++){
@@ -394,6 +447,15 @@ public class algutils{
 		return null;
 	}
 	
+	public static float[][] convert_arr_float(List<List<Number>> input){
+		//note that this is unreachable (overridden by object instance)
+		float[][] output=new float[input.size()][];
+		for(int i=0;i<input.size();i++){
+			output[i]=convert_arr_float(input.get(i));
+		}
+		return output;
+	}
+	
 	public static float[][] convert_arr_float(Object[] input){
 		float[][] out=new float[input.length][];
 		for(int i=0;i<input.length;i++){
@@ -467,6 +529,14 @@ public class algutils{
 		return null;
 	}
 	
+	public static int[][] convert_arr_int(List<List<Number>> input){
+		int[][] output=new int[input.size()][];
+		for(int i=0;i<input.size();i++){
+			output[i]=convert_arr_int(input.get(i));
+		}
+		return output;
+	}
+	
 	public static int[][] convert_arr_int(Object[] input){
 		int[][] out=new int[input.length][];
 		for(int i=0;i<input.length;i++){
@@ -532,6 +602,14 @@ public class algutils{
 			return temparr;
 		}
 		return null;
+	}
+	
+	public static double[][] convert_arr_double(List<List<Number>> input){
+		double[][] output=new double[input.size()][];
+		for(int i=0;i<input.size();i++){
+			output[i]=convert_arr_double(input.get(i));
+		}
+		return output;
 	}
 	
 	public static double[][] convert_arr_double(Object[] input){
@@ -625,6 +703,14 @@ public class algutils{
 			return temparr;
 		}
 		return null;
+	}
+	
+	public static short[][] convert_arr_short(List<List<Number>> input){
+		short[][] output=new short[input.size()][];
+		for(int i=0;i<input.size();i++){
+			output[i]=convert_arr_short(input.get(i));
+		}
+		return output;
 	}
 	
 	public static short[][] convert_arr_short(Object[] input){

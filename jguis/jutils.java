@@ -58,6 +58,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
@@ -519,6 +520,21 @@ public class jutils{
 		return constructReflectionObject(tclass,args,argcs);
 	}
 	
+	public static Object constructReflectionObjectLists(Object tclass,Object[] args){
+		// here we automatically convert lists to native arrays
+		if(args==null)
+			return constructReflectionObject(tclass,null,null);
+		Object[] args2=new Object[args.length];
+		for(int i=0;i<args2.length;i++){
+			if(args[i] instanceof List<?>) args2[i]=algutils.list2array((List<?>)args[i]);
+			else args2[i]=args[i];
+		}
+		Class[] argcs=new Class[args.length];
+		for(int i=0;i<args.length;i++) argcs[i]=args2[i].getClass();
+		transformClasses(argcs);
+		return constructReflectionObject(tclass,args2,argcs);
+	}
+	
 	public static Object constructReflectionObject(Object tclass,Object[] args,Class[] argcs){
 		try{
 			Class<?> temp=tclass.getClass();
@@ -558,6 +574,21 @@ public class jutils{
 	}
 
 	public static Object runReflectionMethod(Object obj,String method,Object[] args){
+		// here we automatically assume that number types are primitive
+		if(args==null)
+			return runReflectionMethod(obj,method,null,null);
+		Object[] args2=new Object[args.length];
+		for(int i=0;i<args2.length;i++){
+			if(args[i] instanceof List<?>) args2[i]=algutils.list2array((List<?>)args[i]);
+			else args2[i]=args[i];
+		}
+		Class[] argcs=new Class[args.length];
+		for(int i=0;i<args.length;i++) argcs[i]=args2[i].getClass();
+		transformClasses(argcs);
+		return runReflectionMethod(obj,method,args2,argcs);
+	}
+	
+	public static Object runReflectionMethodLists(Object obj,String method,Object[] args){
 		// here we automatically assume that number types are primitive
 		if(args==null)
 			return runReflectionMethod(obj,method,null,null);
@@ -1753,6 +1784,110 @@ public class jutils{
 		List<List<String>> listtable=table_tools.table2listtable(tp);
 		listtable.add(0,collist);
 		return listtable;
+	}
+		
+	/******************
+	 * this copies an image as an arraylist
+	 * @param imp
+	 * @return
+	 */
+	public static Object getImageAsList(ImagePlus imp){
+		int width=imp.getWidth(); int height=imp.getHeight();
+		int nchans=imp.getNChannels(); int nslices=imp.getNSlices(); int nframes=imp.getNFrames();
+		ImageStack stack2=imp.getStack();
+		Object[] stack=stack2array(stack2);
+		List<List<List<?>>> framelist=new ArrayList<List<List<?>>>();
+		if(imp.getProcessor().getPixels() instanceof int[]){
+			for(int i=0;i<nframes;i++){
+				List<List<?>> stacklist=new ArrayList<List<?>>();
+				for(int j=0;j<nslices;j++){
+					List<?> chanlist=getImageAsList(stack[j+i*nslices],width,height);
+					stacklist.add(chanlist);
+				}
+				framelist.add(stacklist);
+			}
+		} else {
+    		for(int i=0;i<nframes;i++){
+    			List<List<?>> stacklist=new ArrayList<List<?>>();
+    			for(int j=0;j<nslices;j++){
+    				Object[] cstack=get3DCSeries(stack2,j,i,nframes,nslices,nchans);
+    				List<?> chanlist=getImageAsList(cstack,width,height);
+    				stacklist.add(chanlist);
+    			}
+    			framelist.add(stacklist);
+    		}
+		}
+		//return getImageAsList(imp.getProcessor().getPixels(),width,height);
+		return framelist;
+	}
+	
+	/****************
+	 * returns a stack of images as a nested list (of unknown depth)
+	 * @param pix
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	public static List<?> getImageAsList(Object[] pix,int width,int height){
+		List<List<?>> liststack = new ArrayList<List<?>>();
+		for(int i=0;i<pix.length;i++){
+			liststack.add(getImageAsList(pix[i],width,height));
+		}
+		return liststack;
+	}
+	
+	/*****************
+	 * returns a single image as a nested list, color images are returned as 3d list
+	 * @param pix
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	public static List<?> getImageAsList(Object pix,int width,int height){
+		if(pix instanceof float[]){
+			List<List<Float>> listimg=new ArrayList<List<Float>>();
+			for(int i=0;i<height;i++){
+				float[] subarr=(float[])algutils.get_subarray(pix,i*width,width);
+				List<Float> temp=new ArrayList<Float>();
+				for(int j=0;j<width;j++) temp.add(subarr[j]);
+				listimg.add(temp);
+			}
+			return listimg;
+		} else if(pix instanceof byte[]){
+			List<List<Byte>> listimg=new ArrayList<List<Byte>>();
+			for(int i=0;i<height;i++){
+				byte[] subarr=(byte[])algutils.get_subarray(pix,i*width,width);
+				List<Byte> temp=new ArrayList<Byte>();
+				for(int j=0;j<width;j++) temp.add(subarr[j]);
+				listimg.add(temp);
+			}
+			return listimg;
+		}  else if(pix instanceof short[]){
+			List<List<Short>> listimg=new ArrayList<List<Short>>();
+			for(int i=0;i<height;i++){
+				short[] subarr=(short[])algutils.get_subarray(pix,i*width,width);
+				List<Short> temp=new ArrayList<Short>();
+				for(int j=0;j<width;j++) temp.add(subarr[j]);
+				listimg.add(temp);
+			}
+			return listimg;
+		}   else if(pix instanceof int[]){
+			//here we do something special and create a 3D array with 4 channels (include alpha)
+			List<List<List<Byte>>> listimg=new ArrayList<List<List<Byte>>>();
+			byte[][] colors=intval2rgb((int[])pix);
+			for(int i=0;i<colors.length;i++) listimg.add((List<List<Byte>>)getImageAsList(colors[i],width,height));
+			return listimg;
+		}    else if(pix instanceof double[]){
+			List<List<Double>> listimg=new ArrayList<List<Double>>();
+			for(int i=0;i<height;i++){
+				double[] subarr=(double[])algutils.get_subarray(pix,i*width,width);
+				List<Double> temp=new ArrayList<Double>();
+				for(int j=0;j<width;j++) temp.add(subarr[j]);
+				listimg.add(temp);
+			}
+			return listimg;
+		}
+		return null;
 	}
 	
 	public static String getUniqueTableName(String title){

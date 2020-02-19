@@ -362,3 +362,6 @@ Plugins>Stowers>Jay_Unruh>ImageStream	amfret profile jru v1	amfret_profile_jru_v
 Plugins>Stowers>Jay_Unruh>Misc Tools	manual transform 3D images jru v1	manual_transform_3D_images_jru_v1	"uses alternating rois in the roi manager to tranform one 3D image into the coordinates of another, must have z calibration set"
 Plugins>Stowers>Jay_Unruh>Trajectory Tools	export plot jru v2	export_plot_jru_v2	exports a plot to a text file
 Plugins>Stowers>Jay_Unruh>Misc Tools	normalize stack jru v1	normalize_stack_jru_v1	normalizes each channel and frame of a z stack to the maximum or sum of that stack
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	overlap objects jru v1	overlap_objects_jru_v1	calculates the number of masked objects that do and don't overlap
+Plugins>Stowers>Jay_Unruh>ImageStream	manual hist gate jru v1	manual_hist_gate_jru_v1	converts a left-to-right line roi on a histogram into a gate for amfret analysis
+Plugins>Stowers>Jay_Unruh>Image Tools	SIFTj jru v1	SIFTj_jru_v1	my implementation of SIFT stack alignment which allows for hyperstack and secondary stack alignment 
