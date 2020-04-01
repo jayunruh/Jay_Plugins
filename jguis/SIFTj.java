@@ -319,7 +319,7 @@ public class SIFTj{
 		return stack.getProcessor(getPos(channel,slice,frame,nchans,nslices,nframes));
 	}
 	
-	public static ImagePlus doTransformations(ImagePlus source,float[][][] trans,boolean interpolate){
+	public static ImagePlus doTransformations(ImagePlus source,float[][][] trans,boolean interpolate,boolean global){
 		//here we take a stack of affine matrix values and apply them to an image
 		//this version aligns a secondary image with the same number of frames
 		int nchans=source.getNChannels();
@@ -345,6 +345,23 @@ public class SIFTj{
 		//ijSIFT.extractFeatures(ip2,fs2);
 		AbstractAffineModel2D model=new AffineModel2D();
 		Mapping mapping=new InverseTransformMapping<AbstractAffineModel2D<?>>(model);
+		if(global){
+			AffineModel2D currentModel=new AffineModel2D();
+			final double[] t={(double)trans[0][0][0],(double)trans[0][1][0],(double)trans[0][0][1],(double)trans[0][1][1],(double)trans[0][0][2],(double)trans[0][1][2]};
+			currentModel.set(t[0],t[1],t[2],t[3],t[4],t[5]);
+			model.set(currentModel);
+			for(int j=0;j<nslices;j++){
+				for(int k=0;k<nchans;k++){
+    				//ImageProcessor originalSlice=stack.getProcessor(i+1);
+    				ImageProcessor originalSlice=getProc(stack,k,j,0,nchans,nslices,nframes);
+    				originalSlice.setInterpolationMethod(ImageProcessor.BILINEAR);
+    				ImageProcessor alignedSlice=originalSlice.createProcessor(stack.getWidth(),stack.getHeight());
+    				if(interpolate) mapping.mapInterpolated(originalSlice,alignedSlice);
+    				else mapping.map(originalSlice,alignedSlice);
+    				aligned.addSlice(null,alignedSlice);
+				}
+			}
+		}
 		for(int i=1;i<nframes;i++){
 			ip1=ip2;
 			//ip2=stack.getProcessor(i+1);
@@ -352,7 +369,8 @@ public class SIFTj{
 			AffineModel2D currentModel=new AffineModel2D();
 			final double[] t={(double)trans[i][0][0],(double)trans[i][1][0],(double)trans[i][0][1],(double)trans[i][1][1],(double)trans[i][0][2],(double)trans[i][1][2]};
 			currentModel.set(t[0],t[1],t[2],t[3],t[4],t[5]);
-			model.concatenate(currentModel);
+			if(!global) model.concatenate(currentModel);
+			else model.set(currentModel);
 			for(int j=0;j<nslices;j++){
 				for(int k=0;k<nchans;k++){
     				//ImageProcessor originalSlice=stack.getProcessor(i+1);

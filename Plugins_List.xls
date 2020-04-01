@@ -365,3 +365,4 @@ Plugins>Stowers>Jay_Unruh>Misc Tools	normalize stack jru v1	normalize_stack_jru_
 Plugins>Stowers>Jay_Unruh>Segmentation Tools	overlap objects jru v1	overlap_objects_jru_v1	calculates the number of masked objects that do and don't overlap
 Plugins>Stowers>Jay_Unruh>ImageStream	manual hist gate jru v1	manual_hist_gate_jru_v1	converts a left-to-right line roi on a histogram into a gate for amfret analysis
 Plugins>Stowers>Jay_Unruh>Image Tools	SIFTj jru v1	SIFTj_jru_v1	my implementation of SIFT stack alignment which allows for hyperstack and secondary stack alignment 
+Plugins>Stowers>Jay_Unruh>Image Tools	transform from table jru v1	transform_from_table_jru_v1	"takes a table where the last 6 columns list the first two rows of an affine transformation matrix and realigns a hyperstack, scaling allows for larger hyperstacks to be aligned from smaller alignments"

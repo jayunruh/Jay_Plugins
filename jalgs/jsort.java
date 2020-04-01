@@ -221,10 +221,23 @@ public class jsort{
 	}
 
 	public static int[] get_javasort_order(int[] arr){
-		float[] newarr=new float[arr.length];
-		for(int i=0;i<arr.length;i++)
-			newarr[i]=arr[i];
-		return get_javasort_order(newarr);
+		List<List<Integer>> list= new ArrayList<List<Integer>>();
+		for(int i=0;i<arr.length;i++){
+			List<Integer> temp=new ArrayList<Integer>();
+			temp.add(new Integer(arr[i]));
+			temp.add(new Integer(i));
+			list.add(temp);
+		}
+		Collections.sort(list,new Comparator<List<Integer>>(){
+			public int compare(List<Integer> o1,List<Integer> o2){
+				return o1.get(0).compareTo(o2.get(0));
+			}
+		});
+		int[] order=new int[arr.length];
+		for(int i=0;i<arr.length;i++){
+			order[i]=list.get(i).get(1).intValue();
+		}
+		return order;
 	}
 
 	public static int[] get_javasort_order(float[] arr){
@@ -266,6 +279,28 @@ public class jsort{
 		});
 		int[] order=new int[arr.length];
 		for(int i=0;i<arr.length;i++){
+			order[i]=((Integer)list.get(i).get(1)).intValue();
+		}
+		return order;
+	}
+	
+	public static int[] get_javasort_order(List<String> arr){
+		List<List<Object>> list=new ArrayList<List<Object>>();
+		for(int i=0;i<arr.size();i++){
+			List<Object> temp=new ArrayList<Object>();
+			temp.add(arr.get(i));
+			temp.add(new Integer(i));
+			list.add(temp);
+		}
+		Collections.sort(list,new Comparator<List<Object>>(){
+			public int compare(List<Object> o1,List<Object> o2){
+				String s1=(String)o1.get(0);
+				String s2=(String)o2.get(0);
+				return s1.compareTo(s2);
+			}
+		});
+		int[] order=new int[arr.size()];
+		for(int i=0;i<arr.size();i++){
 			order[i]=((Integer)list.get(i).get(1)).intValue();
 		}
 		return order;

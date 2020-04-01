@@ -66,6 +66,20 @@ public class jdataio{
 			return null;
 		}
 	}
+	
+	public List<String> readstringfilelines2(BufferedReader b){
+		try{
+			List<String> s2=new ArrayList<String>();
+			String s=b.readLine();
+			while(s!=null){
+				s2.add(s);
+				s=b.readLine();
+			}
+			return s2;
+		}catch(IOException e){
+			return null;
+		}
+	}
 
 	public boolean writestringfile(BufferedWriter b,String s){
 		try{
@@ -80,6 +94,64 @@ public class jdataio{
 		try{
 			for(int i=0;i<lines.length;i++){
 				b.write(lines[i]+"\n");
+			}
+			return true;
+		}catch(IOException e){
+			return false;
+		}
+	}
+	
+	public boolean writestringfile(BufferedWriter b,String[][] lines){
+		try{
+			for(int i=0;i<lines.length;i++){
+				String templine=lines[i][0];
+				for(int j=1;j<lines[i].length;j++){
+					templine+=","+lines[i][j];
+				}
+				b.write(templine+"\n");
+			}
+			return true;
+		}catch(IOException e){
+			return false;
+		}
+	}
+	
+	public boolean writestringfile(BufferedWriter b,List<List<String>> lines){
+		try{
+			for(int i=0;i<lines.size();i++){
+				List<String> templine2=lines.get(i);
+				String templine=templine2.get(0);
+				for(int j=1;j<templine2.size();j++){
+					templine+=","+templine2.get(j);
+				}
+				b.write(templine+"\n");
+			}
+			return true;
+		}catch(IOException e){
+			return false;
+		}
+	}
+	
+	public boolean writestringfile3(BufferedWriter b,List<String[]> lines){
+		try{
+			for(int i=0;i<lines.size();i++){
+				String[] templine2=lines.get(i);
+				String templine=templine2[0];
+				for(int j=1;j<templine2.length;j++){
+					templine+=","+templine2[j];
+				}
+				b.write(templine+"\n");
+			}
+			return true;
+		}catch(IOException e){
+			return false;
+		}
+	}
+	
+	public boolean writestringfile2(BufferedWriter b,List<String> lines){
+		try{
+			for(int i=0;i<lines.size();i++){
+				b.write(lines.get(i)+"\n");
 			}
 			return true;
 		}catch(IOException e){
