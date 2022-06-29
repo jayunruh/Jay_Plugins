@@ -65,7 +65,7 @@ public class trajectory_statistics_jru_v2 implements PlugIn {
 			if(statistic.equals("Percentile")){
 				for(int j=1;j<extras.length;j++) collabels=collabels+"\t"+statistic+(j+1);
 			}
-			TextWindow tw=new TextWindow("Trajectory_Statistics",collabels,"",400,200);}
+			TextWindow tw=new TextWindow("Trajectory_Statistics",collabels,"",400,200);
 			for(int i=0;i<yvals.length;i++){
 				float[] temp=new float[npts[i]];
 				System.arraycopy(yvals[i],0,temp,0,npts[i]);
