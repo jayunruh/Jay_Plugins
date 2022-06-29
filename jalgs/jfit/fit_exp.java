@@ -12,6 +12,7 @@ public class fit_exp{
 	public float tmult=1.05f;
 	public float mint,maxt;
 	public float minratio=2.0f;
+	public boolean fix1,fix2;
 
 	public fit_exp(float mint,float maxt){
 		this.mint=mint;
@@ -32,7 +33,9 @@ public class fit_exp{
 		double c2min=0.0;
 		double[] minparams=new double[4];
 		boolean first=true;
-		for(double t=mint;t<maxt;t*=tmult){
+		float maxt1=maxt;
+		if(mint==maxt || fix1) maxt1=mint*tmult;
+		for(double t=mint;t<maxt1;t*=tmult){
 			double[] coef=fit_linear(t,data,xvals);
 			double[] fitparams={coef[0],coef[1],t};
 			double c2val=c2(fitparams,data,xvals);
@@ -70,8 +73,16 @@ public class fit_exp{
 		double c2min=0.0;
 		double[] minparams=new double[6];
 		boolean first=true;
-		for(double t1=mint;t1<(maxt/minratio);t1*=tmult){
-			for(double t2=t1*minratio;t2<maxt;t2*=tmult){
+		float maxt1=maxt/minratio;
+		if(fix1) maxt1=mint*tmult;
+		for(double t1=mint;t1<maxt1;t1*=tmult){
+			double mint2=t1*minratio;
+			double maxt2=maxt;
+			if(fix2){
+				mint2=maxt;
+				maxt2=maxt*tmult;
+			}
+			for(double t2=mint2;t2<maxt2;t2*=tmult){
 				double[] coef=fit_linear2exp(t1,t2,ac,xvals);
 				double[] fitparams={0.0,coef[0],t1,coef[1],t2};
 				fitparams[0]=coef[0];

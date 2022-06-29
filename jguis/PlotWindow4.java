@@ -18,6 +18,7 @@ import ij.plugin.frame.Recorder;
 import ij.process.ColorProcessor;
 import ij.text.TextWindow;
 import ij.util.Tools;
+import jalgs.algutils;
 import jalgs.jdataio;
 
 import java.awt.Button;
@@ -31,6 +32,7 @@ import java.awt.datatransfer.StringSelection;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowEvent;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -99,6 +101,18 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 		}
 		p3=new Plot4(xLabel1,yLabel1,xvals,yvals,npts);
 	}
+	
+	/************
+	 * this is for interface with python routines that send arraylists
+	 * @param title1
+	 * @param xLabel1
+	 * @param yLabel1
+	 * @param xvals1
+	 * @param yvals1
+	 */
+	public PlotWindow4(String title1,String xLabel1,String yLabel1,List<Number> xvals1,List<Number> yvals1){
+		this(title1,xLabel1,yLabel1,algutils.convert_arr_float(xvals1),algutils.convert_arr_float(yvals1));
+	}
 
 	public PlotWindow4(String title1,Plot4 plot){
 		super(createImage(title1));
@@ -141,6 +155,10 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 
 	public float getmagratio(){
 		return p3.getmagratio();
+	}
+	
+	public void setAllShapeSizes(int shapesize) {
+		p3.setShapeSize(shapesize);
 	}
 
 	static ImagePlus createImage(String title1){
@@ -308,7 +326,24 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 		// coordinates.setText("");
 		updatePlot();
 		IJ.register(this.getClass());
+		ic.requestFocus();
 	}
+	
+    /** Called when the window is activated (WindowListener)
+     *  Window layout is finished at latest a few millisec after windowActivated, then the
+     *  'wasActivated' boolean is set to tell the ImageCanvas that resize events should
+     *  lead to resizing the canvas (before, creating the layout can lead to resize events)*/
+    /*public void windowActivated(WindowEvent e) {
+        super.windowActivated(e);
+        if (!wasActivated) {
+            new Thread(new Runnable() {
+                public void run() {
+                    IJ.wait(50);  //sometimes, window layout is done only a few millisec after windowActivated
+                    wasActivated = true;
+                }
+            }).start();
+        }
+    }*/
 
 	/**
 	 * Updates the graph X and Y values when the mouse is moved. Overrides
@@ -811,6 +846,8 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 				}
 			}
 		}
+		//IJ.log(e.getActionCommand());
+		ic.requestFocus();
 	}
 
 	public void selectSeries(int series){

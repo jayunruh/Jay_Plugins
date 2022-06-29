@@ -41,6 +41,13 @@ public class table_tools{
 		return temp.split(delim);
 	}
 	
+	/***********************
+	 * splits a single line (no returns) with delim
+	 * @param line
+	 * @param delim
+	 * @param noconsec: if true consecutive delimiters are eliminated (e.g. ,,,, in csv)
+	 * @return
+	 */
 	public static String[] split(String line,String delim,boolean noconsec){
 		String temp;
 		if(line.endsWith(delim)){
@@ -177,6 +184,13 @@ public class table_tools{
 		return retarray;
 	}
 	
+	/*******************************
+	 * reads a table from a file
+	 * @param infile
+	 * @param delim: the column delimiter ("," for csv)
+	 * @param noconsec: if true consecutive delimiters are eliminated
+	 * @return
+	 */
 	public static List<List<String>> getTableFromFile(File infile,String delim,boolean noconsec){
 		try{
 			BufferedReader b=new BufferedReader(new FileReader(infile));
@@ -800,6 +814,24 @@ public class table_tools{
 			labels=new String[ncolumns];
 			for(int i=0;i<ncolumns;i++)
 				labels[i]="col"+(i+1);
+		}
+		String title2=title;
+		if(title==null){
+			title2="Table";
+		}
+		new TextWindow(title2,print_string_array(labels),print_listtable(list),400,200);
+	}
+	
+	public static void create_table(String title,List<List<String>> list,List<String> collabels){
+		int ncolumns=0;
+		if(list.size()>0) ncolumns=list.get(0).size();
+		if(ncolumns==0 && collabels!=null) ncolumns=collabels.size(); //blank table
+		List<String> labels=collabels;
+		if(collabels==null){
+			if(ncolumns==0) return; //empty file
+			labels=new ArrayList<String>();
+			for(int i=0;i<ncolumns;i++)
+				labels.add("col"+(i+1));
 		}
 		String title2=title;
 		if(title==null){

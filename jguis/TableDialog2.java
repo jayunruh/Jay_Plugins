@@ -154,7 +154,7 @@ public class TableDialog2 extends JDialog implements ActionListener,KeyListener,
 			for(int i=0;i<height;i++){
 				for(int j=0;j<width;j++){
 					if(tabledata1[i][j] instanceof Number){
-						TableDialog2.outdata[i][j]=new Double((String)table.getValueAt(i,j));
+						TableDialog2.outdata[i][j]=Double.valueOf((String)table.getValueAt(i,j));
 					}else{
 						TableDialog2.outdata[i][j]=table.getValueAt(i,j);
 					}
@@ -190,7 +190,7 @@ public class TableDialog2 extends JDialog implements ActionListener,KeyListener,
 		for(int i=0;i<height;i++){
 			for(int j=0;j<width;j++){
 				if(tabledata1[i][j] instanceof Number){
-					tempoutdata[i][j]=new Double((String)table.getValueAt(i,j));
+					tempoutdata[i][j]=Double.valueOf((String)table.getValueAt(i,j));
 				}else{
 					tempoutdata[i][j]=table.getValueAt(i,j);
 				}

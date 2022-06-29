@@ -17,6 +17,7 @@ import ij.io.SaveDialog;
 import ij.plugin.frame.Recorder;
 import ij.process.ColorProcessor;
 import ij.text.TextWindow;
+import jalgs.algutils;
 import jalgs.jdist;
 import jalgs.jstatistics;
 import jalgs.jsim.rngs;
@@ -37,6 +38,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
 import java.io.File;
+import java.util.List;
 
 /**
  * This class is an extended ImageWindow that displays 2D histograms. This class
@@ -56,6 +58,21 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 		super(createImage(title1));
 		savehist=false;
 		p3=new Plot2DHist(xLabel1,yLabel1,xValues1,yValues1,lut1);
+		imp.getCanvas().addMouseMotionListener(this);
+	}
+	
+	/*****************
+	 * simple conversion constructor for pyimagej
+	 * @param title1
+	 * @param xLabel1
+	 * @param yLabel1
+	 * @param xValues1
+	 * @param yValues1
+	 */
+	public PlotWindow2DHist(String title1,String xLabel1,String yLabel1,List<Float> xValues1,List<Float> yValues1){
+		super(createImage(title1));
+		savehist=false;
+		p3=new Plot2DHist(xLabel1,yLabel1,algutils.convert_arr_float(xValues1),algutils.convert_arr_float(yValues1),null);
 		imp.getCanvas().addMouseMotionListener(this);
 	}
 
@@ -215,6 +232,7 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 		// pack();
 		// this.setSize(364,326);
 		updatePlot();
+		ic.requestFocus();
 	}
 
 	/**
@@ -403,6 +421,7 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 		gd.addNumericField("Magnification",p3.getmagnification(),5,10,null);
 		gd.addNumericField("Bin Size",p3.getBinSize(),0,10,null);
 		gd.addChoice("LUT",Plot2DHist.lutnames,Plot2DHist.lutnames[p3.getLut()]);
+		gd.addCheckbox("Interpolate?",p3.interpolate);
 		gd.addCheckbox("Save Histogram?",savehist);
 		gd.addCheckbox("Pearson?",pearson);
 		gd.addCheckbox("Pearson_Analysis?",false);
@@ -430,6 +449,7 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 		p3.setmagnification((float)gd.getNextNumber());
 		p3.setBinSize((int)gd.getNextNumber());
 		p3.setLut(gd.getNextChoiceIndex());
+		p3.interpolate=gd.getNextBoolean();
 		savehist=gd.getNextBoolean();
 		pearson=gd.getNextBoolean();
 		if(gd.getNextBoolean()){
@@ -558,6 +578,7 @@ public class PlotWindow2DHist extends ImageWindow implements ActionListener,Clip
 				}
 			}
 		}
+		ic.requestFocus();
 	}
 
 	public float[] getXValues(){

@@ -376,6 +376,7 @@ public class Plot4{
 
 	public void setShapeSize(int shapesize){
 		this.shapesize=shapesize;
+		for(int i=0;i<shapesizes.length;i++) shapesizes[i]=shapesize;
 	}
 	
 	public void setAnnotations(String[] annotations){

@@ -154,20 +154,20 @@ public class FitDialog_v2 implements NLLSfitinterface_v2,TableDialogListener{
 		Object[][] tabledata=new Object[nparams+5][3];
 		String[] columnlabels={"Parameters","Values","Fix?"};
 		tabledata[0][0]="Check chi^2?";
-		tabledata[0][1]=new Boolean(checkc2);
+		tabledata[0][1]=Boolean.valueOf(checkc2);
 		for(int i=0;i<nparams;i++){
 			tabledata[i+1][0]=labels[i];
-			tabledata[i+1][1]=new Double(params[i]);
-			tabledata[i+1][2]=new Boolean(fixes[i]==1);
+			tabledata[i+1][1]=Double.valueOf(params[i]);
+			tabledata[i+1][2]=Boolean.valueOf(fixes[i]==1);
 		}
 		tabledata[nparams+1][0]="Get Errors";
-		tabledata[nparams+1][1]=new Boolean(false);
+		tabledata[nparams+1][1]=Boolean.valueOf(false);
 		tabledata[nparams+2][0]="Edit Constraints";
-		tabledata[nparams+2][1]=new Boolean(false);
+		tabledata[nparams+2][1]=Boolean.valueOf(false);
 		tabledata[nparams+3][0]="Iterations";
-		tabledata[nparams+3][1]=new Integer(iterations);
+		tabledata[nparams+3][1]=Integer.valueOf(iterations);
 		tabledata[nparams+4][0]="Chi Squared";
-		tabledata[nparams+4][1]=new Double(c2);
+		tabledata[nparams+4][1]=Double.valueOf(c2);
 		TableDialog2 td=new TableDialog2(null,null,"Fit Parameters",columnlabels,tabledata,null);
 		td.addTableDialogListener(this);
 		Object[][] retvals=TableDialog2.showDialog(td);

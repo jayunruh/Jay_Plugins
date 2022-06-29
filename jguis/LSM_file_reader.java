@@ -337,7 +337,7 @@ public class LSM_file_reader{
 				}
 				ch=(char)in;
 				if(addchar==true){
-					String achar=new Character(ch).toString();
+					String achar=Character.valueOf(ch).toString();
 					if(ch!=0x00){
 						tempstr+=achar;
 					}else{

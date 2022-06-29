@@ -17,7 +17,7 @@ import ij.text.*;
 
 public class batch_FRAP_fit_jru_v1 implements PlugIn {
 	fit_exp fitfunc;
-	boolean twocomp;
+	boolean twocomp,fix1,fix2;
 
 	public void run(String arg) {
 		ImageWindow iw=WindowManager.getCurrentWindow();
@@ -37,7 +37,10 @@ public class batch_FRAP_fit_jru_v1 implements PlugIn {
 		gd.addNumericField("Maximum tau (frames)",maxtau,5,15,null);
 		gd.addCheckbox("Two Component?",false);
 		gd.addNumericField("Min_tau_ratio",2.0f,5,15,null);
+		gd.addCheckbox("Fix_tau1 (to min value)",false);
+		gd.addCheckbox("Fix_tau2 (to max value)",false);
 		gd.addCheckbox("Output_chisquared",false);
+		gd.addNumericField("Search_Multiplier",1.05f,5,15,null);
 		gd.showDialog(); if(gd.wasCanceled()){return;}
 		bf=(int)gd.getNextNumber();
 		totframes=(int)gd.getNextNumber();
@@ -45,9 +48,15 @@ public class batch_FRAP_fit_jru_v1 implements PlugIn {
 		maxtau=(float)gd.getNextNumber();
 		twocomp=gd.getNextBoolean();
 		float minratio=(float)gd.getNextNumber();
+		fix1=gd.getNextBoolean();
+		fix2=gd.getNextBoolean();
 		boolean outchi=gd.getNextBoolean();
+		float tmult=(float)gd.getNextNumber();
 		fitfunc=new fit_exp(mintau,maxtau);
+		fitfunc.tmult=tmult;
 		fitfunc.minratio=minratio;
+		fitfunc.fix1=fix1;
+		fitfunc.fix2=fix2;
 		String labels="Prefrap\tBaseline\tAmplitude\tTau(frames)";
 		if(twocomp) labels="Prefrap\tBaseline\tAmplitude1\tTau1(frames)\tAmplitude2\tTau2(frames)";
 		if(outchi) labels+="\tc2";

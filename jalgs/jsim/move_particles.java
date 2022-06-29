@@ -12,7 +12,7 @@ public class move_particles implements Cloneable{
 	rngs random;
 	public int confineindex,boundaryindex;
 	public float D2,fboxpixels,yflowrate2,gridsizepixels,jumpprob,dfraction;
-	public boolean restrict;
+	public boolean restrict,restrictbox;
 	public sim_setup set;
 
 	public move_particles(sim_species ss1,sim_setup set1){
@@ -27,6 +27,7 @@ public class move_particles implements Cloneable{
 		jumpprob=set1.jumpprob;
 		dfraction=set1.dfraction;
 		restrict=set1.restrict;
+		restrictbox=false;
 	}
 
 	public Object Clone() throws CloneNotSupportedException{
@@ -256,46 +257,115 @@ public class move_particles implements Cloneable{
 		boolean oldstuck=sp.stuck;
 		float fx=sp.coords[0]-xdev;
 		float fy=sp.coords[1]-ydev;
-		int gridunitx=(int)(sp.coords[0]/gridsizepixels);
-		int fgridunitx=(int)(fx/gridsizepixels);
-		int gridunity=(int)(sp.coords[1]/gridsizepixels);
-		int fgridunity=(int)(fy/gridsizepixels);
-		if(confineindex<2){
-			if((gridunitx!=fgridunitx&&gridunity==fgridunity)||(gridunitx==fgridunitx&&gridunity!=fgridunity)){
-				// we crossed a boundary--check if that was okay--if not,
-				// reflect
-				newstuck=!oldstuck;
-				if(jumpprob==0.0f||(float)random.unidev(1.0,0.0)>jumpprob){
-					if(fgridunitx!=gridunitx){
-						if(gridunitx>fgridunitx){
-							sp.coords[0]=2.0f*(gridsizepixels*gridunitx)-sp.coords[0];
-						}else{
-							sp.coords[0]=2.0f*(gridsizepixels*fgridunitx)-sp.coords[0];
-						}
-					}else{
-						if(gridunity>fgridunity){
-							sp.coords[1]=2.0f*(gridsizepixels*gridunity)-sp.coords[1];
-						}else{
-							sp.coords[1]=2.0f*(gridsizepixels*fgridunity)-sp.coords[1];
-						}
-					}
-					newstuck=oldstuck;
-				}
-			}
-		}else{
-			if(gridunitx!=fgridunitx){
-				// we crossed a boundary--check if that was okay--if not,
-				// reflect
-				newstuck=!oldstuck;
-				if(jumpprob==0.0f||(float)random.unidev(1.0,0.0)>jumpprob){
-					if(gridunitx>fgridunitx){
-						sp.coords[0]=2.0f*(gridsizepixels*gridunitx)-sp.coords[0];
-					}else{
-						sp.coords[0]=2.0f*(gridsizepixels*fgridunitx)-sp.coords[0];
-					}
-					newstuck=oldstuck;
-				}
-			}
+		if(!restrictbox){
+    		int gridunitx=(int)(sp.coords[0]/gridsizepixels);
+    		int fgridunitx=(int)(fx/gridsizepixels);
+    		int gridunity=(int)(sp.coords[1]/gridsizepixels);
+    		int fgridunity=(int)(fy/gridsizepixels);
+    		if(confineindex<2){
+    			if((gridunitx!=fgridunitx&&gridunity==fgridunity)||(gridunitx==fgridunitx&&gridunity!=fgridunity)){
+    				// we crossed a boundary--check if that was okay--if not,
+    				// reflect
+    				newstuck=!oldstuck;
+    				if(jumpprob==0.0f||(float)random.unidev(1.0,0.0)>jumpprob){
+    					if(fgridunitx!=gridunitx){
+    						if(gridunitx>fgridunitx){
+    							sp.coords[0]=2.0f*(gridsizepixels*gridunitx)-sp.coords[0];
+    						}else{
+    							sp.coords[0]=2.0f*(gridsizepixels*fgridunitx)-sp.coords[0];
+    						}
+    					}else{
+    						if(gridunity>fgridunity){
+    							sp.coords[1]=2.0f*(gridsizepixels*gridunity)-sp.coords[1];
+    						}else{
+    							sp.coords[1]=2.0f*(gridsizepixels*fgridunity)-sp.coords[1];
+    						}
+    					}
+    					newstuck=oldstuck;
+    				}
+    			}
+    		}else{
+    			if(gridunitx!=fgridunitx){
+    				// we crossed a boundary--check if that was okay--if not,
+    				// reflect
+    				newstuck=!oldstuck;
+    				if(jumpprob==0.0f||(float)random.unidev(1.0,0.0)>jumpprob){
+    					if(gridunitx>fgridunitx){
+    						sp.coords[0]=2.0f*(gridsizepixels*gridunitx)-sp.coords[0];
+    					}else{
+    						sp.coords[0]=2.0f*(gridsizepixels*fgridunitx)-sp.coords[0];
+    					}
+    					newstuck=oldstuck;
+    				}
+    			}
+    		}
+		} else {
+			//here instead of confining on a grid, we confine in a center box with width gridsizepixels
+			float left=0.5f*(fboxpixels-gridsizepixels);
+			float right=left+gridsizepixels;
+			float top=left;
+			float bottom=right;
+			boolean xin=(sp.coords[0]>=left&&sp.coords[0]<right);
+			boolean yin=(sp.coords[1]>=top&&sp.coords[1]<bottom);
+			boolean inbox=(xin&&yin);
+			boolean fxin=(fx>=left&&fx<right);
+			boolean fyin=(fy>=top&&fy<bottom);
+			boolean finbox=(fxin&&fyin);
+    		if(confineindex<2){
+    			if((inbox!=finbox)){
+    				// we crossed a boundary--check if that was okay--if not,
+    				// reflect
+    				newstuck=!oldstuck;
+    				if(jumpprob==0.0f||(float)random.unidev(1.0,0.0)>jumpprob){
+    					if(xin!=fxin){
+    						//crossed an xboundary, find out which one
+    						if(xin){
+    							//going in
+    							if(fx<left) sp.coords[0]=2.0f*left-sp.coords[0];
+    							else sp.coords[0]=2.0f*right-sp.coords[0];
+    						}else{
+    							//coming out
+    							if(sp.coords[0]<left) sp.coords[0]=2.0f*left-sp.coords[0];
+    							else sp.coords[0]=2.0f*right-sp.coords[0];
+    						}
+    					}
+    					if(yin!=fyin){
+    						//crossed a yboundary, find out which one
+    						if(yin){
+    							//going in
+    							if(fy<top) sp.coords[1]=2.0f*top-sp.coords[1];
+    							else sp.coords[1]=2.0f*bottom-sp.coords[1];
+    						}else{
+    							//coming out
+    							if(sp.coords[1]<top) sp.coords[1]=2.0f*top-sp.coords[1];
+    							else sp.coords[1]=2.0f*bottom-sp.coords[1];
+    						}
+    					}
+    					newstuck=oldstuck;
+    				}
+    			}
+    		}else{
+    			if(inbox!=finbox){
+    				// we crossed a boundary--check if that was okay--if not,
+    				// reflect
+    				newstuck=!oldstuck;
+    				if(jumpprob==0.0f||(float)random.unidev(1.0,0.0)>jumpprob){
+    					if(xin!=fxin){
+    						//crossed an xboundary, find out which one
+    						if(xin){
+    							//going in
+    							if(fx<left) sp.coords[0]=2.0f*left-sp.coords[0];
+    							else sp.coords[0]=2.0f*right-sp.coords[0];
+    						}else{
+    							//coming out
+    							if(sp.coords[0]<left) sp.coords[0]=2.0f*left-sp.coords[0];
+    							else sp.coords[0]=2.0f*right-sp.coords[0];
+    						}
+    					}
+    					newstuck=oldstuck;
+    				}
+    			}
+    		}
 		}
 		sp.stuck=newstuck;
 	}

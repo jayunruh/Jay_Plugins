@@ -20,6 +20,7 @@ public class filter_objects_jru_v1 implements PlugIn {
 		boolean clearedges=true;
 		gd.addCheckbox("Clear_Edges?",clearedges);
 		int minarea=10;
+		gd.addNumericField("Edge_Thickness",1,0);
 		gd.addNumericField("Min Size (pixels)",minarea,0);
 		int maxarea=100;
 		gd.addNumericField("Max Size (pixels)",maxarea,0);
@@ -29,8 +30,12 @@ public class filter_objects_jru_v1 implements PlugIn {
 		gd.addCheckbox("Create_Border (circ)",false);
 		gd.addNumericField("Border_Thickness (pixels)",3,0);
 		gd.addNumericField("Border_Gap (pixels)",0,0);
+		gd.addCheckbox("Filter_Circularity",false);
+		gd.addNumericField("Min_Circ",0.0,5,15,null);
+		gd.addNumericField("Max_Circ",1.0,5,15,null);
 		gd.showDialog(); if(gd.wasCanceled()){return;}
 		clearedges=gd.getNextBoolean();
+		int edgethickness=(int)gd.getNextNumber();
 		minarea=(int)gd.getNextNumber();
 		maxarea=(int)gd.getNextNumber();
 		newimage=gd.getNextBoolean();
@@ -38,6 +43,9 @@ public class filter_objects_jru_v1 implements PlugIn {
 		boolean border=gd.getNextBoolean();
 		int bordrad=(int)gd.getNextNumber();
 		int bordgap=(int)gd.getNextNumber();
+		boolean filtcirc=gd.getNextBoolean();
+		float mincirc=(float)gd.getNextNumber();
+		float maxcirc=(float)gd.getNextNumber();
 		ImagePlus imp=WindowManager.getCurrentImage();
 		int width=imp.getWidth(); int height=imp.getHeight();
 		findblobs3 fb=new findblobs3(width,height);
@@ -47,9 +55,14 @@ public class filter_objects_jru_v1 implements PlugIn {
 		for(int i=0;i<size;i++){
 			byte[] data=(byte[])stack.getProcessor(i+1).getPixels();
 			float[] objects=fb.dofindblobs(data);
-			if(clearedges) fb.clear_edges(objects);
+			//if(clearedges) fb.clear_edges(objects);
+			if(clearedges) fb.clear_borders(objects,edgethickness);
 			int[] filter={minarea,maxarea};
 			fb.filter_area(objects,filter);
+			if(filtcirc){
+				float[] circfilt={(float)minarea,(float)maxarea,mincirc,maxcirc};
+				fb.filter_area_circ(objects,circfilt);
+			}
 			if(border) objects=fb.get_circ(objects,bordrad,bordgap);
 			if(newimage || outindexed){
 				if(!outindexed) retstack.addSlice("",fb.tobinary(objects,true));

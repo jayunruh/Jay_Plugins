@@ -178,7 +178,7 @@ public class AutoCorrFitWindow extends Panel implements ActionListener,NLLSfitin
 		//now set up the selections
 		for(int i=0;i<nseries;i++) {
 			include[i]=(selections[i]==1);
-			datapanel.table.setValueAt(new Boolean(include[i]),i,0);
+			datapanel.table.setValueAt(Boolean.valueOf(include[i]),i,0);
 		}
 		updateavg();
 		datapanel.table.setValueAt(""+(float)intensity1[ncurves],ncurves,2);
@@ -283,7 +283,7 @@ public class AutoCorrFitWindow extends Panel implements ActionListener,NLLSfitin
 		}
 		for(int i=0;i<=ncurves;i++){
 			if(i!=ncurves){
-				tabledata[i][0]=new Boolean(true);
+				tabledata[i][0]=Boolean.valueOf(true);
 				tabledata[i][1]=""+names[i];
 			}else{
 				tabledata[i][1]="Avg";
@@ -775,7 +775,7 @@ public class AutoCorrFitWindow extends Panel implements ActionListener,NLLSfitin
 		Object[][] tabledata=new Object[nparams+1][3];
 		String[] columnlabels={"Parameters","Values","Fix?"};
 		tabledata[0][0]="Check chi^2?";
-		tabledata[0][1]=new Boolean(checkc2);
+		tabledata[0][1]=Boolean.valueOf(checkc2);
 		tabledata[1][0]="z0/w0";
 		tabledata[2][0]="offset";
 		tabledata[3][0]="G01";
@@ -785,8 +785,8 @@ public class AutoCorrFitWindow extends Panel implements ActionListener,NLLSfitin
 		tabledata[7][0]="ftrip";
 		tabledata[8][0]="ttrip(us)";
 		for(int i=0;i<nparams;i++){
-			tabledata[i+1][1]=new Double(avgparams[i]);
-			tabledata[i+1][2]=new Boolean(avgfixes[i]==1);
+			tabledata[i+1][1]=Double.valueOf(avgparams[i]);
+			tabledata[i+1][2]=Boolean.valueOf(avgfixes[i]==1);
 		}
 		Object[][] retvals=jguis.TableDialog2.showDialog(null,null,"Fit Parameters",columnlabels,tabledata,null);
 		if(retvals==null){
@@ -815,7 +815,7 @@ public class AutoCorrFitWindow extends Panel implements ActionListener,NLLSfitin
 		String[] vfl={"Vary","Fix","Link","FLink"};
 		String[] linking={"Custom","LinkAll","VaryAll"};
 		tabledata[0][0]="Check chi^2?";
-		tabledata[0][1]=new Boolean(checkc2);
+		tabledata[0][1]=Boolean.valueOf(checkc2);
 		tabledata[1][0]="z0/w0";
 		tabledata[2][0]="offset";
 		tabledata[3][0]="G01";

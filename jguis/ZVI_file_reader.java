@@ -310,9 +310,9 @@ public class ZVI_file_reader{
 			// - if (theT >= numT) numT = theT + 1;
 			// + new code
 			// populate Z, C and T index collections
-			Z_Set.add(new Integer(theZ));
-			C_Set.add(new Integer(theC));
-			T_Set.add(new Integer(theT));
+			Z_Set.add(Integer.valueOf(theZ));
+			C_Set.add(Integer.valueOf(theC));
+			T_Set.add(Integer.valueOf(theT));
 			// - (mb)
 			// save this image block's position
 			blockList.add(zviBlock);

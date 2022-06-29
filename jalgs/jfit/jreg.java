@@ -116,7 +116,7 @@ public class jreg{
 		//r is the rotation matrix (ndims x ndims)
 		//t is the translation vector (ndims length)
 		//s is the scaling factor
-		return new Object[]{r,t,new Float(s),centroid1,centroid2};
+		return new Object[]{r,t,Float.valueOf(s),centroid1,centroid2};
 	}
 	
 	/**************************

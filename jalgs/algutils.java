@@ -8,7 +8,9 @@
 
 package jalgs;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class algutils{
 
@@ -83,21 +85,53 @@ public class algutils{
 	
 	/*********************************
 	 * this returns my own array type index: 0 for byte, 1 for short, 2 for float, 3 for double, and 4 for int
-	 * @param arr
+	 * @param arr: an array up to 3 dimensions
 	 * @return
 	 */
 	public static int get_array_type(Object arr){
-		if(arr instanceof byte[])
+		if(arr instanceof byte[] || arr instanceof byte[][] || arr instanceof byte[][][])
 			return 0;
-		if(arr instanceof short[])
+		if(arr instanceof short[] || arr instanceof short[][] || arr instanceof short[][][])
 			return 1;
-		if(arr instanceof float[])
+		if(arr instanceof float[] || arr instanceof float[][] || arr instanceof float[][][])
 			return 2;
-		if(arr instanceof double[])
+		if(arr instanceof double[] || arr instanceof double[][] || arr instanceof double[][][])
 			return 3;
-		if(arr instanceof int[])
+		if(arr instanceof int[] || arr instanceof int[][] || arr instanceof int[][][])
 			return 4;
 		return -1;
+	}
+	
+	/*******************
+	 * this returns an array shape for up to a 3 dimensional array (dtype is from get_array_type)
+	 * @param arr
+	 * @param dtype
+	 * @return
+	 */
+	public static int[] getArrayShape(Object arr,int dtype) {
+		//gets the shape of an array up to 3 dimensions
+		if(dtype==0) {
+			if(arr instanceof byte[]) return new int[] {((byte[])arr).length};
+			else if(arr instanceof byte[][]) return new int[] {((byte[][])arr).length,((byte[][])arr)[0].length};
+			else if(arr instanceof byte[][][]) return new int[] {((byte[][][])arr).length,((byte[][][])arr)[0].length,((byte[][][])arr)[0][0].length};
+		} else if(dtype==1) {
+			if(arr instanceof short[]) return new int[] {((short[])arr).length};
+			else if(arr instanceof short[][]) return new int[] {((short[][])arr).length,((short[][])arr)[0].length};
+			else if(arr instanceof short[][][]) return new int[] {((short[][][])arr).length,((short[][][])arr)[0].length,((short[][][])arr)[0][0].length};
+		} else if(dtype==2) {
+			if(arr instanceof float[]) return new int[] {((float[])arr).length};
+			else if(arr instanceof float[][]) return new int[] {((float[][])arr).length,((float[][])arr)[0].length};
+			else if(arr instanceof float[][][]) return new int[] {((float[][][])arr).length,((float[][][])arr)[0].length,((float[][][])arr)[0][0].length};
+		} else if(dtype==3) {
+			if(arr instanceof double[]) return new int[] {((double[])arr).length};
+			else if(arr instanceof double[][]) return new int[] {((double[][])arr).length,((double[][])arr)[0].length};
+			else if(arr instanceof double[][][]) return new int[] {((double[][][])arr).length,((double[][][])arr)[0].length,((double[][][])arr)[0][0].length};
+		} else if(dtype==4) {
+			if(arr instanceof int[]) return new int[] {((int[])arr).length};
+			else if(arr instanceof int[][]) return new int[] {((int[][])arr).length,((int[][])arr)[0].length};
+			else if(arr instanceof int[][][]) return new int[] {((int[][][])arr).length,((int[][][])arr)[0].length,((int[][][])arr)[0][0].length};
+		}
+		return null;
 	}
 	
 	public static int get_number_type(Number val) {
@@ -122,6 +156,51 @@ public class algutils{
 		if(atype==3) return ((double[])arr).length;
 		if(atype==4) return ((int[])arr).length;
 		return -1;
+	}
+	
+	/*******************************
+	 * converts a nested list to multidimensional array (max depth = 3, dimensions other than last must be constant)
+	 * @param list
+	 * @return
+	 */
+	public static Object list2array(List<?> list){
+		List<Integer> dims=new ArrayList<Integer>();
+		dims.add(list.size());
+		int dtype=-1;
+		if(list.get(0) instanceof List<?>){
+			List<?> list2=(List<?>)list.get(0);
+			dims.add(list2.size());
+			if(list2.get(0) instanceof List<?>){
+				List<?> list3=(List<?>)list2.get(0);
+				dims.add(list3.size());
+				dtype=get_number_type((Number)list3.get(0));
+			} else {
+				dtype=get_number_type((Number)list2.get(0));
+			}
+		} else {
+			dtype=get_number_type((Number)list.get(0));
+		}
+		if(dims.size()==1){
+			return convert_array(list,dtype);
+		} else if(dims.size()==2){
+			Object[] temp=new Object[dims.get(0)];
+			for(int i=0;i<dims.get(0);i++){
+				List<?> list2=(List<?>)list.get(0);
+				temp[i]=convert_array(list2,dtype);
+			}
+			return temp;
+		} else if(dims.size()==3){
+			Object[][] temp=new Object[dims.get(0)][dims.get(1)];
+			for(int i=0;i<dims.get(0);i++){
+				List<?> list2=(List<?>)list.get(0);
+				for(int j=0;j<dims.get(1);j++){
+					List<?> list3=(List<?>)list2.get(0);
+					temp[i][j]=convert_array(list3,dtype);
+				}
+			}
+			return temp;
+		}
+		return null;
 	}
 
 	/************************************
@@ -273,7 +352,24 @@ public class algutils{
 			}
 			return newarr;
 		}
+		if(oldarr instanceof ArrayList){
+			//this arraylist should be of numeric type
+			List<Number> tlist=(ArrayList<Number>)oldarr;
+			int len=tlist.size();
+			byte[] temparr=new byte[len];
+			for(int i=0;i<temparr.length;i++){
+				temparr[i]=tlist.get(i).byteValue();
+			}
+		}
 		return null;
+	}
+	
+	public static byte[][] convert_arr_byte(List<List<Number>> input){
+		byte[][] output=new byte[input.size()][];
+		for(int i=0;i<input.size();i++){
+			output[i]=convert_arr_byte(input.get(i));
+		}
+		return output;
 	}
 	
 	public static byte[][] convert_arr_byte(Object[] input){
@@ -338,7 +434,26 @@ public class algutils{
 			}
 			return newarr;
 		}
+		if(oldarr instanceof ArrayList){
+			//this arraylist should be of numeric type
+			List<Number> tlist=(ArrayList<Number>)oldarr;
+			int len=tlist.size();
+			float[] temparr=new float[len];
+			for(int i=0;i<temparr.length;i++){
+				temparr[i]=tlist.get(i).floatValue();
+			}
+			return temparr;
+		}
 		return null;
+	}
+	
+	public static float[][] convert_arr_float(List<List<Number>> input){
+		//note that this is unreachable (overridden by object instance)
+		float[][] output=new float[input.size()][];
+		for(int i=0;i<input.size();i++){
+			output[i]=convert_arr_float(input.get(i));
+		}
+		return output;
 	}
 	
 	public static float[][] convert_arr_float(Object[] input){
@@ -401,7 +516,25 @@ public class algutils{
 			System.arraycopy(temparr,0,newarr,0,temparr.length);
 			return newarr;
 		}
+		if(oldarr instanceof ArrayList){
+			//this arraylist should be of numeric type
+			List<Number> tlist=(ArrayList<Number>)oldarr;
+			int len=tlist.size();
+			int[] temparr=new int[len];
+			for(int i=0;i<temparr.length;i++){
+				temparr[i]=tlist.get(i).intValue();
+			}
+			return temparr;
+		}
 		return null;
+	}
+	
+	public static int[][] convert_arr_int(List<List<Number>> input){
+		int[][] output=new int[input.size()][];
+		for(int i=0;i<input.size();i++){
+			output[i]=convert_arr_int(input.get(i));
+		}
+		return output;
 	}
 	
 	public static int[][] convert_arr_int(Object[] input){
@@ -458,7 +591,25 @@ public class algutils{
 			}
 			return newarr;
 		}
+		if(oldarr instanceof ArrayList){
+			//this arraylist should be of numeric type
+			List<Number> tlist=(ArrayList<Number>)oldarr;
+			int len=tlist.size();
+			double[] temparr=new double[len];
+			for(int i=0;i<temparr.length;i++){
+				temparr[i]=tlist.get(i).doubleValue();
+			}
+			return temparr;
+		}
 		return null;
+	}
+	
+	public static double[][] convert_arr_double(List<List<Number>> input){
+		double[][] output=new double[input.size()][];
+		for(int i=0;i<input.size();i++){
+			output[i]=convert_arr_double(input.get(i));
+		}
+		return output;
 	}
 	
 	public static double[][] convert_arr_double(Object[] input){
@@ -541,7 +692,25 @@ public class algutils{
 			}
 			return newarr;
 		}
+		if(oldarr instanceof ArrayList){
+			//this arraylist should be of numeric type
+			List<Number> tlist=(ArrayList<Number>)oldarr;
+			int len=tlist.size();
+			short[] temparr=new short[len];
+			for(int i=0;i<temparr.length;i++){
+				temparr[i]=tlist.get(i).shortValue();
+			}
+			return temparr;
+		}
 		return null;
+	}
+	
+	public static short[][] convert_arr_short(List<List<Number>> input){
+		short[][] output=new short[input.size()][];
+		for(int i=0;i<input.size();i++){
+			output[i]=convert_arr_short(input.get(i));
+		}
+		return output;
 	}
 	
 	public static short[][] convert_arr_short(Object[] input){
@@ -1546,6 +1715,121 @@ public class algutils{
 		}
 	}
 	
+	public static Object reshape(Object arr,int[] shape) {
+		//takes a 1D array and reshapes it up to 3 dimensions
+		if(arr instanceof byte[]) return reshape((byte[])arr,shape);
+		if(arr instanceof short[]) return reshape((short[])arr,shape);
+		if(arr instanceof float[]) return reshape((float[])arr,shape);
+		if(arr instanceof double[]) return reshape((double[])arr,shape);
+		if(arr instanceof int[]) return reshape((int[])arr,shape);
+		return null;
+	}
+	
+	public static Object reshape(byte[] arr,int[] shape) {
+		//reshapes arr up to 3 dimensions
+		if(shape.length==1) {return arr;}
+		else if(shape.length==2) {
+			byte[][] arr2=new byte[shape[0]][];
+			for(int i=0;i<shape[0];i++) {
+				arr2[i]=(byte[])algutils.get_subarray(arr,i*shape[1],shape[1]);
+			}
+			return arr2;
+		} else if(shape.length==3) {
+			byte[][][] arr2=new byte[shape[0]][shape[1]][];
+			for(int i=0;i<shape[0];i++) {
+				for(int j=0;j<shape[1];j++) {
+					arr2[i][j]=(byte[])algutils.get_subarray(arr,i*shape[1]*shape[2]+j*shape[2],shape[2]);
+				}
+			}
+			return arr2;
+		}
+		return null;
+	}
+	
+	public static Object reshape(short[] arr,int[] shape) {
+		//reshapes arr up to 3 dimensions
+		if(shape.length==1) {return arr;}
+		else if(shape.length==2) {
+			short[][] arr2=new short[shape[0]][];
+			for(int i=0;i<shape[0];i++) {
+				arr2[i]=(short[])algutils.get_subarray(arr,i*shape[1],shape[1]);
+			}
+			return arr2;
+		} else if(shape.length==3) {
+			short[][][] arr2=new short[shape[0]][shape[1]][];
+			for(int i=0;i<shape[0];i++) {
+				for(int j=0;j<shape[1];j++) {
+					arr2[i][j]=(short[])algutils.get_subarray(arr,i*shape[1]*shape[2]+j*shape[2],shape[2]);
+				}
+			}
+			return arr2;
+		}
+		return null;
+	}
+	
+	public static Object reshape(float[] arr,int[] shape) {
+		//reshapes arr up to 3 dimensions
+		if(shape.length==1) {return arr;}
+		else if(shape.length==2) {
+			float[][] arr2=new float[shape[0]][];
+			for(int i=0;i<shape[0];i++) {
+				arr2[i]=(float[])algutils.get_subarray(arr,i*shape[1],shape[1]);
+			}
+			return arr2;
+		} else if(shape.length==3) {
+			float[][][] arr2=new float[shape[0]][shape[1]][];
+			for(int i=0;i<shape[0];i++) {
+				for(int j=0;j<shape[1];j++) {
+					arr2[i][j]=(float[])algutils.get_subarray(arr,i*shape[1]*shape[2]+j*shape[2],shape[2]);
+				}
+			}
+			return arr2;
+		}
+		return null;
+	}
+	
+	public static Object reshape(double[] arr,int[] shape) {
+		//reshapes arr up to 3 dimensions
+		if(shape.length==1) {return arr;}
+		else if(shape.length==2) {
+			double[][] arr2=new double[shape[0]][];
+			for(int i=0;i<shape[0];i++) {
+				arr2[i]=(double[])algutils.get_subarray(arr,i*shape[1],shape[1]);
+			}
+			return arr2;
+		} else if(shape.length==3) {
+			double[][][] arr2=new double[shape[0]][shape[1]][];
+			for(int i=0;i<shape[0];i++) {
+				for(int j=0;j<shape[1];j++) {
+					arr2[i][j]=(double[])algutils.get_subarray(arr,i*shape[1]*shape[2]+j*shape[2],shape[2]);
+				}
+			}
+			return arr2;
+		}
+		return null;
+	}
+	
+	public static Object reshape(int[] arr,int[] shape) {
+		//reshapes arr up to 3 dimensions
+		if(shape.length==1) {return arr;}
+		else if(shape.length==2) {
+			int[][] arr2=new int[shape[0]][];
+			for(int i=0;i<shape[0];i++) {
+				arr2[i]=(int[])algutils.get_subarray(arr,i*shape[1],shape[1]);
+			}
+			return arr2;
+		} else if(shape.length==3) {
+			int[][][] arr2=new int[shape[0]][shape[1]][];
+			for(int i=0;i<shape[0];i++) {
+				for(int j=0;j<shape[1];j++) {
+					arr2[i][j]=(int[])algutils.get_subarray(arr,i*shape[1]*shape[2]+j*shape[2],shape[2]);
+				}
+			}
+			return arr2;
+		}
+		return null;
+	}
+	
 	public static Object expand_array(Object source,int length){
 		if(source instanceof float[]){
 			float[] temp=new float[length];
@@ -1950,7 +2234,7 @@ public class algutils{
 
 	public static float[] pad_2D(float[] image,int width,int height,int newwidth,int newheight,int padindex){
 		// here we pad an image to newwidth,newheight with 0, the avg, or the
-		// edge avg
+		// edge avg (padindex is 0,1, or 2, respectively
 		// if newwidth or newheight is less than width or height, we crop
 		float[] newimg=new float[newwidth*newheight];
 		float avg=0.0f;

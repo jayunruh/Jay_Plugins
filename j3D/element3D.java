@@ -45,6 +45,8 @@ public abstract class element3D implements Cloneable{
 
 	public abstract void drawelement(Graphics g);
 	
+	//public abstract void draw3Delement(Graphics[] g);
+	
 	public abstract element3D clone();
 
 }

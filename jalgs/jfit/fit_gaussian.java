@@ -8,10 +8,12 @@
 
 package jalgs.jfit;
 
+import jalgs.algutils;
 import jalgs.jstatistics;
 import jalgs.matrixsolve;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class fit_gaussian{
 	/*
@@ -565,6 +567,40 @@ public class fit_gaussian{
 		return params;
 	}
 	
+	/************
+	 * this guesses parameters for a 1D data set with two peaks, xvals1 can be null, returns base, ampavg, ampratio, xc, d, sdavg, sdratio
+	 * @param xvals
+	 * @param yvals
+	 * @param length
+	 * @return
+	 */
+	public static double[] guess1D2GParams(float[] xvals1,float[] yvals,float stdevguess,int length){
+		float[] xvals=new float[length];
+		if(xvals1!=null) xvals=xvals1;
+		else for(int i=0;i<length;i++) xvals[i]=(float)i;
+		float min=yvals[0];
+		int maxloc=0;
+		float max=yvals[0];
+		for(int i=1;i<length;i++){
+			if(yvals[i]<min){min=yvals[i];}
+			if(yvals[i]>max){max=yvals[i]; maxloc=i;}
+		}
+		float x1=xvals[maxloc];
+		//find the highest value 1.5 stdevguess units away from the first one
+		float maxaway=min;
+		float x2=xvals[0]-1.0f;
+		for(int i=0;i<xvals.length;i++){
+			if((float)Math.abs(x1-xvals[i])>2.0f*stdevguess){
+				if(yvals[i]>maxaway){maxaway=yvals[i]; x2=xvals[i];}
+			}
+		}
+		float dguess=(float)Math.abs(x2-x1);
+		float xcguess=0.5f*(x2-x1);
+		//parameters are base, ampavg, ampratio, xc, d, sdavg, sdratio
+		double[] params={(double)min,(double)max-min,1.0,xcguess,dguess,stdevguess,1.0};
+		return params;
+	}
+	
 	/*****************
 	 * generates constraints for the 1D data set, xvals1 can be null
 	 * @param xvals1
@@ -677,10 +713,10 @@ public class fit_gaussian{
 	}
 	
 	/****************
-	 * a 1D gaussian fitting function with no user intervention
+	 * a 1D gaussian fitting function with no user intervention for two peaks
 	 * @param xvals1: can be null
 	 * @param yvals
-	 * @param params: base, xc, stdev,amp
+	 * @param params: base, ampavg, ampratio, xc, d, sdavg, sdratio
 	 * @param stats
 	 * @param constraints
 	 * @param fixes
@@ -696,6 +732,7 @@ public class fit_gaussian{
 		if(sumparams==0.0) params=guess1DParams(tempx,yvals,yvals.length);
 		double[][] constraints=constraints1;
 		if(constraints1==null) constraints=get1DConstraints(tempx,params,yvals.length);
+		
 		int maxiter=10;
 		float[] fit=new float[yvals.length];
 		for(int i=0;i<yvals.length;i++) fit[i]=(float)gf.getinterpgaus(Math.abs(tempx[i]-params[1]),params[2])*(float)params[3]+(float)params[0];
@@ -752,6 +789,100 @@ public class fit_gaussian{
 		stats[1]=c2;
 		for(int i=0;i<params.length;i++) params1[i]=params[i];
 		return fit;
+	}
+	
+	public double[][] fit1DNGaussians(List<Float> data,List<Float> weights,int ngaus,List<Float> guessParams,List<List<Float>> constraints,List<Integer> fixes){
+		double[][] constraints1=new double[constraints.size()][];
+		for(int i=0;i<constraints1.length;i++) constraints1[i]=algutils.convert_arr_double(constraints.get(i));
+		return fit1DNGaussians(algutils.convert_arr_float(data),algutils.convert_arr_float(weights),ngaus,algutils.convert_arr_double(guessParams),
+				constraints1,algutils.convert_arr_int(fixes));
+	}
+	
+	public double[][] fit1DNGaussians(float[] data,float[] weights,int ngaus,double[] guessParams,double[][] constraints,int[] fixes){
+		//this fits a function to an arbitrary number of Gaussian functions via the NLLSfit mechanism
+		//parameters are baseline and then xc#, stdev#, and amp#
+		//x axis is assumed to go from 0 to npts-1
+		//return arrays are the parameters, the stats (iterations and chi squared) and the fit function
+		//first create a local class that will provide our fit interface
+		class mygausfitclass implements NLLSfitinterface_v2{
+			public int ngaus;
+			public int npts;
+			public mygausfitclass(int ngaus,int npts){
+				this.ngaus=ngaus;
+				this.npts=npts;
+			}
+			public double[] fitfunc(double[] params){
+				double[] temp=new double[npts];
+				for(int i=0;i<npts;i++) temp[i]+=params[0];
+				for(int i=0;i<ngaus;i++){
+					float[] temp2=gf.get_func(-params[3*i+1],npts,1.0,params[3*i+2]);
+					for(int j=0;j<npts;j++) temp[j]+=params[3*i+3]*(double)temp2[j];
+				}
+				return temp;
+			}
+			public void showresults(String results){
+				System.out.println(results);
+			}
+		}
+		//now instantiate the local fit interface class
+		mygausfitclass funcclass=new mygausfitclass(ngaus,data.length);
+		//now create our NLLSfit_v2 class
+		NLLSfit_v2 fitclass=new NLLSfit_v2(funcclass,0.0001,20,0.1);
+		//now run the fit
+		double[] stats=new double[2];
+		double[] params=guessParams.clone();
+		float[] fitfunc=fitclass.fitdata(params,fixes,constraints,data,weights,stats,true);
+		return new double[][]{params,stats,algutils.convert_arr_double(fitfunc)};
+	}
+	
+	public double[][] fit3DNGaussians(List<Float> data,List<Float> weights,List<Integer> shape,int ngaus,List<Float> guessParams,List<List<Float>> constraints,List<Integer> fixes){
+		double[][] constraints1=new double[constraints.size()][];
+		for(int i=0;i<constraints1.length;i++) constraints1[i]=algutils.convert_arr_double(constraints.get(i));
+		return fit3DNGaussians(algutils.convert_arr_float(data),algutils.convert_arr_float(weights),algutils.convert_arr_int(shape),ngaus,algutils.convert_arr_double(guessParams),
+				constraints1,algutils.convert_arr_int(fixes));
+	}
+	
+	public double[][] fit3DNGaussians(float[] data,float[] weights,int[] shape,int ngaus,double[] guessParams,double[][] constraints,int[] fixes){
+		//this fits a function to an arbitrary number of 3D Gaussian functions via the NLLSfit mechanism
+		//parameters are baseline and then xc#,yc#,zc#,xystdev#,zstdev#,and amp#
+		//all axes go from 0 to length-1
+		//return arrays are the parameters, the stats (iterations and chi squared) and the fit function
+		//first create a local class that will provide our fit interface
+		class mygausfitclass implements NLLSfitinterface_v2{
+			public int ngaus;
+			public int xpts,ypts,zpts;
+			public mygausfitclass(int ngaus,int xpts,int ypts,int zpts){
+				this.ngaus=ngaus;
+				this.xpts=xpts;
+				this.ypts=ypts;
+				this.zpts=zpts;
+			}
+			public double[] fitfunc(double[] params){
+				double[][] temp=new double[zpts][xpts*ypts];
+				for(int i=0;i<ngaus;i++){
+					gf.draw_3D_func(temp,params[i*6+2],params[i*6+3],params[i*6+4],xpts,ypts,params[i*6+5],params[i*6+6],(float)params[i*6+1]);
+				}
+				double[] temp2=new double[zpts*xpts*ypts];
+				for(int i=0;i<zpts;i++){
+					for(int j=0;j<xpts*ypts;j++){
+						temp2[i*xpts*ypts+j]=params[0]+temp[i][j];
+					}
+				}
+				return temp2;
+			}
+			public void showresults(String results){
+				System.out.println(results);
+			}
+		}
+		//now instantiate the local fit interface class
+		mygausfitclass funcclass=new mygausfitclass(ngaus,shape[2],shape[1],shape[0]);
+		//now create our NLLSfit_v2 class
+		NLLSfit_v2 fitclass=new NLLSfit_v2(funcclass,0.0001,20,0.1);
+		//now run the fit
+		double[] stats=new double[2];
+		double[] params=guessParams.clone();
+		float[] fitfunc=fitclass.fitdata(params,fixes,constraints,data,weights,stats,true);
+		return new double[][]{params,stats,algutils.convert_arr_double(fitfunc)};
 	}
 
 }

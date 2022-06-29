@@ -364,7 +364,7 @@ public class LSM_virtual_stack extends VirtualStack{
 				}
 				ch=(char)in;
 				if(addchar==true){
-					String achar=new Character(ch).toString();
+					String achar=Character.valueOf(ch).toString();
 					if(ch!=0x00){
 						tempstr+=achar;
 					}else{

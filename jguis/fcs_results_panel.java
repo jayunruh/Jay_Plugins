@@ -215,15 +215,15 @@ public class fcs_results_panel extends Panel implements ActionListener,ItemListe
 		celltable=new TablePanel();
 		Object[][] cell_data=new Object[maxruns][nparams+2];
 		for(int i=0;i<plate.wells[0].cells[0].runs.length;i++){
-			cell_data[i][0]=new Integer(plate.wells[0].cells[0].runs[i].runnumber);
-			cell_data[i][1]=new Boolean(plate.wells[0].cells[0].runs[i].valid);
+			cell_data[i][0]=Integer.valueOf(plate.wells[0].cells[0].runs[i].runnumber);
+			cell_data[i][1]=Boolean.valueOf(plate.wells[0].cells[0].runs[i].valid);
 			for(int j=0;j<nparams;j++){
 				cell_data[i][j+2]=""+(float)plate.wells[0].cells[0].runs[i].params[j];
 			}
 		}
 		for(int i=plate.wells[0].cells[0].runs.length;i<maxruns;i++){
 			cell_data[i][0]=new String();
-			cell_data[i][1]=new Boolean(false);
+			cell_data[i][1]=Boolean.valueOf(false);
 			for(int j=0;j<nparams;j++){
 				cell_data[i][j+2]="";
 			}
@@ -340,7 +340,7 @@ public class fcs_results_panel extends Panel implements ActionListener,ItemListe
 				cellavg[j][k]/=nvalid;
 			}
 		}
-		Object[] corrs={cellavgxvals,cellavg,new Integer(nvalid)};
+		Object[] corrs={cellavgxvals,cellavg,Integer.valueOf(nvalid)};
 		return corrs;
 	}
 
@@ -370,7 +370,7 @@ public class fcs_results_panel extends Panel implements ActionListener,ItemListe
 				cellavg[j][k]/=wellnvalid;
 			}
 		}
-		Object[] corrs={cellavgxvals,cellavg,new Integer(wellnvalid)};
+		Object[] corrs={cellavgxvals,cellavg,Integer.valueOf(wellnvalid)};
 		return corrs;
 	}
 
@@ -478,14 +478,14 @@ public class fcs_results_panel extends Panel implements ActionListener,ItemListe
 		// now update the cell table
 		for(int i=0;i<nruns;i++){
 			celltable.table.setValueAt(""+runs[i].runnumber,i,0);
-			celltable.table.setValueAt(new Boolean(runs[i].valid),i,1);
+			celltable.table.setValueAt(Boolean.valueOf(runs[i].valid),i,1);
 			for(int j=0;j<nparams;j++){
 				celltable.table.setValueAt(""+(float)runs[i].params[j],i,j+2);
 			}
 		}
 		for(int i=nruns;i<maxruns;i++){
 			celltable.table.setValueAt("",i,0);
-			celltable.table.setValueAt(new Boolean(false),i,1);
+			celltable.table.setValueAt(Boolean.valueOf(false),i,1);
 			for(int j=0;j<nparams;j++){
 				celltable.table.setValueAt("",i,j+2);
 			}
@@ -608,10 +608,10 @@ public class fcs_results_panel extends Panel implements ActionListener,ItemListe
 		if(filter==null){
 			filter=new Object[8][4];
 			for(int i=0;i<8;i++){
-				filter[i][0]=new Boolean(false);
-				filter[i][1]=new Integer(0);
-				filter[i][2]=new Integer(0);
-				filter[i][3]=new Double(0.0);
+				filter[i][0]=Boolean.valueOf(false);
+				filter[i][1]=Integer.valueOf(0);
+				filter[i][2]=Integer.valueOf(0);
+				filter[i][3]=Double.valueOf(0.0);
 			}
 		}
 		Object[][] tabledata=new Object[8][4];
@@ -634,18 +634,18 @@ public class fcs_results_panel extends Panel implements ActionListener,ItemListe
 			String retparam=(String)retvals[i][1];
 			for(int j=0;j<paramsnames.length;j++){
 				if(paramsnames[j].equals(retparam)){
-					filter[i][1]=new Integer(j);
+					filter[i][1]=Integer.valueOf(j);
 					break;
 				}
 			}
 			String rettype=(String)retvals[i][2];
 			for(int j=0;j<types.length;j++){
 				if(types[j].equals(rettype)){
-					filter[i][2]=new Integer(j);
+					filter[i][2]=Integer.valueOf(j);
 					break;
 				}
 			}
-			filter[i][3]=new Double((String)retvals[i][3]);
+			filter[i][3]=Double.valueOf((String)retvals[i][3]);
 		}
 		return true;
 	}

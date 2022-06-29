@@ -30,6 +30,7 @@ public class amfret_utils implements gui_interface{
 	public String accname="FL10-A";
 	public String fretname="FL04-A";
 	public boolean drawgate=false;
+	public int[] histlut;
 
 	public static void main(String[] args){
 		//here we batch process a folder outside of imagej
@@ -66,8 +67,8 @@ public class amfret_utils implements gui_interface{
 			return;
 		}
 		//System.out.println(table_tools.print_string_array(args,1));
-		String[] col_labels={"basename","datFile","Well","Plate","acceptor","c^2","Iter","baseline","amp","EC50","alpha","xshift","EC50_errs","alpha_errs","totcells","fretcells","bimodal_metric","f_gate","delta","delta_errs"};
-		//String[] col_labels={"basename","datFile","well","plate","acceptor","c^2","Iter","baseline","amp","EC50","alpha","xshift","EC50_errs","alpha_errs","totcells","fretcells","bimodal_metric","f_gate","delta","delta_errs","accstdev","nfaccmean","nfaccstdev","faccmean","faccstdev","fretmean","fretstdev"};
+		//String[] col_labels={"basename","datFile","Well","Plate","acceptor","c^2","Iter","baseline","amp","EC50","alpha","xshift","EC50_errs","alpha_errs","totcells","fretcells","bimodal_metric","f_gate","delta","delta_errs"};
+		String[] col_labels={"basename","datFile","Well","Plate","acceptor","c^2","Iter","baseline","amp","EC50","alpha","xshift","EC50_errs","alpha_errs","totcells","fretcells","bimodal_metric","f_gate","delta","delta_errs","accstdev","nfaccmean","nfaccstdev","faccmean","faccstdev","fretmean","fretstdev"};
 		System.out.println(table_tools.print_string_array(col_labels,1));
 		float minamfret=-0.2f; float maxamfret=1.0f; int mincells=1; float mincrop=1.5f;
 		if(args.length>5) {
@@ -84,7 +85,7 @@ public class amfret_utils implements gui_interface{
 				String child=(new File(args[0])).getName();
 				List<String> output=custom.exec(parent+File.separator,child,args[1],args[2],Float.parseFloat(args[3]),Float.parseFloat(args[4]),minamfret,maxamfret,mincells,mincrop,0.02f,0.95f,false);
 				List<String> output2=output.subList(0,20); //eliminate some of the rightmost parameters
-				System.out.println(table_tools.print_string_array(output2,1));
+				System.out.println(table_tools.print_string_array(output,1));
 			} else {
 				//this is the standard operation on an entire folder
 				//args is indir, savedir, roipath, minconc, maxconc,...
@@ -97,8 +98,13 @@ public class amfret_utils implements gui_interface{
     				List<String> output=custom.exec(args[0],fcsfiles[i],args[1],args[2],Float.parseFloat(args[3]),Float.parseFloat(args[4]),minamfret,maxamfret,mincells,mincrop,0.02f,0.95f,false);
     				if(output!=null){
     					List<String> output2=output.subList(0,20); //eliminate some of the rightmost parameters
-    					System.out.println(table_tools.print_string_array(output2,1));
-    					b.write(table_tools.print_string_array(output2,0)+"\n");
+    					System.out.println(table_tools.print_string_array(output,1));
+    					b.write(table_tools.print_string_array(output,0)+"\n");
+    				} else {
+    					output=new ArrayList<String>();
+    					for(int j=0;j<col_labels.length;j++) output.add("0");
+    					System.out.println(table_tools.print_string_array(output,1));
+    					b.write(table_tools.print_string_array(output,0)+"\n");
     				}
     			}
     			b.close();
@@ -108,6 +114,29 @@ public class amfret_utils implements gui_interface{
 		}
 		return;
 	}
+	
+	/*public static int[] makeCustomLut() {
+		int[] r={255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+				0,0,0,0,0,0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100,104,108,112,116,120,124,128,132,136,140,144,148,152,156,160,164,168,172,176,180,184,188,192,196,
+				200,204,208,212,216,220,224,228,232,236,240,244,248,252,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+				255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+				255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255};
+		int[] g={255,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100,104,108,112,116,120,124,128,132,136,140,
+				144,148,152,156,160,164,168,172,176,180,184,188,192,196,200,204,208,212,216,220,224,228,232,236,240,244,248,252,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+				255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+				255,255,255,251,247,243,239,235,231,227,223,219,215,211,207,203,199,195,191,187,183,179,175,171,167,163,159,155,151,147,143,139,135,131,127,123,119,115,111,107,103,99,95,91,87,83,79,
+				75,71,67,63,59,55,51,47,43,39,35,31,27,23,19,15,11,7,3,0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100,104,108,112,116,120,255};
+		int[] b={255,132,136,140,144,148,152,156,160,164,168,172,176,180,184,188,192,196,200,204,208,212,216,220,224,228,232,236,240,244,248,252,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+				255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,255,
+				255,255,255,255,255,255,251,247,243,239,235,231,227,223,219,215,211,207,203,199,195,191,187,183,179,175,171,167,163,159,155,151,147,143,139,135,131,127,123,119,115,111,107,103,99,95,
+				91,87,83,79,75,71,67,63,59,55,51,47,43,39,35,31,27,23,19,15,11,7,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+				0,0,0,0,0,0,0,4,8,12,16,20,24,28,32,36,40,44,48,52,56,60,64,68,72,76,80,84,88,92,96,100,104,108,112,116,120,255};
+		int[] lut=new int[256];
+		for(int i=0;i<256;i++){
+			lut[i]=jutils.rgb2intval(r[i],g[i],b[i]);
+		}
+		return lut;
+	}*/
 
 	public List<String> exec(String directory,String name,String outdir,String roipath,float minconc,float maxconc,float minamfret,float maxamfret,
 		int mincells,float startcrop,float minbimodefrac,float maxbimodefrac,boolean showplots){
@@ -148,12 +177,12 @@ public class amfret_utils implements gui_interface{
 		float[][] rowdata=(float[][])data[1];
 		if(rowdata==null){
 			if(showplots) IJ.log("No data in the fcs file");
-			for(int i=0;i<16;i++) output.add("");
+			for(int i=0;i<23;i++) output.add("");
 			return output;
 		}
 		if(rowdata.length<mincells){
 			if(showplots) IJ.log("Not enough cells in the fcs file");
-			for(int i=0;i<16;i++) output.add("");
+			for(int i=0;i<23;i++) output.add("");
 			return output;
 		}
 		int ncells=rowdata.length;
@@ -181,7 +210,7 @@ public class amfret_utils implements gui_interface{
 		//float acceptoravg=jstatistics.getstatistic("Avg",acceptor,null);
 
 		//now create the 2D AmFRET histogram
-		Plot2DHist amfrethist=new Plot2DHist("Acceptor","AmFRET",acceptor,amfret,null);
+		Plot2DHist amfrethist=new Plot2DHist("Acceptor","AmFRET",acceptor,amfret,histlut);
 		amfrethist.setLogAxes(true,false);
 		float[] templims=amfrethist.getLimits();
 		amfrethist.setLimits(minconc,maxconc,minamfret,maxamfret,templims[4],templims[5]);
@@ -201,7 +230,8 @@ public class amfret_utils implements gui_interface{
 		float[] gatestats=getStats(acceptor,amfret,plotindices,gateindices);
 
 		//now get the acceptor histogram 99.9th percentile
-		float uplim=jstatistics.getstatistic("Percentile",acceptor,new float[]{99.9f});
+		float[] accpercentiles={99.9f,25.0f,50.0f,75.0f};
+		float uplim=jstatistics.getstatistic("Percentile",acceptor,accpercentiles);
 		if(showplots) IJ.log("fitting upper limit = "+uplim);
 		
 		//now get the grayscale AmFRET image and gate it
@@ -336,6 +366,11 @@ public class amfret_utils implements gui_interface{
 		ImagePlus overviewimp=new ImagePlus("Overview",overviewcp);
 		String overviewname=name.substring(0,name.length()-4)+"_overview.png";
 		IJ.save(overviewimp,outdir+overviewname);
+		//(new LOCI_file_writer()).save_imp_as_png(overviewimp,outdir+overviewname);
+		//note that this is triggering an x windows headless error
+		//might try using BMPWriterJ or another png writer
+		//String overviewname=name.substring(0,name.length()-4)+"_overview.bmp";
+		//BMPWriterJ.writeBMP32((int[])overviewcp.getPixels(),overviewcp.getWidth(),overviewcp.getHeight(),outdir+overviewname);
 		return output;
 	}
 
@@ -395,12 +430,12 @@ public class amfret_utils implements gui_interface{
 			float[][] rowdata=(float[][])data[1];
 			if(rowdata==null){
 				if(showplots) IJ.log("No data in the fcs file");
-				for(int i=0;i<16;i++) output.add("");
+				for(int i=0;i<23;i++) output.add("");
 				return output;
 			}
 			if(rowdata.length<mincells){
 				if(showplots) IJ.log("Not enough cells in the fcs file");
-				for(int i=0;i<16;i++) output.add("");
+				for(int i=0;i<23;i++) output.add("");
 				return output;
 			}
 			int ncells=rowdata.length;
@@ -424,7 +459,7 @@ public class amfret_utils implements gui_interface{
 				if(showplots) IJ.log("Can't find correct columns");
 				List<String> blankout=new ArrayList<String>();
 				blankout.add(shortname);
-				for(int i=1;i<17;i++) blankout.add("");
+				for(int i=1;i<24;i++) blankout.add("");
 				return blankout;
 			}
 			//IJ.log(""+colnames[acccol]+" , "+colnames[fretcol]);
@@ -437,7 +472,7 @@ public class amfret_utils implements gui_interface{
 			//float acceptoravg=jstatistics.getstatistic("Avg",acceptor,null);
 
 			//now create the 2D AmFRET histogram
-			Plot2DHist amfrethist=new Plot2DHist("Acceptor","AmFRET",acceptor,amfret,null);
+			Plot2DHist amfrethist=new Plot2DHist("Acceptor","AmFRET",acceptor,amfret,histlut);
 			amfrethist.setLogAxes(true,false);
 			float[] templims=amfrethist.getLimits();
 			amfrethist.setLimits(minconc,maxconc,minamfret,maxamfret,templims[4],templims[5]);
@@ -457,7 +492,8 @@ public class amfret_utils implements gui_interface{
 			float[] gatestats=getStats(acceptor,amfret,plotindices,gateindices);
 
 			//now get the acceptor histogram 99.9th percentile
-			float uplim=jstatistics.getstatistic("Percentile",acceptor,new float[]{99.9f});
+			float[] accpercentiles={99.9f,25.0f,50.0f,75.0f};
+			float uplim=jstatistics.getstatistic("Percentile",acceptor,accpercentiles);
 			if(showplots) IJ.log("fitting upper limit = "+uplim);
 			
 			//now get the grayscale AmFRET image and gate it
@@ -595,6 +631,9 @@ public class amfret_utils implements gui_interface{
 		}
 	
 	public float[] getStats(float[] acceptor,float[] amfret,int[] plotindices,int[] gateindices) {
+		float[] stats=new float[8]; //stats are 0accavg,1accstdev,2loweraccavg,3loweraccstdev,4upperaccavg,5upperaccstdev,6upperamfretavg,7upperamfretstdev
+		if(plotindices==null || plotindices.length<1) return stats;
+		if(gateindices==null || gateindices.length<1) return stats;
 		float[] plotacc=new float[plotindices.length];
 		float[] plotamfret=new float[plotindices.length];
 		float[] gateacc=new float[gateindices.length];
@@ -607,7 +646,6 @@ public class amfret_utils implements gui_interface{
 			gateacc[i]=acceptor[gateindices[i]];
 			gateamfret[i]=amfret[gateindices[i]];
 		}
-		float[] stats=new float[8]; //stats are 0accavg,1accstdev,2loweraccavg,3loweraccstdev,4upperaccavg,5upperaccstdev,6upperamfretavg,7upperamfretstdev
 		int ngate=gateindices.length;
 		int nplot=plotindices.length;
 		int nnotgate=nplot-ngate;
@@ -622,10 +660,10 @@ public class amfret_utils implements gui_interface{
 		float notgatesumsq=totsumsq-gatesumsq;
 		if(nnotgate>0) stats[5]=(float)Math.sqrt(notgatesumsq/(float)nnotgate-stats[4]*stats[4]);
 		float gateamfretavg=jstatistics.getstatistic("Avg",gateamfret,null);
-		float amfretavg=jstatistics.getstatistic("Avg",gateamfret,null);
+		float amfretavg=jstatistics.getstatistic("Avg",plotamfret,null);
 		if(nnotgate>0) stats[6]=(amfretavg*(float)nplot-gateamfretavg*(float)ngate)/(float)nnotgate;
 		float gateamfretstdev=jstatistics.getstatistic("StDev",gateamfret,null);
-		float amfretstdev=jstatistics.getstatistic("StDev",gateamfret,null);
+		float amfretstdev=jstatistics.getstatistic("StDev",plotamfret,null);
 		float gateamfretsumsq=(gateamfretstdev*gateamfretstdev+gateamfretavg*gateamfretavg)*(float)ngate;
 		float totamfretsumsq=(amfretstdev*amfretstdev+amfretavg*amfretavg)*(float)nplot;
 		float notgateamfretsumsq=totamfretsumsq-gateamfretsumsq;
@@ -715,6 +753,12 @@ public class amfret_utils implements gui_interface{
 	 */
 	public void getGate(String directory,String name,String outdir,String roiname,float minconc,float maxconc,float minamfret,float maxamfret,
 			float startcrop,float uppercentile,float gateper,int gateshift,boolean showplots) {
+		if(name.endsWith(".roi")){
+			//this is already a gate, copy it named as roiname in the outdir folder and exit
+			Roi roi=multi_roi_writer.readRoi(directory+name);
+			multi_roi_writer.writeRoi(roi,outdir+roiname);
+			return;
+		}
 		//now load the fcs data
 		Object[] data=(new import_flowcyte()).getFCSFile(directory+name);
 		//now calculate the acceptor and amfret data sets
@@ -748,7 +792,7 @@ public class amfret_utils implements gui_interface{
 		}
 
 		//now create the 2D AmFRET histogram
-		Plot2DHist amfrethist=new Plot2DHist("Acceptor","AmFRET",acceptor,amfret,null);
+		Plot2DHist amfrethist=new Plot2DHist("Acceptor","AmFRET",acceptor,amfret,histlut);
 		amfrethist.setLogAxes(true,false);
 		float[] templims=amfrethist.getLimits();
 		amfrethist.setLimits(minconc,maxconc,minamfret,maxamfret,templims[4],templims[5]);
@@ -873,6 +917,12 @@ public class amfret_utils implements gui_interface{
 	 */
 	public void getGate2(String directory,String name,String outdir,String roiname,float minconc,float maxconc,float minamfret,float maxamfret,
 			float startcrop,float uppercentile,float gateper,int gateshift,boolean showplots) {
+		if(name.endsWith(".roi")){
+			//this is already a gate, copy it named as roiname in the outdir folder and exit
+			Roi roi=multi_roi_writer.readRoi(directory+name);
+			multi_roi_writer.writeRoi(roi,outdir+roiname);
+			return;
+		}
 		//now load the fcs data
 		Object[] data=(new import_flowcyte()).getFCSFile(directory+name);
 		//now calculate the acceptor and amfret data sets
@@ -906,7 +956,7 @@ public class amfret_utils implements gui_interface{
 		}
 
 		//now create the 2D AmFRET histogram
-		Plot2DHist amfrethist=new Plot2DHist("Acceptor","AmFRET",acceptor,amfret,null);
+		Plot2DHist amfrethist=new Plot2DHist("Acceptor","AmFRET",acceptor,amfret,histlut);
 		amfrethist.setLogAxes(true,false);
 		float[] templims=amfrethist.getLimits();
 		amfrethist.setLimits(minconc,maxconc,minamfret,maxamfret,templims[4],templims[5]);
@@ -1208,6 +1258,29 @@ public class amfret_utils implements gui_interface{
 			newmeta2[1][i]=(newmeta.get(i))[1];
 		}
 		return newmeta2;
+	}
+	
+	public static float[][] getAmFRETProfile(float[] histpix,int histwidth,int histheight,float minamfret,float maxamfret,Roi roi){
+		float[] amfretprofile=new float[histwidth];
+		float[] gateamfretprofile=new float[histwidth];
+		float[] gatecells=new float[histwidth];
+		float[] totcells=new float[histwidth];
+		for(int i=0;i<histwidth;i++){
+			for(int j=0;j<histheight;j++){
+				float amfretval=((float)(histheight-j-1)/(float)histheight)*(maxamfret-minamfret)+minamfret;
+				totcells[i]+=(float)histpix[i+j*histwidth];
+				amfretprofile[i]+=histpix[i+j*histwidth]*amfretval;
+				if(!roi.contains(i,j)) {
+					gatecells[i]+=(float)histpix[i+j*histwidth];
+					gateamfretprofile[i]+=histpix[i+j*histwidth]*amfretval;
+				}
+			}
+			if(totcells[i]>1) amfretprofile[i]/=totcells[i];
+			else amfretprofile[i]=Float.NaN;
+			if(gatecells[i]>1) gateamfretprofile[i]/=gatecells[i];
+			else gateamfretprofile[i]=Float.NaN;
+		}
+		return new float[][]{amfretprofile,totcells,gateamfretprofile,gatecells};
 	}
 
 	public void showMessage(String message){

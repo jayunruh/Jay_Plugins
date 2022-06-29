@@ -10,6 +10,7 @@ package jalgs;
 
 import java.awt.Component;
 import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
@@ -17,6 +18,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -64,6 +66,20 @@ public class jdataio{
 			return null;
 		}
 	}
+	
+	public List<String> readstringfilelines2(BufferedReader b){
+		try{
+			List<String> s2=new ArrayList<String>();
+			String s=b.readLine();
+			while(s!=null){
+				s2.add(s);
+				s=b.readLine();
+			}
+			return s2;
+		}catch(IOException e){
+			return null;
+		}
+	}
 
 	public boolean writestringfile(BufferedWriter b,String s){
 		try{
@@ -78,6 +94,64 @@ public class jdataio{
 		try{
 			for(int i=0;i<lines.length;i++){
 				b.write(lines[i]+"\n");
+			}
+			return true;
+		}catch(IOException e){
+			return false;
+		}
+	}
+	
+	public boolean writestringfile(BufferedWriter b,String[][] lines){
+		try{
+			for(int i=0;i<lines.length;i++){
+				String templine=lines[i][0];
+				for(int j=1;j<lines[i].length;j++){
+					templine+=","+lines[i][j];
+				}
+				b.write(templine+"\n");
+			}
+			return true;
+		}catch(IOException e){
+			return false;
+		}
+	}
+	
+	public boolean writestringfile(BufferedWriter b,List<List<String>> lines){
+		try{
+			for(int i=0;i<lines.size();i++){
+				List<String> templine2=lines.get(i);
+				String templine=templine2.get(0);
+				for(int j=1;j<templine2.size();j++){
+					templine+=","+templine2.get(j);
+				}
+				b.write(templine+"\n");
+			}
+			return true;
+		}catch(IOException e){
+			return false;
+		}
+	}
+	
+	public boolean writestringfile3(BufferedWriter b,List<String[]> lines){
+		try{
+			for(int i=0;i<lines.size();i++){
+				String[] templine2=lines.get(i);
+				String templine=templine2[0];
+				for(int j=1;j<templine2.length;j++){
+					templine+=","+templine2[j];
+				}
+				b.write(templine+"\n");
+			}
+			return true;
+		}catch(IOException e){
+			return false;
+		}
+	}
+	
+	public boolean writestringfile2(BufferedWriter b,List<String> lines){
+		try{
+			for(int i=0;i<lines.size();i++){
+				b.write(lines.get(i)+"\n");
 			}
 			return true;
 		}catch(IOException e){
@@ -315,6 +389,33 @@ public class jdataio{
 	public boolean writeinteldouble(OutputStream outstream,double data) {
 		return writeintellong(outstream,Double.doubleToLongBits(data));
 	}
+	
+	public boolean writeinteldoublearray(OutputStream outstream,double[] data){
+		for(int i=0;i<data.length;i++){
+			if(!writeinteldouble(outstream,data[i])){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean writeinteldoublearray(OutputStream outstream,double[][] data) {
+		for(int i=0;i<data.length;i++){
+			if(!writeinteldoublearray(outstream,data[i])){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean writeinteldoublearray(OutputStream outstream,double[][][] data) {
+		for(int i=0;i<data.length;i++){
+			if(!writeinteldoublearray(outstream,data[i])){
+				return false;
+			}
+		}
+		return true;
+	}
 
 	public boolean writeintelintarray(OutputStream outstream,int[] data){
 		for(int i=0;i<data.length;i++){
@@ -351,6 +452,15 @@ public class jdataio{
 		}
 		return true;
 	}
+	
+	public boolean writeintelintarray(OutputStream outstream,int[][][] data){
+		for(int i=0;i<data.length;i++){
+			if(!writeintelintarray(outstream,data[i])){
+				return false;
+			}
+		}
+		return true;
+	}
 
 	public boolean writeintelintarray(OutputStream outstream,int[] data,int length){
 		for(int i=0;i<length;i++){
@@ -366,6 +476,24 @@ public class jdataio{
 			outstream.write(data);
 		}catch(IOException e){
 			return false;
+		}
+		return true;
+	}
+	
+	public boolean writebytearray(OutputStream outstream,byte[][] data) {
+		for(int i=0;i<data.length;i++){
+			if(!writebytearray(outstream,data[i])){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean writebytearray(OutputStream outstream,byte[][][] data) {
+		for(int i=0;i<data.length;i++){
+			if(!writebytearray(outstream,data[i])){
+				return false;
+			}
 		}
 		return true;
 	}
@@ -393,6 +521,24 @@ public class jdataio{
 	public boolean writeintelshortarray(OutputStream outstream,short[] data){
 		for(int i=0;i<data.length;i++){
 			if(!writeintelshort(outstream,data[i])){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean writeintelshortarray(OutputStream outstream,short[][] data){
+		for(int i=0;i<data.length;i++){
+			if(!writeintelshortarray(outstream,data[i])){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	public boolean writeintelshortarray(OutputStream outstream,short[][][] data){
+		for(int i=0;i<data.length;i++){
+			if(!writeintelshortarray(outstream,data[i])){
 				return false;
 			}
 		}
@@ -694,7 +840,7 @@ public class jdataio{
 	public byte[] readentirebytefile(File f){
 		int length=(int)f.length();
 		try{
-			InputStream is=new BufferedInputStream(new FileInputStream(f));
+			InputStream is=new BufferedInputStream(new FileInputStream(f),2097152);
 			int n=0;
 			byte[] data=new byte[length];
 			while(n<length){
@@ -709,6 +855,17 @@ public class jdataio{
 			return data;
 		}catch(IOException e){
 			return null;
+		}
+	}
+	
+	public boolean writeFile(byte[] contents,String fname){
+		try{
+			OutputStream os=new BufferedOutputStream(new FileOutputStream(fname),2097152);
+			boolean worked=(new jdataio()).writebytearray(os,contents);
+			os.close();
+			return worked;
+		}catch(IOException e){
+			return false;
 		}
 	}
 

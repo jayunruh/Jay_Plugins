@@ -8,9 +8,11 @@
 
 package jalgs.jfit;
 
+import jalgs.algutils;
 import jalgs.matrixsolve;
 
 import java.util.Arrays;
+import java.util.List;
 
 public class linleastsquares{
 	public float[][] indvars;
@@ -31,6 +33,18 @@ public class linleastsquares{
 
 	public linleastsquares(){
 		// only use this constructor for the get_amp_offset method
+	}
+	
+	public linleastsquares(List<List<Float>> indvars1){
+		nindvars=indvars1.size();
+		indvars=new float[nindvars][];
+		for(int i=0;i<nindvars;i++){
+			indvars[i]=algutils.convert_arr_float(indvars1.get(i));
+		}
+		npts=indvars[0].length;
+		startfit=0;
+		endfit=npts-1;
+		isfloat=true;
 	}
 
 	public linleastsquares(float[][] indvars1){
@@ -95,6 +109,10 @@ public class linleastsquares{
 		startfit=startfit1;
 		endfit=endfit1;
 		isfloat=true;
+	}
+	
+	public double[] fitdata(List<Float> data,List<Float> weights){
+		return fitdata(algutils.convert_arr_float(data),algutils.convert_arr_float(weights));
 	}
 
 	public double[] fitdata(float[] data,float[] weights){

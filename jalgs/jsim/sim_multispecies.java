@@ -116,6 +116,37 @@ public class sim_multispecies{
 			sslist[i].change_setup(set);
 		}
 	}
+	
+	public void set_restrict_box(boolean restrictbox){
+		for(int i=0;i<sslist.length;i++){
+			sslist[i].mp.restrictbox=restrictbox;
+		}
+		float gridsizepixels=set.gridsizepixels;
+		float fboxpixels=set.fboxpixels;
+		if(restrictbox){
+			float left=0.5f*(fboxpixels-gridsizepixels);
+			float right=left+gridsizepixels;
+			float top=left;
+			float bottom=right;
+			for(int i=0;i<sps.length;i++){
+				if(sps[i].coords[0]>=left&&sps[i].coords[0]<right&&sps[i].coords[1]>=top&&sps[i].coords[1]<bottom){
+					sps[i].stuck=true;
+				} else {
+					sps[i].stuck=false;
+				}
+			}
+		} else {
+			for(int i=0;i<sps.length;i++){
+    			float testx=sps[i].coords[0]%(2.0f*gridsizepixels);
+    			float testy=sps[i].coords[1]%(2.0f*gridsizepixels);
+    			if((testx>gridsizepixels&&testy>gridsizepixels)||(testx<gridsizepixels&&testy<gridsizepixels)){
+    				sps[i].stuck=true;
+    			} else {
+    				sps[i].stuck=false;
+    			}
+			}
+		}
+	}
 
 	public void perform_time_step(){
 		for(int i=0;i<sps.length;i++){

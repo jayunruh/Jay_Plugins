@@ -1,11 +1,16 @@
 package jguis;
 
 import jalgs.interpolation;
+import jalgs.jdataio;
 import jalgs.jsim.rngs;
 
+import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 
 public class lututils{
@@ -282,6 +287,34 @@ public class lututils{
 			return true;
 		}catch(IOException e){
 			return false;
+		}
+	}
+	
+	public static byte[][] read_lut(String path){
+		try {
+			byte[][] lut=new byte[3][256];
+			jdataio jdio=new jdataio();
+			File pathfile=new File(path);
+			int lutsize=(int)pathfile.length();
+			InputStream instream=new BufferedInputStream(new FileInputStream(path));
+			if(lutsize>768) {
+				//this is either an NIH Image LUT or a text LUT
+				int id=jdio.readmotorolaint(instream);
+				if(id!=1229147980) {
+					//this is a text lut (not supported for now)
+					instream.close();
+					return null;
+				} else {
+					jdio.skipstreambytes(instream,32-4);
+				}
+			}
+			jdio.readintelbytefile(instream,256,lut[0]);
+			jdio.readintelbytefile(instream,256,lut[1]);
+			jdio.readintelbytefile(instream,256,lut[2]);
+			instream.close();
+			return lut;
+		} catch(IOException e) {
+			return null;
 		}
 	}
 	

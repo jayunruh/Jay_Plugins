@@ -154,6 +154,14 @@ public class LOCI_random_access_file_reader{
 		}
 		return carray;
 	}
+	
+	public Object[] getCSeries(int slice,int frame,int rx,int ry,int rwidth,int rheight){
+		Object[] cseries=new Object[channels];
+		for(int i=0;i<channels;i++){
+			cseries[i]=getSubImage(rx,ry,rwidth,rheight,i,slice,frame);
+		}
+		return cseries;
+	}
 
 	public int getNSeries(String directory,String fname){
 		ImageProcessorReader r=new ImageProcessorReader(new ChannelSeparator(LociPrefs.makeImageReader()));

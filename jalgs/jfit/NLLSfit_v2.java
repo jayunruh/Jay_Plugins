@@ -380,6 +380,16 @@ public class NLLSfit_v2{
 		return tempc2/(length-numfit);
 	}
 	
+	public static float[] calculate_resid_fit(double[] fit,float[] data){
+		//calculates the raw (not weighted) residuals from the fit
+		int length=data.length;
+		float[] resid=new float[length];
+		for(int i=0;i<length;i++){
+			resid[i]=data[i]-(float)fit[i];
+		}
+		return resid;
+	}
+	
 	public double calculate_aic_fit(double[] fit,int numfit,float[] data,double[] weights){
 		double c2=calculate_c2_fit(fit,numfit,data,weights);
 		return calculate_aic_c2(c2,numfit,data.length);

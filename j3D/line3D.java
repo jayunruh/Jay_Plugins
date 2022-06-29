@@ -108,6 +108,13 @@ public class line3D extends element3D implements Cloneable{
 		g.setColor(tempcolor);
 	}
 	
+	public void draw3Delement(Graphics[] g){
+		Color tempcolor=g[0].getColor();
+		for(int i=0;i<g.length;i++) g[i].setColor(color);
+		j3Dutils.draw3DLine(g,pt1.x,pt1.y,pt1.z,pt2.x,pt2.y,pt2.z,thick);
+		for(int i=0;i<g.length;i++) g[i].setColor(tempcolor);
+	}
+	
 	public line3D clone(){
 		return new line3D(pt1.clone(),pt2.clone(),color);
 	}

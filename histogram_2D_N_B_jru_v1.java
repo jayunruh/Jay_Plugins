@@ -131,7 +131,7 @@ public class histogram_2D_N_B_jru_v1 implements PlugIn {
 
 }
 
-class CustomWindow extends Panel implements ActionListener, AdjustmentListener, MouseListener, MouseMotionListener, ItemListener {
+/*class CustomWindow extends Panel implements ActionListener, AdjustmentListener, MouseListener, MouseMotionListener, ItemListener {
 
 	public final static int H = 612;
 	public final static int WR = 800;
@@ -1121,4 +1121,4 @@ class CustomWindow extends Panel implements ActionListener, AdjustmentListener, 
 		return;
 	}
 
-}
+}*/

@@ -221,18 +221,31 @@ public class jsort{
 	}
 
 	public static int[] get_javasort_order(int[] arr){
-		float[] newarr=new float[arr.length];
-		for(int i=0;i<arr.length;i++)
-			newarr[i]=arr[i];
-		return get_javasort_order(newarr);
+		List<List<Integer>> list= new ArrayList<List<Integer>>();
+		for(int i=0;i<arr.length;i++){
+			List<Integer> temp=new ArrayList<Integer>();
+			temp.add(Integer.valueOf(arr[i]));
+			temp.add(Integer.valueOf(i));
+			list.add(temp);
+		}
+		Collections.sort(list,new Comparator<List<Integer>>(){
+			public int compare(List<Integer> o1,List<Integer> o2){
+				return o1.get(0).compareTo(o2.get(0));
+			}
+		});
+		int[] order=new int[arr.length];
+		for(int i=0;i<arr.length;i++){
+			order[i]=list.get(i).get(1).intValue();
+		}
+		return order;
 	}
 
 	public static int[] get_javasort_order(float[] arr){
 		List<List<Number>> list=new ArrayList<List<Number>>();
 		for(int i=0;i<arr.length;i++){
 			List<Number> temp=new ArrayList<Number>();
-			temp.add(new Float(arr[i]));
-			temp.add(new Integer(i));
+			temp.add(Float.valueOf(arr[i]));
+			temp.add(Integer.valueOf(i));
 			list.add(temp);
 		}
 		Collections.sort(list,new Comparator<List<Number>>(){
@@ -254,7 +267,7 @@ public class jsort{
 		for(int i=0;i<arr.length;i++){
 			List<Object> temp=new ArrayList<Object>();
 			temp.add(arr[i]);
-			temp.add(new Integer(i));
+			temp.add(Integer.valueOf(i));
 			list.add(temp);
 		}
 		Collections.sort(list,new Comparator<List<Object>>(){
@@ -270,13 +283,35 @@ public class jsort{
 		}
 		return order;
 	}
+	
+	public static int[] get_javasort_order(List<String> arr){
+		List<List<Object>> list=new ArrayList<List<Object>>();
+		for(int i=0;i<arr.size();i++){
+			List<Object> temp=new ArrayList<Object>();
+			temp.add(arr.get(i));
+			temp.add(Integer.valueOf(i));
+			list.add(temp);
+		}
+		Collections.sort(list,new Comparator<List<Object>>(){
+			public int compare(List<Object> o1,List<Object> o2){
+				String s1=(String)o1.get(0);
+				String s2=(String)o2.get(0);
+				return s1.compareTo(s2);
+			}
+		});
+		int[] order=new int[arr.size()];
+		for(int i=0;i<arr.size();i++){
+			order[i]=((Integer)list.get(i).get(1)).intValue();
+		}
+		return order;
+	}
 
 	public static int[] get_javasort_order(long[] arr){
 		List<List<Long>> list=new ArrayList<List<Long>>();
 		for(int i=0;i<arr.length;i++){
 			List<Long> temp=new ArrayList<Long>();
-			temp.add(new Long(arr[i]));
-			temp.add(new Long(i));
+			temp.add(Long.valueOf(arr[i]));
+			temp.add(Long.valueOf(i));
 			list.add(temp);
 		}
 		Collections.sort(list,new Comparator<List<Long>>(){
@@ -306,8 +341,8 @@ public class jsort{
 		List<List<Number>> list=new ArrayList<List<Number>>();
 		for(int i=0;i<arr.length;i++){
 			List<Number> temp=new ArrayList<Number>();
-			temp.add(new Float(arr[i]));
-			temp.add(new Integer(i));
+			temp.add(Float.valueOf(arr[i]));
+			temp.add(Integer.valueOf(i));
 			list.add(temp);
 		}
 		Collections.sort(list,new Comparator<List<Number>>(){
@@ -330,7 +365,7 @@ public class jsort{
 		for(int i=0;i<arr.length;i++){
 			List<Object> temp=new ArrayList<Object>();
 			temp.add(arr[i]);
-			temp.add(new Float(i));
+			temp.add(Float.valueOf(i));
 			list.add(temp);
 		}
 		Collections.sort(list,new Comparator<List<Object>>(){

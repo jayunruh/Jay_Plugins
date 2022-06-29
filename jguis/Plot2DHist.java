@@ -57,6 +57,7 @@ public class Plot2DHist{
 	public static final int fontsize=14;
 	private float magnification;
 	public static final String[] lutnames={"Greys","Red","Green","Blue","NICE","NICE_whiteback","User"};
+	public boolean interpolate=false;
 
 	public Plot2DHist(String xLabel1,String yLabel1,float[] xValues1,float[] yValues1,int[] lut1){
 		initLuts(lut1);
@@ -703,19 +704,33 @@ public class Plot2DHist{
 		for(int i=0;i<newhistsize;i++){
 			for(int j=0;j<newhistsize;j++){
 				int value=(int)((histogram[j][i]-intMin)/(intMax-intMin)*255);
-				if(value>255){
-					value=255;
-				}
-				if(value<0){
-					value=0;
+				if(value>255) value=255;
+				if(value<0) value=0;
+				float ul=value,ur=value,ll=value,lr=value;
+				if(interpolate && j<(newhistsize-1) && i<(newhistsize-1)){
+					ll=((histogram[j][i]-intMin)/(intMax-intMin)*255.0f);
+					lr=((histogram[j+1][i]-intMin)/(intMax-intMin)*255.0f);;
+					ur=((histogram[j+1][i+1]-intMin)/(intMax-intMin)*255.0f);
+					ul=((histogram[j][i+1]-intMin)/(intMax-intMin)*255.0f);
 				}
 				for(int k=0;k<subsize;k++){
 					int ypos=newheight-i*subsize-k-1;
 					if(ypos>=0){
 						for(int l=0;l<subsize;l++){
 							int xpos=j*subsize+l;
-							if(xpos<newwidth)
-								temp2[xpos+ypos*newwidth]=lut[value];
+							if(xpos<newwidth){
+								if(interpolate){
+									float fracy=(float)k/(float)subsize;
+									float fracx=(float)l/(float)subsize;
+									float lt=ll+fracx*(lr-ll);
+									float ut=ul+fracx*(ur-ul);
+									int interpval=(int)(lt+fracy*(ut-lt));
+									if(interpval<0) interpval=0; if(interpval>255) interpval=255;
+									temp2[xpos+ypos*newwidth]=lut[interpval];
+								} else {
+									temp2[xpos+ypos*newwidth]=lut[value];
+								}
+							}
 						}
 					}
 				}

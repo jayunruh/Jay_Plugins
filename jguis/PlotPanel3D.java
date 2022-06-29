@@ -346,7 +346,7 @@ public class PlotPanel3D extends JPanel implements MouseListener,MouseMotionList
 		for(int i=0;i<nseries;i++){
 			for(int j=0;j<maxxpts;j++){
 				for(int k=0;k<maxypts;k++){
-					tabledata[j][k+i*maxypts]=new Float(zValues[i][j][k]);
+					tabledata[j][k+i*maxypts]=Float.valueOf(zValues[i][j][k]);
 				}
 			}
 		}

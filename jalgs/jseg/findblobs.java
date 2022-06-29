@@ -178,7 +178,7 @@ public class findblobs{
 		float maxval=0.0f;
 		boolean ptfound=false;
 		boolean atedge=false;
-		float[][] tempstats=new float[maxblobs][5];
+		float[][] tempstats=new float[maxblobs][8];
 		int blobcounter=0;
 		int validblobs=0;
 		int searchr=(int)(0.5f*minsep+0.5f);
@@ -252,6 +252,9 @@ public class findblobs{
 					}
 					tempstats[blobcounter-1][0]/=intval;
 					tempstats[blobcounter-1][1]/=intval;
+					tempstats[blobcounter-1][5]=maxx; //in case we need these later
+					tempstats[blobcounter-1][6]=maxy; //in case we need these later
+					tempstats[blobcounter-1][7]=maxval;
 					if(usemaxpt){
 						tempstats[blobcounter-1][0]=maxx;
 						tempstats[blobcounter-1][1]=maxy;
@@ -271,7 +274,7 @@ public class findblobs{
 				}
 			}
 		}while(ptfound&&blobcounter<maxblobs);
-		float[][] stats=new float[validblobs][4];
+		float[][] stats=new float[validblobs][7];
 		int counter=0;
 		for(int i=0;i<blobcounter;i++){
 			if(tempstats[i][4]==1.0f){
@@ -279,6 +282,9 @@ public class findblobs{
 				stats[counter][1]=tempstats[i][1];
 				stats[counter][2]=tempstats[i][2];
 				stats[counter][3]=tempstats[i][3];
+				stats[counter][4]=tempstats[i][5];
+				stats[counter][5]=tempstats[i][6];
+				stats[counter][6]=tempstats[i][7];
 				for(int j=0;j<width*height;j++){
 					if(mask[j]==i+1){
 						mask[j]=counter+1;
@@ -293,7 +299,7 @@ public class findblobs{
 				}
 			}
 		}
-		// stats are centerx,centery,integral,area
+		// stats are centerx,centery,integral,area,maxx,maxy,maxint (at maxx, maxy)
 		return stats;
 	}
 	
@@ -330,7 +336,7 @@ public class findblobs{
 		float maxval=0.0f;
 		boolean ptfound=false;
 		boolean atedge=false;
-		float[][] tempstats=new float[maxblobs][6];
+		float[][] tempstats=new float[maxblobs][10];
 		int blobcounter=0;
 		int validblobs=0;
 		int searchr=(int)(0.5f*minsep+0.5f);
@@ -382,6 +388,10 @@ public class findblobs{
 					tempstats[blobcounter-1][0]/=intval;
 					tempstats[blobcounter-1][1]/=intval;
 					tempstats[blobcounter-1][2]/=intval;
+					tempstats[blobcounter-1][6]=maxx; //in case we need these later
+					tempstats[blobcounter-1][7]=maxy; //in case we need these later
+					tempstats[blobcounter-1][8]=maxz;
+					tempstats[blobcounter-1][9]=maxval;
 					if(usemaxpt){
 						tempstats[blobcounter-1][0]=maxx;
 						tempstats[blobcounter-1][1]=maxy;
@@ -405,7 +415,7 @@ public class findblobs{
 				}
 			}
 		}while(ptfound&&blobcounter<maxblobs);
-		float[][] stats=new float[validblobs][5];
+		float[][] stats=new float[validblobs][9];
 		int counter=0;
 		for(int i=0;i<blobcounter;i++){
 			if(tempstats[i][5]==1.0f){
@@ -414,10 +424,14 @@ public class findblobs{
 				stats[counter][2]=tempstats[i][2];
 				stats[counter][3]=tempstats[i][3];
 				stats[counter][4]=tempstats[i][4];
+				stats[counter][5]=tempstats[i][6];
+				stats[counter][6]=tempstats[i][7];
+				stats[counter][7]=tempstats[i][8];
+				stats[counter][8]=tempstats[i][9];
 				counter++;
 			}
 		}
-		// stats are centerx,centery,centerz,maxval,area (above thresh)
+		// stats are centerx,centery,centerz,maxval,area (above thresh),maxx,maxy,maxz,maxint(at maxx,maxy)
 		return stats;
 	}
 	

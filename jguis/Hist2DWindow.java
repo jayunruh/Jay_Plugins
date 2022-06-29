@@ -92,6 +92,7 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 	boolean inroi,threshfirst;
 	int imageheight=256;
 	public ImageStack datastack;
+	int calltype;
 
 	public static void launch_frame(String title,Hist2DWindow panel){
 		final Frame f=new Frame(title);
@@ -131,9 +132,11 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 	public void init(ImagePlus ximp,ImagePlus yimp,ImagePlus zimp,ImagePlus dataimp,ImagePlus dispimp,int calltype){
 		//calltype is 1: N&B, 2: acceptor photobleaching fret, and 3: ratiometric fret
 		//want to add a spectral phasor option (4)
+		//also FLIM phasor (5)
 		//need a placeholder for profile data
+		this.calltype=calltype;
 		init_options();
-		if(calltype==4) {
+		if(calltype>3) {
 			ascale=0;
 			xmin=-1.0f;
 			xmax=1.0f;
@@ -181,50 +184,50 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		addMouseListener(this);
 
 		xminval=new TextField(""+xmin,10);
-		xminval.setBounds(90,10+imageheight+50+256+20,80,20);
+		xminval.setBounds(90,10+imageheight+50+256+20,100,20);
 		xminval.addActionListener(this);
 		xmaxval=new TextField(""+xmax,10);
-		xmaxval.setBounds(90+245,10+imageheight+50+256+20,80,20);
+		xmaxval.setBounds(90+245,10+imageheight+50+256+20,100,20);
 		xmaxval.addActionListener(this);
 		yminval=new TextField(""+ymin,10);
 		yminval.addActionListener(this);
-		yminval.setBounds(10,10+imageheight+40+256,80,20);
+		yminval.setBounds(10,10+imageheight+40+256,90,20);
 		ymaxval=new TextField(""+ymax,10);
-		ymaxval.setBounds(10,10+imageheight+40,80,20);
+		ymaxval.setBounds(10,10+imageheight+40,90,20);
 		ymaxval.addActionListener(this);
 		smooth_button=new Button("Smooth");
-		smooth_button.setBounds(10,10+imageheight+70,60,30);
+		smooth_button.setBounds(10,10+imageheight+70,80,30);
 		smooth_button.addActionListener(this);
 		revert_button=new Button("Revert");
-		revert_button.setBounds(10,10+imageheight+110,60,30);
+		revert_button.setBounds(10,10+imageheight+110,80,30);
 		revert_button.addActionListener(this);
 		savehist_button=new Button("Save");
-		savehist_button.setBounds(10,10+imageheight+150,60,30);
+		savehist_button.setBounds(10,10+imageheight+150,80,30);
 		savehist_button.addActionListener(this);
 		saveimg_button=new Button("Save Image");
-		saveimg_button.setBounds(10,50,80,30);
+		saveimg_button.setBounds(10,50,100,30);
 		saveimg_button.addActionListener(this);
 		String saveyimglabel="Save Y Image";
-		if(calltype==4) saveyimglabel="Save Profile";
+		if(calltype>3) saveyimglabel="Save Profile";
 		saveyimg_button=new Button(saveyimglabel);
-		saveyimg_button.setBounds(100+256+10+110+10+100,10+imageheight+50+260,80,20);
+		saveyimg_button.setBounds(100+256+10+110+10+100,10+imageheight+50+260,90,20);
 		saveyimg_button.addActionListener(this);
-		unmix_button=new Button("Unmix Histogram");
+		unmix_button=new Button("Unmix Hist");
 		unmix_button.setBounds(100+256+10+110,10+imageheight+50+260,100,20);
 		unmix_button.addActionListener(this);
-		unmix_button2=new Button("Unmix Histogram2");
+		unmix_button2=new Button("Unmix Hist2");
 		unmix_button2.setBounds(100+256+10+110,10+imageheight+50+290,100,20);
 		unmix_button2.addActionListener(this);
 
 		roiwidthlabel=new Label("Roi Width");
-		roiwidthlabel.setBounds(100+256+10,10+imageheight+50,100,20);
+		roiwidthlabel.setBounds(110+256+10,10+imageheight+50,100,20);
 		roiwidthval=new TextField(""+roiwidth,15);
-		roiwidthval.setBounds(100+256+10,10+imageheight+50+30,80,20);
+		roiwidthval.setBounds(110+256+10,10+imageheight+50+30,80,20);
 		roiwidthval.addActionListener(this);
 		roiheightlabel=new Label("Roi Height");
-		roiheightlabel.setBounds(100+256+10,10+imageheight+50+60,100,20);
+		roiheightlabel.setBounds(110+256+10,10+imageheight+50+60,100,20);
 		roiheightval=new TextField(""+roiheight,15);
-		roiheightval.setBounds(100+256+10,10+imageheight+50+90,80,20);
+		roiheightval.setBounds(110+256+10,10+imageheight+50+90,80,20);
 		roiheightval.addActionListener(this);
 		roixlabel=new Label("Roi X");
 		roixlabel.setBounds(100+256+10+110,10+imageheight+50,100,20);
@@ -273,13 +276,13 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		ylabel.setBounds(100+256+10+110+10+100,10+imageheight+50+60,100,20);
 		xavg=0.0f;
 		xavglabel=new Label("x avg = "+xavg);
-		xavglabel.setBounds(100+256+10+110+10+100,10+imageheight+50+90,100,20);
+		xavglabel.setBounds(100+256+10+110+10+100,10+imageheight+50+90,120,20);
 		yavg=0.0f;
 		yavglabel=new Label("y avg = "+yavg);
-		yavglabel.setBounds(100+256+10+110+10+100,10+imageheight+50+120,100,20);
+		yavglabel.setBounds(100+256+10+110+10+100,10+imageheight+50+120,120,20);
 		zavg=0.0f;
 		zavglabel=new Label("z avg = "+zavg);
-		zavglabel.setBounds(100+256+10+110+10+100,10+imageheight+50+150,100,20);
+		zavglabel.setBounds(100+256+10+110+10+100,10+imageheight+50+150,120,20);
 		xstdev=0.0f;
 		xstdevlabel=new Label("x stdev = "+xstdev);
 		xstdevlabel.setBounds(100+256+10+110+10+100,10+imageheight+50+180,120,20);
@@ -305,11 +308,11 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		if(calltype==3){
 			templabel="Acc vs. Don";
 		}
-		if(calltype==4){
+		if(calltype>3){
 			templabel="S vs. G";
 		}
 		plotnorm=new Checkbox(templabel,plottypegroup,(plottype==0)?true:false);
-		plotnorm.setBounds(10,10+imageheight+180,80,20);
+		plotnorm.setBounds(10,10+imageheight+180,100,20);
 		plotnorm.addItemListener(this);
 		templabel="B/S vs. I/S";
 		if(calltype==2){
@@ -318,60 +321,60 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 		if(calltype==3){
 			templabel="Ratio vs. Don";
 		}
-		if(calltype==4){
+		if(calltype>3){
 			templabel="Ratio vs. G";
 		}
 		plotdiff=new Checkbox(templabel,plottypegroup,(plottype==1)?true:false);
-		plotdiff.setBounds(10,10+imageheight+200,80,20);
+		plotdiff.setBounds(10,10+imageheight+200,100,20);
 		plotdiff.addItemListener(this);
 		smoothtypegroup=new CheckboxGroup();
 		medsmooth=new Checkbox("Median Sm",smoothtypegroup,(smoothtype==0)?true:false);
-		medsmooth.setBounds(10,10+imageheight+240,80,20);
+		medsmooth.setBounds(10,10+imageheight+240,100,20);
 		medsmooth.addItemListener(this);
 		gassmooth=new Checkbox("Mean Sm",smoothtypegroup,(smoothtype==1)?true:false);
-		gassmooth.setBounds(10,10+imageheight+260,80,20);
+		gassmooth.setBounds(10,10+imageheight+260,100,20);
 		gassmooth.addItemListener(this);
 		binsmooth=new Checkbox("Bin Sm",smoothtypegroup,(smoothtype==2)?true:false);
-		binsmooth.setBounds(10,10+imageheight+220,80,20);
+		binsmooth.setBounds(10,10+imageheight+220,100,20);
 		binsmooth.addItemListener(this);
 		ascalecheck=new Checkbox("Autoscale",(ascale==1)?true:false);
-		ascalecheck.setBounds(200,10+imageheight+50+256+30,80,20);
+		ascalecheck.setBounds(200,10+imageheight+50+256+30,100,20);
 		ascalecheck.addItemListener(this);
 
 		// xmaxval.setBounds(90+245,10+imageheight+50+256+20,80,20);
 
 		multiplier=1.0f;
-		scalehistlabel=new Label("Scale Histogram");
-		scalehistlabel.setBounds(100+256+10,10+imageheight+50+180,100,20);
+		scalehistlabel=new Label("Scale Hist");
+		scalehistlabel.setBounds(110+256+10,10+imageheight+50+180,100,20);
 		scalehistval=new TextField(""+multiplier);
-		scalehistval.setBounds(100+256+10,10+imageheight+50+205,80,20);
+		scalehistval.setBounds(110+256+10,10+imageheight+50+205,80,20);
 		scalehistval.addActionListener(this);
 		threshlabel=new Label("Threshhold");
-		threshlabel.setBounds(100+newwidth+10,10,150,20);
+		threshlabel.setBounds(110+newwidth+10,10,150,20);
 		threshval=new TextField(""+thresh,10);
-		threshval.setBounds(100+newwidth+10,30,80,20);
+		threshval.setBounds(110+newwidth+10,30,80,20);
 		threshval.addActionListener(this);
 		threshfirstcheck=new Checkbox("Thresh by 1st?",true);
-		threshfirstcheck.setBounds(100+newwidth+10+150,60,100,20);
+		threshfirstcheck.setBounds(110+newwidth+10+150,60,130,20);
 		threshfirstcheck.addItemListener(this);
 		dispminlabel=new Label("Minimum Intensity");
-		dispminlabel.setBounds(100+newwidth+10,60,150,20);
+		dispminlabel.setBounds(110+newwidth+10,60,150,20);
 		dispminval=new TextField(""+dispmin,10);
-		dispminval.setBounds(100+newwidth+10,90,80,20);
+		dispminval.setBounds(110+newwidth+10,90,80,20);
 		dispminval.addActionListener(this);
 		dispmaxlabel=new Label("Maximum Intensity");
-		dispmaxlabel.setBounds(100+newwidth+10,120,150,20);
+		dispmaxlabel.setBounds(110+newwidth+10,120,150,20);
 		dispmaxval=new TextField(""+dispmax,10);
-		dispmaxval.setBounds(100+newwidth+10,150,80,20);
+		dispmaxval.setBounds(110+newwidth+10,150,80,20);
 		dispmaxval.addActionListener(this);
 
 		slicelabel=new Label("Slice");
-		slicelabel.setBounds(100+newwidth+10+150,90,80,20);
+		slicelabel.setBounds(110+newwidth+10+150,90,80,20);
 		sliceval=new TextField(""+currslice,10);
-		sliceval.setBounds(100+newwidth+10+150,120,80,20);
+		sliceval.setBounds(110+newwidth+10+150,120,80,20);
 		sliceval.addActionListener(this);
 		slice_slider=new Scrollbar(Scrollbar.HORIZONTAL,currslice,5,0,slices-1+5);
-		slice_slider.setBounds(100+newwidth+10+150,150,150,20);
+		slice_slider.setBounds(110+newwidth+10+150,150,150,20);
 		slice_slider.addAdjustmentListener(this);
 
 		add(xminval);
@@ -442,14 +445,14 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 	}
 
 	public void paint(Graphics g){
-		g.drawImage(dispimg,100,10,this);
-		g.drawImage(histimg,100,50+imageheight+10,this);
-		g.setClip(100,imageheight+50+10,256,256);
+		g.drawImage(dispimg,110,10,this);
+		g.drawImage(histimg,110,50+imageheight+10,this);
+		g.setClip(110,imageheight+50+10,256,256);
 		g.setColor(Color.red);
 		if(roishape==0){
-			g.drawRect(100+roix,(50+imageheight+10+256)-(roiy+roiheight),roiwidth,roiheight);
+			g.drawRect(110+roix,(50+imageheight+10+256)-(roiy+roiheight),roiwidth,roiheight);
 		}else{
-			g.drawOval(100+roix,(50+imageheight+10+256)-(roiy+roiheight),roiwidth,roiheight);
+			g.drawOval(110+roix,(50+imageheight+10+256)-(roiy+roiheight),roiwidth,roiheight);
 		}
 		g.setColor(Color.green);
 		float intercept=s0-off*s;
@@ -461,8 +464,22 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 			y1=1.0f;
 			y2=1.0f;
 		}
-		g.setColor(Color.green);
-		g.drawLine(100,imageheight+50+10+256-(int)(((y1-ymin)/(ymax-ymin))*256.0),100+256,imageheight+50+10+256-(int)(((y2-ymin)/(ymax-ymin))*256.0));
+		if(calltype<4) {
+			g.setColor(Color.green);
+			g.drawLine(110,imageheight+50+10+256-(int)(((y1-ymin)/(ymax-ymin))*256.0),110+256,imageheight+50+10+256-(int)(((y2-ymin)/(ymax-ymin))*256.0));
+		} else {
+			//draw the crosshairs
+			g.setColor(Color.white);
+			int x0=(int)((256.0f*xmax)/(xmax-xmin));
+			int y0=(int)((256.0f*ymax)/(ymax-ymin));
+			g.drawLine(110+256-x0,50+imageheight+10+256,110+256-x0,50+imageheight+10);
+			g.drawLine(110,50+imageheight+10+y0,110+256,50+imageheight+10+y0);
+			//draw the phasor half circle
+			g.setColor(Color.green);
+			int y0_5=(int)((256.0f*0.5f)/(ymax-ymin));
+			int x0_5=(int)((256.0f*0.5f)/(xmax-xmin));
+			g.drawArc(110+256-x0,50+imageheight+10+y0-y0_5,2*x0_5,2*y0_5,0,180);
+		}
 		g.setClip(null);
 	}
 
@@ -603,7 +620,7 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 
 	public void mousePressed(MouseEvent e){
 		int xpos=e.getX();
-		int xvalue=xpos-100;
+		int xvalue=xpos-110;
 		int ypos=e.getY();
 		int yvalue=(256+imageheight+10+50)-ypos;
 		if(roishape==0){
@@ -1417,6 +1434,21 @@ public class Hist2DWindow extends Panel implements ActionListener,AdjustmentList
 				}
 			}
 			(new PlotWindow4("Masked Profile","channel","Intensity",decay)).draw();
+		}
+		//output the roi stats as well for the lifetime phasor
+		if(calltype==5) {
+			GenericDialog taugd=new GenericDialog("Options");
+			taugd.addNumericField("Frequency (MHz)",80.0,5,15,null);
+			taugd.showDialog(); if(taugd.wasCanceled()) return;
+			float megafreq=(float)taugd.getNextNumber();
+			IJ.log("G avg= "+xavg);
+			IJ.log("S avg= "+yavg);
+			float tempfreq=2.0f*megafreq*0.001f*(float)Math.PI;
+			float tphi=yavg/(xavg*tempfreq);
+			float tmod=(float)Math.sqrt((1.0f/(xavg*xavg+yavg*yavg))-1.0f);
+			tmod/=tempfreq;
+			IJ.log("Tau Mod= "+tmod);
+			IJ.log("Tau Phase= "+tphi);
 		}
 	}
 	

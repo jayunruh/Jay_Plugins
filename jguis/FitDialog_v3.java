@@ -180,6 +180,9 @@ public class FitDialog_v3 implements DialogListener,NLLSfitinterface_v2{
 	}
 
 	public boolean showoptions(double[] params,int[] fixes){
+		//if(IJ.isMacro()) return true;
+		//IJ.log("before options params");
+		//IJ.log(table_tools.print_double_array(params));
 		GenericDialog gd=new GenericDialog("Starting Fit Parameters");
 		gd.setLayout(new GridLayout(params.length+5, 2));
 		gd.addCheckbox("Check Chi Squared",checkc2); gd.addMessage(" "); gd.addMessage(" ");
@@ -203,6 +206,8 @@ public class FitDialog_v3 implements DialogListener,NLLSfitinterface_v2{
 				fixes[i]=0;
 			}
 		}
+		//IJ.log("mid options params");
+		//IJ.log(table_tools.print_double_array(params));
 		if(gd.getNextBoolean()){
 			if(!get_errors(params,fixes)){
 				return false;
@@ -213,10 +218,12 @@ public class FitDialog_v3 implements DialogListener,NLLSfitinterface_v2{
 				return false;
 			}
 		}
+		//IJ.log("after options params");
+		//IJ.log(table_tools.print_double_array(params));
 		return true;
 	}
 	
-	private boolean showconstraintsdialog(){
+	public boolean showconstraintsdialog(){
 		GenericDialog gd=new GenericDialog("Constraints");
 		int nparams=labels.length;
 		gd.setLayout(new GridLayout(nparams+2,4));

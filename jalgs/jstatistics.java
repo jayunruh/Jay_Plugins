@@ -14,9 +14,9 @@ import java.util.Arrays;
 
 public class jstatistics{
 	public static final String[] stats={"Avg","Sum","Max","Min","Variance","Median","Mode","StDev","StErr","RelErr","Count","Percentile","ConditionalAvg","Not0Avg","Not0StDev","Not0StErr","Not0Sum",
-			"Not0Count","Not0Min","Identity","Zero","MaxPos","AvgPos","NaN"};
+			"Not0Count","Not0Min","Identity","Zero","MaxPos","AvgPos","NaN","AvgTopN"};
 	public static final String[] stats2={"avg","sum","max","min","variance","median","mode","stdev","sterr","relerr","count","percentile","conditionalavg","not0avg","not0stdev","not0sterr","not0sum",
-			"not0count","not0min","identity","zero","maxpos","avgpos","nan"};
+			"not0count","not0min","identity","zero","maxpos","avgpos","nan","avgtopn"};
 
 	public static float getstatistic(String stat,Object data,int width,int height,Rectangle r,float[] extras){
 		if(data instanceof float[]){
@@ -269,6 +269,9 @@ public class jstatistics{
 		if(stat.equalsIgnoreCase("nan")){
 			return Float.NaN;
 		}
+		if(stat.equalsIgnoreCase("avgtopn")){
+			return favgtopn(tempdata,extras);
+		}
 		return 0.0f;
 	}
 
@@ -346,6 +349,9 @@ public class jstatistics{
 		}
 		if(stat.equalsIgnoreCase("nan")){
 			return Float.NaN;
+		}
+		if(stat.equalsIgnoreCase("avgtopn")){
+			return savgtopn(tempdata,extras);
 		}
 		return 0.0f;
 	}
@@ -425,6 +431,9 @@ public class jstatistics{
 		if(stat.equalsIgnoreCase("nan")){
 			return Float.NaN;
 		}
+		if(stat.equalsIgnoreCase("avgtopn")){
+			return iavgtopn(tempdata,extras);
+		}
 		return 0.0f;
 	}
 
@@ -502,6 +511,9 @@ public class jstatistics{
 		}
 		if(stat.equalsIgnoreCase("nan")){
 			return Float.NaN;
+		}
+		if(stat.equalsIgnoreCase("avgtopn")){
+			return bavgtopn(tempdata,extras);
 		}
 		return 0.0f;
 	}
@@ -754,6 +766,74 @@ public class jstatistics{
 			for(int i=0;i<percentile.length;i++)
 				percentile[i]=percentile2[i];
 		return percentile2[0];
+	}
+	
+	public static float favgtopn(float[] data,float[] nvals){
+		int nvals2=4;
+		if(nvals!=null){
+			nvals2=(int)nvals[0];
+		} else {
+			if(nvals2>data.length) nvals2=data.length;
+		}
+		float[] tempdata=data.clone();
+		Arrays.sort(tempdata);
+		float avg=0.0f;
+			for(int j=0;j<nvals2;j++){
+				avg+=tempdata[data.length-j-1];
+			}
+			avg/=(float)nvals2;
+		return avg;
+	}
+	
+	public static float iavgtopn(int[] data,float[] nvals){
+		int nvals2=4;
+		if(nvals!=null){
+			nvals2=(int)nvals[0];
+		} else {
+			if(nvals2>data.length) nvals2=data.length;
+		}
+		int[] tempdata=data.clone();
+		Arrays.sort(tempdata);
+		float avg=0.0f;
+			for(int j=0;j<nvals2;j++){
+				avg+=(float)tempdata[data.length-j-1];
+			}
+			avg/=(float)nvals2;
+		return avg;
+	}
+	
+	public static float savgtopn(short[] data,float[] nvals){
+		int nvals2=4;
+		if(nvals!=null){
+			nvals2=(int)nvals[0];
+		} else {
+			if(nvals2>data.length) nvals2=data.length;
+		}
+		short[] tempdata=data.clone();
+		Arrays.sort(tempdata);
+		float avg=0.0f;
+			for(int j=0;j<nvals2;j++){
+				avg+=(float)(tempdata[data.length-j-1]&0xffff);
+			}
+			avg/=(float)nvals2;
+		return avg;
+	}
+	
+	public static float bavgtopn(byte[] data,float[] nvals){
+		int nvals2=4;
+		if(nvals!=null){
+			nvals2=(int)nvals[0];
+		} else {
+			if(nvals2>data.length) nvals2=data.length;
+		}
+		byte[] tempdata=data.clone();
+		Arrays.sort(tempdata);
+		float avg=0.0f;
+			for(int j=0;j<nvals2;j++){
+				avg+=(float)(tempdata[data.length-j-1]&0xff);
+			}
+			avg/=(float)nvals2;
+		return avg;
 	}
 
 	public static float fmax(float[] data){
@@ -1475,11 +1555,15 @@ public class jstatistics{
 	public static float fcount(float[] data,float[] extras){
 		if(extras==null)
 			return data.length;
+		float upper=Float.MAX_VALUE;
+		if(extras.length>1){
+			upper=extras[1];
+		}
 		int counter=0;
 		for(int i=0;i<data.length;i++){
 			if(!Float.isInfinite(data[i])){
 				if(!Float.isNaN(data[i])){
-					if(data[i]>=extras[0]&&data[i]<=extras[1]){
+					if(data[i]>=extras[0]&&data[i]<=upper){
 						counter++;
 					}
 				}
@@ -1491,10 +1575,14 @@ public class jstatistics{
 	public static float icount(int[] data,float[] extras){
 		if(extras==null)
 			return data.length;
+		float upper=Integer.MAX_VALUE;
+		if(extras.length>1){
+			upper=extras[1];
+		}
 		int counter=0;
 		for(int i=0;i<data.length;i++){
 			float temp=(data[i]);
-			if(temp>=extras[0]&&temp<=extras[1]){
+			if(temp>=extras[0]&&temp<=upper){
 				counter++;
 			}
 		}
@@ -1504,10 +1592,14 @@ public class jstatistics{
 	public static float scount(short[] data,float[] extras){
 		if(extras==null)
 			return data.length;
+		float upper=65536.0f;
+		if(extras.length>1){
+			upper=extras[1];
+		}
 		int counter=0;
 		for(int i=0;i<data.length;i++){
 			float temp=data[i]&0xffff;
-			if(temp>=extras[0]&&temp<=extras[1]){
+			if(temp>=extras[0]&&temp<=upper){
 				counter++;
 			}
 		}
@@ -1517,10 +1609,14 @@ public class jstatistics{
 	public static float bcount(byte[] data,float[] extras){
 		if(extras==null)
 			return data.length;
+		float upper=256.0f;
+		if(extras.length>1){
+			upper=extras[1];
+		}
 		int counter=0;
 		for(int i=0;i<data.length;i++){
 			float temp=data[i]&0xff;
-			if(temp>=extras[0]&&temp<=extras[1]){
+			if(temp>=extras[0]&&temp<=upper){
 				counter++;
 			}
 		}

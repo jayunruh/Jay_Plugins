@@ -408,8 +408,8 @@ public class PlotPanel extends JPanel implements MouseListener,MouseMotionListen
 			columnlabels[2*i]="x"+(i+1);
 			columnlabels[2*i+1]="y"+(i+1);
 			for(int j=0;j<maxpts;j++){
-				tabledata[j][2*i]=new Float(tempxvals[i][j]);
-				tabledata[j][2*i+1]=new Float(tempyvals[i][j]);
+				tabledata[j][2*i]=Float.valueOf(tempxvals[i][j]);
+				tabledata[j][2*i+1]=Float.valueOf(tempyvals[i][j]);
 			}
 		}
 		TableDialog2.showDialog(null,null,"Plot Data",columnlabels,tabledata,null);

@@ -118,7 +118,7 @@ public class TiffReader{
 			entry.add(""+tag); entry.add(""+type); entry.add(""+cnt);
 			if(type==2) entry.add(temp);
 			else entry.add(""+val);
-			Object tagval=new Integer((int)val);
+			Object tagval=Integer.valueOf((int)val);
 			if(type==2) tagval=temp;
 			entry.add(getTagDesc(tag,tagval));
 			return entry;
@@ -159,7 +159,7 @@ public class TiffReader{
 			entry.add(""+tag); entry.add(""+type); entry.add(""+cnt);
 			if(type==2) entry.add(temp);
 			else entry.add(""+val);
-			Object tagval=new Integer((int)val);
+			Object tagval=Integer.valueOf((int)val);
 			if(type==2) tagval=temp;
 			entry.add(getTagDesc(tag,tagval));
 			return entry;

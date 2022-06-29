@@ -205,6 +205,7 @@ public class PlotWindowColumn extends ImageWindow implements ActionListener,Clip
 		// coordinates.setText("");
 		updatePlot();
 		IJ.register(this.getClass());
+		ic.requestFocus();
 	}
 	
 	/**
@@ -513,6 +514,7 @@ public class PlotWindowColumn extends ImageWindow implements ActionListener,Clip
 				}
 			}
 		}
+		ic.requestFocus();
 	}
 
 	public void selectSeries(int series){

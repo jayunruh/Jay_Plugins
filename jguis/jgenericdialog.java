@@ -114,13 +114,13 @@ public class jgenericdialog extends JDialog implements ActionListener{
 			jgenericdialog.outdata=new Object[length];
 			for(int i=0;i<length;i++){
 				if(tabledata1[i] instanceof Number){
-					jgenericdialog.outdata[i]=new Double(((JTextField)tableitems[i]).getText());
+					jgenericdialog.outdata[i]=Double.valueOf(((JTextField)tableitems[i]).getText());
 				}else{
 					if(tabledata1[i] instanceof Boolean){
-						jgenericdialog.outdata[i]=new Boolean(((JCheckBox)tableitems[i]).isSelected());
+						jgenericdialog.outdata[i]=Boolean.valueOf(((JCheckBox)tableitems[i]).isSelected());
 					}else{
 						if(tabledata1[i] instanceof String[]){
-							jgenericdialog.outdata[i]=new Integer(((JComboBox)tableitems[i]).getSelectedIndex());
+							jgenericdialog.outdata[i]=Integer.valueOf(((JComboBox)tableitems[i]).getSelectedIndex());
 						}else{
 							jgenericdialog.outdata[i]=((JTextField)tableitems[i]).getText();
 						}

@@ -18,6 +18,7 @@ import ij.io.SaveDialog;
 import ij.plugin.frame.Recorder;
 import ij.process.ColorProcessor;
 import ij.text.TextWindow;
+import jalgs.algutils;
 
 import java.awt.Button;
 import java.awt.FileDialog;
@@ -41,6 +42,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * This class is an extended ImageWindow that displays line graphs. This class
@@ -59,6 +61,13 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 	public PlotWindowHist(String title1,String xLabel1,String yLabel1,float[] xValues1,int color){
 		super(createImage(title1));
 		p3=new PlotHist(xLabel1,yLabel1,xValues1,color);
+		savehist=true;
+		imp.getCanvas().addMouseMotionListener(this);
+	}
+	
+	public PlotWindowHist(String title1,String xLabel1,String yLabel1,List<Float> xValues1,int color){
+		super(createImage(title1));
+		p3=new PlotHist(xLabel1,yLabel1,algutils.convert_arr_float(xValues1),color);
 		savehist=true;
 		imp.getCanvas().addMouseMotionListener(this);
 	}
@@ -151,14 +160,16 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 
 	public int[] getroiindices(){
 		Roi roi=imp.getRoi();
-		if(roi instanceof PolygonRoi){
+		Rectangle rect=roi.getBounds();
+		return p3.getrectindices(rect);
+		/*if(roi instanceof PolygonRoi){
 			// Polygon poly=roi.getPolygon();
 			// return p3.getpolygonindices(poly);
 			return null;
 		}else{
 			Rectangle rect=imp.getProcessor().getRoi();
 			return p3.getrectindices(rect);
-		}
+		}*/
 	}
 
 	public void scaleroi(){
@@ -211,6 +222,7 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 		// coordinates.setText("");
 		updatePlot();
 		IJ.register(this.getClass());
+		ic.requestFocus();
 	}
 	
 	/**
@@ -548,6 +560,7 @@ public class PlotWindowHist extends ImageWindow implements ActionListener,Clipbo
 				}
 			}
 		}
+		ic.requestFocus();
 	}
 
 	public void selectSeries(int series){

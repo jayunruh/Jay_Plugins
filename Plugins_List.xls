@@ -1,5 +1,4 @@
 Location	Name	Class	Description
-Jay_Plugins	first plugins jar	Jay_Plugins.jar	First plugins file
 Plugins>Stowers>Jay_Unruh>Detrend Tools	carpet detrend linear jru v1	carpet_detrend_linear_jru_v1	Fits each vertical line of a carpet to segmented lines and subtracts the lines from the carpet.  There are options for retaining average vertical (for temporal correlation) or horizontal (for spatial correlation) line intensities.
 Plugins>Stowers>Jay_Unruh>Detrend Tools	carpet sub mov avg jru v1	carpet_sub_mov_avg_jru_v1	Subtracts a temporal moving average from a carpet.
 Plugins>Stowers>Jay_Unruh>Detrend Tools	divide line from carpet jru v1	divide_line_from_carpet_jru_v1	Divides a plot window line from the vertical axis of a carpet.
@@ -98,7 +97,6 @@ Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj MSD jru v1	traj_MSD_jru_v1	Calcu
 Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj rescale x jru v1	traj_rescale_x_jru_v1	Rescale the x axis of plot using simple linear interpolation between minimum and maximum values.
 Plugins>Stowers>Jay_Unruh>Trajectory Tools	trajectory statistics jru v1	trajectory_statistics_jru_v1	Average and variance or covariance statistics for N&B analysis.
 Plugins>Stowers>Jay_Unruh>Trajectory Tools	trajectory statistics jru v2	trajectory_statistics_jru_v2	Simple plot statistics.
-Jay_Plugins2	second plugins jar	Jay_Plugins2.jar	Second plugins file
 Plugins>Stowers>Jay_Unruh>Carpet Tools	carpet ICCS jru v1	carpet_ICCS_jru_v1	calculates the spatial cross correlation for a carpet (power of 2 width)
 Plugins>Stowers>Jay_Unruh>Carpet Tools	carpet ICCS pearson jru v1	carpet_ICCS_pearson_jru_v1	"as above, but calculates the pearson correlation"
 Plugins>Stowers>Jay_Unruh>Carpet Tools	carpet ICS jru v1	carpet_ICS_jru_v1	calculates the spatial correlation for a carpet
@@ -197,7 +195,6 @@ Plugins>Stowers>Jay_Unruh>Trajectory Tools	resample plot jru v1	resample_plot_jr
 Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj fft 2corr jru v1	traj_fft_2corr_jru_v1	"performs auto, cross, and higher order correlations on single or dual trajectories"
 Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj math jru v1	traj_math_jru_v1	performs simple math on x or y components of a plot window trajectory
 Plugins>Stowers>Jay_Unruh>Trajectory Tools	traj crop jru v2	traj_crop_jru_v2	crops a trajectory
-Jay_Plugins3	third plugins jar	Jay_Plugins3.jar	Third plugins file
 Plugins>Stowers>Jay_Unruh>Misc Tools	adjust color balance jru v1	adjust_color_balance_jru_v1	simple plugin to adjust color offset and balance for single color images
 Plugins>Stowers>Jay_Unruh>Trajectory Tools	measure trajectories jru v1	measure_trajectories_jru_v1	measures a certain radius around each trajectory point
 Plugins>Stowers>Jay_Unruh>Misc Tools	id mother lineage jru v1	id_mother_lineage_jru_v1	"takes a table with cell_id, x, y, intensity, start frame, and relative frame and finds mother-daughter pairs by distance, intensity drop, and velocity change"
@@ -338,3 +335,37 @@ Plugins>Stowers>Jay_Unruh>ICS Tools	stack real 3D FFT jru v1	stack_real_3D_FFT_j
 Plugins>Stowers>Jay_Unruh>ICS Tools	stack real 3D iFFT jru v1	stack_real_3D_iFFT_jru_v1	"does a real 3D iFFT of a stack, data is alternating real and im"
 Plugins>Stowers>Jay_Unruh>Image Tools	edf jru v1	edf_jru_v1	creates an extended depth of field image
 Plugins>Stowers>Jay_Unruh>Misc Tools	segment nucleoli jru v4	segment_nucleoli_jru_v4	high throughput nucleolar measurement with better minimum detection and measurement in a 3rd channel
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	filter point pairs jru v1	filter_point_pairs_jru_v1	filters pairs of points (with a distance cutoff) from two trajectories
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	filter point triples jru v1	filter_point_triples_jru_v1	filters triplets of points (with a distance cutoff) from three trajectories
+Plugins>Stowers>Jay_Unruh>Batch Tools	table listener jru v1	table_listener_jru_v1	"listens to the selected row of a table and places a point roi on a 2D or 3D image (table must have x,y,z coordinate columns)"
+Plugins>Stowers>Jay_Unruh>File Tools	batch convert flowcyte jru v1	batch_convert_flowcyte_jru_v1	batch convert flow cytometry files
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	track cells phase jru v1	track_cells_phase_jru_v1	attempts to segment phase contrast images of cells with canny hysteresis and dilations and erosions
+Plugins>Stowers>Jay_Unruh>Sim Tools	random number generator jru v1	random_number_generator_jru_v1	generates different kinds of random number sets as plots
+Plugins>Stowers>Jay_Unruh>Image Tools	measure 3D jru v1	measure_3D_jru_v1	asks for two points and measures the 3D distance between them
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	track max not mask fast jru v1	track_max_not_mask_fast_jru_v1	"faster version of track max not mask, uses tiling and then reconciles points at boundaries"
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	track max not mask 3D fast jru v1	track_max_not_mask_3D_fast_jru_v1	"faster version of track max not mask 3D, uses 2D tiling and then reconciles points at boundaries"
+Plugins>Stowers>Jay_Unruh>Detrend Tools	stack divide moving average jru v2	stack_divide_moving_average_jru_v2	similar to subtract moving average but uses division
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	get traj lengths jru v1	get_traj_lengths_jru_v1	measures the length of a 2D or 3D trajectory
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	set multi plot xspacing jru v1	set_multi_plot_xspacing_jru_v1	sets the x spacing of plot data points for multiple series
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	batch segmentation jru v1	batch_segmentation_jru_v1	performs batch segmentation of nuclear images with the default imagej threshold--needs specific file naming
+Plugins>Stowers>Jay_Unruh>Table Tools	parama table summarize	parama_table_summarize	custom table analysis for Paul et al 2019
+Plugins>Stowers>Jay_Unruh>File Tools	test tiff writer jru v1	test_tiff_writer_jru_v1	my hacked tiff writer plugin
+Plugins>Stowers>Jay_Unruh>Batch Tools	kai gfp loc screen jru v1	kai_gfp_loc_screen_jru_v1	"performs gfp localization analysis of tiff images of yeast with GFP, FM4-64 (membrane), and Hoechst stains"
+Plugins>Stowers>Jay_Unruh>Misc Tools	kai gfp loc table analysis jru v2	kai_gfp_loc_table_analysis_jru_v2	aggregates well data produced by the kai_gfp_loc_screen_jru_v1
+Plugins>Stowers>Jay_Unruh>File Tools	list files date mod jru v1	list_files_date_mod_jru_v1	lists the files in a selected folder with options to filter and sort--names are put in a table
+Plugins>Stowers>Jay_Unruh>File Tools	copy table files jru v1	copy_table_files_jru_v1	copies a list of files from a table from a selected source to a selected destination folder 
+Plugins>Stowers>Jay_Unruh>ICS Tools	STICS map3D jru v1	STICS_map3D_jru_v1	calculates 3D STICS maps for generating 3D flow maps (like particle image velocimetry)
+Plugins>Stowers>Jay_Unruh>ImageStream	amfret profile jru v1	amfret_profile_jru_v1	calculates profiles of amfret values both overall and inside the gate (roi in roi manager)
+Plugins>Stowers>Jay_Unruh>Misc Tools	manual transform 3D images jru v1	manual_transform_3D_images_jru_v1	"uses alternating rois in the roi manager to tranform one 3D image into the coordinates of another, must have z calibration set"
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	export plot jru v2	export_plot_jru_v2	exports a plot to a text file
+Plugins>Stowers>Jay_Unruh>Misc Tools	normalize stack jru v1	normalize_stack_jru_v1	normalizes each channel and frame of a z stack to the maximum or sum of that stack
+Plugins>Stowers>Jay_Unruh>Segmentation Tools	overlap objects jru v1	overlap_objects_jru_v1	calculates the number of masked objects that do and don't overlap
+Plugins>Stowers>Jay_Unruh>ImageStream	manual hist gate jru v1	manual_hist_gate_jru_v1	converts a left-to-right line roi on a histogram into a gate for amfret analysis
+Plugins>Stowers>Jay_Unruh>Image Tools	SIFTj jru v1	SIFTj_jru_v1	my implementation of SIFT stack alignment which allows for hyperstack and secondary stack alignment 
+Plugins>Stowers>Jay_Unruh>Image Tools	transform from table jru v1	transform_from_table_jru_v1	"takes a table where the last 6 columns list the first two rows of an affine transformation matrix and realigns a hyperstack, scaling allows for larger hyperstacks to be aligned from smaller alignments"
+Plugins>Stowers>Jay_Unruh>Trajectory Tools	make pcf fry plot jru v1	make_pcf_fry_plot_jru_v1	"takes a pair correlation function (radial 1D plot) and simulates a random point cloud in a plot, an image, also outputs the 2d probability distribution image"
+Plugins>Stowers>Jay_Unruh>Misc Tools	spatial transcriptomics image maker jru v1	spatial_transcriptomics_image_maker_jru_v1	"makes a spatial transcriptomics image out of a gene x bead matrix, a table of gene names (in the 2nd column) and a table of xy values (in the 2nd and 3rd columns)"
+Plugins>Stowers>Jay_Unruh>Misc Tools	spatial transcriptomics roi profile jru v1	spatial_transcriptomics_roi_profile_jru_v1	"see above (spatial transcriptomics image maker), takes same input and rois on the ouput image and makes a gene count profile table"
+Plugins>Stowers>Jay_Unruh>Misc Tools	contrast saver jru v1	contrast_saver_jru_v1	saves the current image contrast settings and then resets to those settings when desired
+Plugins>Stowers>Jay_Unruh>FLIM Tools	histogram 2D phasor jru v2	histogram_2D_phasor_jru_v2	updated version of the 2D phasor tool that utilizes windowed histograms and image overlays
+Plugins>Stowers>Jay_Unruh>Detrend Tools	stack subtract moving statistic jru v1	stack_subtract_moving_statistic_jru_v1	subtracts or divides a moving statistic from a stack

@@ -122,8 +122,13 @@ public class analysis_pch implements PlugIn {
 				GenericDialog gd2=new GenericDialog("Ascii Import Options");
 				boolean includex=false;
 				gd2.addCheckbox("Include tab delim x column?",includex);
+				int skiphead=0;
+				gd2.addNumericField("Header Rows",skiphead,0);
+				gd2.addCheckbox("Is Trajectory?",false);
 				gd2.showDialog(); if(gd2.wasCanceled()){return;}
 				includex=gd2.getNextBoolean();
+				skiphead=(int)gd2.getNextNumber();
+				boolean istraj=gd2.getNextBoolean();
 				jdataio ioclass=new jdataio();
 				File[] filearray=ioclass.openfiles(OpenDialog.getDefaultDirectory(),IJ.getInstance());
 				if(filearray.length==0){return;}
@@ -141,27 +146,38 @@ public class analysis_pch implements PlugIn {
 					try{
 						names[i]=filearray[i].getName();
 						BufferedReader d=new BufferedReader(new FileReader(filearray[i]));
-						String[] temphist=new String[4096];
+						int flines=0;
+						while(d.readLine()!=null){flines++;}
+						d.close();
+						if(!istraj && flines>4096) flines=4096;
+						d=new BufferedReader(new FileReader(filearray[i]));
+						String[] temphist=new String[flines];
 						int counter=0;
 						do{
 							temphist[counter]=d.readLine();
 							//IJ.log(temphist[counter]);
 							counter++;
-						}while((temphist[counter-1]!=null && temphist[counter-1]!="") && counter<4096);
-						float[] temphist2=new float[counter-1];
-						if((counter-1)>max){max=(counter-1);}
+						}while((temphist[counter-1]!=null && temphist[counter-1]!="") && counter<flines);
+						float[] temphist2=new float[counter-1-skiphead];
+						if(!istraj && (counter-1)>max){max=(counter-1);}
 						if(!includex){
-							for(int j=0;j<(counter-1);j++){
-								temphist2[j]=(float)Integer.parseInt(temphist[j]);
+							for(int j=skiphead;j<(counter-1);j++){
+								temphist2[j-skiphead]=(float)Integer.parseInt(temphist[j]);
 							}
 						} else {
-							for(int j=0;j<(counter-1);j++){
+							for(int j=skiphead;j<(counter-1);j++){
 								int tabindex=temphist[j].indexOf('\t');
-								temphist2[j]=(float)Integer.parseInt(temphist[j].substring(tabindex+1));
+								temphist2[j-skiphead]=(float)Integer.parseInt(temphist[j].substring(tabindex+1));
 							}
 						}
-						histograms[i]=temphist2;
 						d.close();
+						if(istraj){
+							histograms[i]=(new pmodeconvert()).create_histogram(temphist2);
+							int tempmax=((float[])histograms[i]).length+1;
+							if(tempmax>max) max=tempmax;
+						} else {
+							histograms[i]=temphist2;
+						}
 					}
 					catch(IOException e){
 						showioerror();

@@ -31,7 +31,7 @@ public class jama_functions{
 	 }
 
 	 /**
-	  * Computes the Moore–Penrose pseudoinverse using the SVD method.
+	  * Computes the Moore-Penrose pseudoinverse using the SVD method.
 	  * 
 	  * Modified version of the original implementation by Kim van der Linde.
 	  */

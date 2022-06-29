@@ -63,34 +63,43 @@ public class fit_roi_gaussian_gridsearch_jru_v1 implements PlugIn, NLLSfitinterf
 		int maxslice=0;
 		if(nchannels>1 && !singchan){
 			Object[] temp=jutils.get3DCSeries(imp.getStack(),currz-1,currt-1,frames,slices,nchannels);
+			int chfit=currc-1;
 			int ch1=0; int ch2=1;
 			if(nchannels>2){
-				float[] avgs={jstatistics.getstatistic("Avg",temp[0],null),jstatistics.getstatistic("Avg",temp[1],null),jstatistics.getstatistic("Avg",temp[2],null)};
+				//find the two channels other than the transmitted light
+				//float[] avgs={jstatistics.getstatistic("Avg",temp[0],null),jstatistics.getstatistic("Avg",temp[1],null),jstatistics.getstatistic("Avg",temp[2],null)};
 				//the max intensity channel is always the transmitted light channel
-				if(avgs[1]>avgs[0] && avgs[1]>avgs[2]){ch2=2;}
-				if(avgs[0]>avgs[1] && avgs[0]>avgs[2]){ch1=1; ch2=2;}
+				//if(avgs[1]>avgs[0] && avgs[1]>avgs[2]){ch2=2;}
+				//if(avgs[0]>avgs[1] && avgs[0]>avgs[2]){ch1=1; ch2=2;}
+				//just find the two other channels
+				if(chfit==0){ch1=1; ch2=2;}
+				if(chfit==1){ch1=0; ch2=2;}
+				IJ.log("Extra Ch1 selected as "+ch1+" and Ch2 selected as "+ch2);
 			}
 			if(findmax){
-				Object[] temp1=jutils.get3DZSeries(imp.getStack(),ch1,currt-1,frames,slices,nchannels);
-				Object[] temp2=jutils.get3DZSeries(imp.getStack(),ch2,currt-1,frames,slices,nchannels);
+				Object[] temp1=jutils.get3DZSeries(imp.getStack(),chfit,currt-1,frames,slices,nchannels);
+				Object[] temp2=jutils.get3DZSeries(imp.getStack(),ch1,currt-1,frames,slices,nchannels);
+				Object[] temp3=jutils.get3DZSeries(imp.getStack(),ch2,currt-1,frames,slices,nchannels);
 				float maxint=jstatistics.getstatistic("Avg",temp1[0],width,height,r,null);
-				maxint+=jstatistics.getstatistic("Avg",temp2[0],width,height,r,null);
+				//maxint+=jstatistics.getstatistic("Avg",temp2[0],width,height,r,null);
 				maxslice=0;
 				for(int i=1;i<slices;i++){
 					float tempint=jstatistics.getstatistic("Avg",temp1[i],width,height,r,null);
-					tempint+=jstatistics.getstatistic("Avg",temp2[i],width,height,r,null);
+					//tempint+=jstatistics.getstatistic("Avg",temp2[i],width,height,r,null);
 					if(tempint>maxint){
 						maxint=tempint;
 						maxslice=i;
 					}
 				}
-				temp[ch1]=temp1[maxslice];
-				temp[ch2]=temp2[maxslice];
+				temp[chfit]=temp1[maxslice];
+				temp[ch1]=temp2[maxslice];
+				temp[ch2]=temp3[maxslice];
 			}
 			charrays[0]=algutils.convert_arr_float(algutils.get_region(temp[ch1],centerx,centery,xpts,ypts,width,height));
 			charrays[1]=algutils.convert_arr_float(algutils.get_region(temp[ch2],centerx,centery,xpts,ypts,width,height));
-			data=new float[xpts*ypts];
-			for(int i=0;i<data.length;i++) data[i]=charrays[0][i]+charrays[1][i];
+			data=algutils.convert_arr_float(algutils.get_region(temp[chfit],centerx,centery,xpts,ypts,width,height));
+			//data=new float[xpts*ypts];
+			//for(int i=0;i<data.length;i++) data[i]=charrays[0][i]+charrays[1][i];
 		} else {
 			Object temp=imp.getProcessor().getPixels();
 			if(findmax){

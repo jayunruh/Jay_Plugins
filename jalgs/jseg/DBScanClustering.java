@@ -31,7 +31,7 @@ public class DBScanClustering{
 				List<float[]> temp=expandCluster(cluster,point,neighbors,points,visited);
 				clusters.add(temp);
 			} else {
-				visited.put(point,new Integer(0));
+				visited.put(point,Integer.valueOf(0));
 			}
 		}
 		return clusters;
@@ -39,7 +39,7 @@ public class DBScanClustering{
 	
 	public List<float[]> expandCluster(List<float[]> cluster,float[] point,List<float[]> neighbors,List<float[]> points,Map<float[],Integer> visited){
 		cluster.add(point);
-		visited.put(point,new Integer(1));
+		visited.put(point,Integer.valueOf(1));
 		List<float[]> seeds=new ArrayList<float[]>(neighbors);
 		int index=0;
 		while(index<seeds.size()){
@@ -52,7 +52,7 @@ public class DBScanClustering{
 				}
 			}
 			if(pStatus==null || pStatus.intValue()!=1){
-				visited.put(current,new Integer(1));
+				visited.put(current,Integer.valueOf(1));
 				cluster.add(current);
 			}
 			index++;

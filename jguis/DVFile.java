@@ -12,7 +12,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-/* DeltaVision File Opener by Fabrice Cordelières  & Sebastien HUART
+/* DeltaVision File Opener by Fabrice Cordelieres  & Sebastien HUART
  Institut Curie
  UMR146
  ORSAY

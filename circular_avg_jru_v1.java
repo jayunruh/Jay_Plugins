@@ -33,8 +33,9 @@ public class circular_avg_jru_v1 implements PlugIn {
 		float yc=(float)(height/2);
 		Roi roi=imp.getRoi();
 		if(roi!=null){
-			xc=(float)roi.getBounds().x;
-			yc=(float)roi.getBounds().y;
+			Rectangle r=roi.getBounds();
+			xc=(float)r.x+0.5f*(float)r.width;
+			yc=(float)r.y+0.5f*(float)r.height;
 		} else if(com){
 			float[] com2=interpolation.center_of_mass_2D(stack.getPixels(1),width,height);
 			xc=com2[0]; yc=com2[1];
