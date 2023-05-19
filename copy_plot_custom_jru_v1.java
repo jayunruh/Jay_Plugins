@@ -60,6 +60,7 @@ public class copy_plot_custom_jru_v1 implements PlugIn, ClipboardOwner {
 					else sb.append("err1\t");
 				}
 			}
+			sb.append("\n");
 		}
 		for (int i=0; i<length; i++) {
 			for (int j=0; j<nseries; j++) {

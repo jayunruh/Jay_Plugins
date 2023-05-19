@@ -462,12 +462,16 @@ public class PlotWindow4 extends ImageWindow implements ActionListener,Clipboard
 		int tempnseries=p3.getNSeries();
 		float[][] tempxvals=p3.getXValues();
 		float[][] tempyvals=p3.getYValues();
+		float[][][] errs=p3.getErrors();
 		String delim="\t";
 		if(fname.endsWith(".csv")) delim=",";
 		for(int i=0;i<p3.getmaxpts();i++){
 			StringBuffer sb=new StringBuffer();
 			for(int j=0;j<tempnseries;j++){
 				sb.append(""+tempxvals[j][i]+delim+tempyvals[j][i]);
+				if(errs!=null) {
+					sb.append(delim+errs[0][j][i]+delim+errs[1][j][i]);
+				}
 				if(j<(tempnseries-1)){
 					sb.append(delim);
 				}

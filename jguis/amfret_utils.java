@@ -31,6 +31,9 @@ public class amfret_utils implements gui_interface{
 	public String fretname="FL04-A";
 	public boolean drawgate=false;
 	public int[] histlut;
+	public boolean volumeReporter=false;
+	//public String volname="FL29-A";
+	public String volname="SS02-A";
 
 	public static void main(String[] args){
 		//here we batch process a folder outside of imagej
@@ -41,11 +44,19 @@ public class amfret_utils implements gui_interface{
 		//this is a hack to account for flowcore renaming the columns
 		custom.accname=custom.accname.replace('-','.');
 		custom.fretname=custom.fretname.replace('-','.');
+		custom.volname=custom.volname.replace('_', '.');
 		custom.drawgate=true;
 		if(args[0].equals("--getgate")) {
 			//in this version we output a gate roi
 			//args is "--getgate", indir, infile, savedir, savename, minconc, maxconc
 			custom.getGate(args[1],args[2],args[3],args[4],Float.parseFloat(args[5]),Float.parseFloat(args[6]),-0.2f,1.0f,1.5f,99.0f,99.0f,6,false);
+			return;
+		}
+		if(args[0].equals("--getgateVolumeReporter")) {
+			//in this version we output a gate roi
+			//args is "--getgateVolumeReporter", indir, infile, savedir, savename, minconc, maxconc
+			custom.volumeReporter=true;
+			custom.getGate(args[1],args[2],args[3],args[4],Float.parseFloat(args[5]),Float.parseFloat(args[6]),-0.2f,1.0f,0.01f,99.0f,99.0f,6,false);
 			return;
 		}
 		//need to create a version that compensates fcs files
@@ -64,6 +75,56 @@ public class amfret_utils implements gui_interface{
 				}
 			}
 			custom.compensateFCS(args[1],args[2],gatecols,gatetypes,gatevals,false);
+			return;
+		}
+		if(args[0].equals("--volumeReporter")) {
+			//in this version we normalize by a volume reporter
+			//args is "--volumeReporter" and then as it is elsewhere
+			custom.volumeReporter=true;
+			String[] col_labels={"basename","datFile","Well","Plate","volume","c^2","Iter","baseline","amp","EC50","alpha","xshift","EC50_errs","alpha_errs","totcells","fretcells","bimodal_metric","f_gate","delta","delta_errs","accstdev","nfaccmean","nfaccstdev","faccmean","faccstdev","fretmean","fretstdev"};
+			System.out.println(table_tools.print_string_array(col_labels,1));
+			float minamfret=-0.2f; float maxamfret=1.0f; int mincells=1; float mincrop=0.01f;
+			if(args.length>5) {
+				//passing other variables
+				minamfret=Float.parseFloat(args[6]);
+				if(args.length>6) maxamfret=Float.parseFloat(args[7]);
+				if(args.length>7) mincells=(int)Float.parseFloat(args[8]);
+				if(args.length>8) mincrop=Float.parseFloat(args[9]);
+			}
+			try{
+				if(args[1].endsWith(".fcs")) {//this analyzes a single file only
+					//args is "--volumeReporter", infile, savedir, roipath, minconc, maxconc,...
+					String parent=(new File(args[1])).getParent();
+					String child=(new File(args[1])).getName();
+					List<String> output=custom.exec(parent+File.separator,child,args[2],args[3],Float.parseFloat(args[4]),Float.parseFloat(args[5]),minamfret,maxamfret,mincells,mincrop,0.02f,0.95f,false);
+					List<String> output2=output.subList(0,20); //eliminate some of the rightmost parameters
+					System.out.println(table_tools.print_string_array(output,1));
+				} else {
+					//this is the standard operation on an entire folder
+					//args is "--volumeReporter", indir, savedir, roipath, minconc, maxconc, mincells, startcrop
+					String[] fcsfiles=(new jdataio()).get_sorted_string_list(args[1],null);
+	    			BufferedWriter b=new BufferedWriter(new FileWriter(new File(args[1]+"Stretched Exp Fits.xls")));
+	    			b.write(table_tools.print_string_array(col_labels,0)+"\n");
+	    			for(int i=0;i<fcsfiles.length;i++){
+	    				if(!fcsfiles[i].endsWith(".fcs")) continue;
+	    				//assuming that indir and outdir are the same
+	    				List<String> output=custom.exec(args[1],fcsfiles[i],args[2],args[3],Float.parseFloat(args[4]),Float.parseFloat(args[5]),minamfret,maxamfret,mincells,mincrop,0.02f,0.95f,false);
+	    				if(output!=null){
+	    					List<String> output2=output.subList(0,20); //eliminate some of the rightmost parameters
+	    					System.out.println(table_tools.print_string_array(output,1));
+	    					b.write(table_tools.print_string_array(output,0)+"\n");
+	    				} else {
+	    					output=new ArrayList<String>();
+	    					for(int j=0;j<col_labels.length;j++) output.add("0");
+	    					System.out.println(table_tools.print_string_array(output,1));
+	    					b.write(table_tools.print_string_array(output,0)+"\n");
+	    				}
+	    			}
+	    			b.close();
+				}
+			} catch (IOException e){
+				System.out.println("error writing file");
+			}
 			return;
 		}
 		//System.out.println(table_tools.print_string_array(args,1));
@@ -189,6 +250,7 @@ public class amfret_utils implements gui_interface{
 		String[] colnames=(String[])data[0];
 		int acccol=0;
 		int fretcol=0;
+		int volcol=0;
 		for(int i=0;i<colnames.length;i++){
 			if(accname.equals(colnames[i])){
 				acccol=i;
@@ -201,10 +263,22 @@ public class amfret_utils implements gui_interface{
 				break;
 			}
 		}
+		if(volumeReporter) {
+			for(int i=0;i<colnames.length;i++) {
+				if(volname.equals(colnames[i])) {
+					volcol=i;
+					break;
+				}
+			}
+		}
 		float[] acceptor=new float[rowdata.length];
 		float[] amfret=new float[rowdata.length];
 		for(int i=0;i<rowdata.length;i++){
-			acceptor[i]=rowdata[i][acccol]/1000000.0f;
+			if(volumeReporter) {
+				acceptor[i]=rowdata[i][acccol]/rowdata[i][volcol];
+			} else {
+				acceptor[i]=rowdata[i][acccol]/1000000.0f;
+			}
 			amfret[i]=rowdata[i][fretcol]/rowdata[i][acccol];
 		}
 		//float acceptoravg=jstatistics.getstatistic("Avg",acceptor,null);
@@ -772,6 +846,7 @@ public class amfret_utils implements gui_interface{
 		String[] colnames=(String[])data[0];
 		int acccol=0;
 		int fretcol=0;
+		int volcol=0;
 		for(int i=0;i<colnames.length;i++){
 			if(accname.equals(colnames[i])){
 				acccol=i;
@@ -784,10 +859,22 @@ public class amfret_utils implements gui_interface{
 				break;
 			}
 		}
+		if(volumeReporter) {
+			for(int i=0;i<colnames.length;i++) {
+				if(volname.equals(colnames[i])) {
+					volcol=i;
+					break;
+				}
+			}
+		}
 		float[] acceptor=new float[rowdata.length];
 		float[] amfret=new float[rowdata.length];
 		for(int i=0;i<rowdata.length;i++){
-			acceptor[i]=rowdata[i][acccol]/1000000.0f;
+			if(volumeReporter) {
+				acceptor[i]=rowdata[i][acccol]/rowdata[i][volcol];
+			} else {
+				acceptor[i]=rowdata[i][acccol]/1000000.0f;
+			}
 			amfret[i]=rowdata[i][fretcol]/rowdata[i][acccol];
 		}
 

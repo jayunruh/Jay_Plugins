@@ -174,6 +174,33 @@ public class KissPanel extends Panel implements ActionListener,ItemListener,Mous
 		{1,0,1,0,0,0,1,39} // y
 	};
 	
+	public static int[][] althumancode={
+			{0,1,1,1,0,92}, //1 
+			{0,0,0,0,1,100}, //2
+			{1,0,1,1,1,86}, //3 
+			{0,0,1,1,0,88}, //4 
+			{1,1,0,1,1,70}, //5
+			{0,1,1,1,1,71}, //6 
+			{0,1,1,0,0,68}, //7 
+			{0,0,0,1,0,64}, //8
+			{1,0,0,1,1,55}, //9 
+			{0,0,1,0,1,60}, //10 
+			{1,0,1,1,0,59}, //11
+			{0,1,0,0,1,54}, //12 
+			{1,0,0,1,0,48}, //13 
+			{0,1,0,0,0,48}, //14
+			{1,1,1,0,0,50}, //15 
+			{0,1,0,1,0,43}, //16 
+			{0,0,1,0,0,48}, //17
+			{1,1,0,1,0,45}, //18 
+			{1,0,1,0,0,36}, //19 
+			{1,0,0,0,0,36}, //20
+			{0,0,0,1,1,24}, //21 
+			{1,1,1,0,1,32}, //22 
+			{1,0,0,0,1,75}, //x
+			{0,0,1,1,1,39} //y
+		}; //this is another commonly used human labeling code
+	
 	public static String[] alphabet={"A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P","Q","R","S","T","U","V","W","X","Y","Z"};
 	
 	public static Color[] allcolors={Color.white,Color.blue,Color.green,Color.red,Color.magenta,Color.cyan,Color.yellow,Color.orange};

@@ -32,6 +32,7 @@ public class import_KISS_jru_v1 implements PlugIn {
 				gd2.addNumericField("Ch_"+(i+1)+"_Contr_Thresh",0.35,5,15,null);
 			}
 			//gd2.addNumericField("Contribution Threshold",0.35,5,15,null);
+			gd2.addCheckbox("Alt_Human_Code?",false);
 			gd2.addCheckbox("Mouse?",false);
 			Object[] codes=KissPanel.getCustomCodes();
 			String[] codenames=new String[]{"none"};
@@ -49,6 +50,7 @@ public class import_KISS_jru_v1 implements PlugIn {
 			sp.objthresh2=new float[nch];
 			for(int i=0;i<nch;i++) sp.objthresh2[i]=(float)gd2.getNextNumber();
 			//sp.objthresh=(float)gd2.getNextNumber();
+			boolean althuman=gd2.getNextBoolean();
 			boolean mouse=gd2.getNextBoolean();
 			int codeindex=gd2.getNextChoiceIndex();
 			int bwidth=(int)gd2.getNextNumber();
@@ -66,6 +68,7 @@ public class import_KISS_jru_v1 implements PlugIn {
 			sp.cellheight=bheight;
 			int[][] custcode=null;
 			if(codeindex>0) custcode=(int[][])codes[codeindex+1];
+			if(althuman && !mouse) custcode=sp.althumancode;
 			sp.init(is,mouse,custcode);
 			KissPanel.launch_frame(sp);
 			//optionally output the unmixed image

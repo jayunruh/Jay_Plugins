@@ -74,6 +74,8 @@ public class segment_nucleoli_jru_v3 implements PlugIn {
 			third=algutils.convert_arr_float2(stack.getPixels(measchan3));
 			float[] tmeas=meas[0];
 			meas=new float[][]{tmeas,third};
+			//IJ.log("extra channel: "+measchan3);
+			//IJ.log(""+meas.length);
 		}
 
 		//segment the nuclei: gaus blur (try 8), roll ball sub (try 200), div by blurred (try 200), threshold (try 0.1), filter size (try 5000 to 18000)
@@ -227,6 +229,9 @@ public class segment_nucleoli_jru_v3 implements PlugIn {
 		Polygon[] nucleolaroutlines=fb.get_object_outlines(nucleolarobj);
 		float[][] nucleolarmeas=fb.get_area_perim_circ(nucleolarobj,nucleolaroutlines);
 		float[][] measurements=new float[fb.nobjects][11+(meas.length-1)*4];
+		//measurements are
+		//0"id",1"nuclear_id",2"nuclear_area",3"nuclear_avg",4"nuclear_stdev",5"nuclear_circularity",6"number_nucleoli",7"nucleolar_area",
+		//8"nucleolar_avg",9"nucleolar_stdev",10"nucleolar_circularity","thirdnucavg","thirdnucstdev","thirdnuclavg","thirdnuclstdev"
 		for(int i=0;i<fb.nobjects;i++){
 			int nucid=clusterids[i];
 			measurements[i][0]=(float)(i+1);
@@ -237,14 +242,14 @@ public class segment_nucleoli_jru_v3 implements PlugIn {
 			measurements[i][5]=nuclearmeas[2][nucid-1];
 			measurements[i][6]=nuccount[nucid-1];
 			measurements[i][7]=nucleolarmeas[0][i];
-			measurements[i][8]=nucleolaravgs[0][i];
+			measurements[i][8]=nucleolaravgs[0][i]; //this is from the nucleolar measurement channel
 			measurements[i][9]=nucleolarstdev[0][i];
 			measurements[i][10]=nucleolarmeas[2][i];
-			for(int j=0;j<(meas.length-1);j++){
-				measurements[i][j*4+11]=nucmeasavgs[j][nucid-1];
-				measurements[i][j*4+12]=nucmeasstdevs[j][nucid-1];
-				measurements[i][j*4+13]=nucleolaravgs[j][nucid-1];
-				measurements[i][j*4+14]=nucleolarstdev[j][nucid-1];
+			for(int j=0;j<(meas.length-1);j++){ //now add the nuclei and nucleoli from other measurement channels
+				measurements[i][j*4+11]=nucmeasavgs[j+1][nucid-1];
+				measurements[i][j*4+12]=nucmeasstdevs[j+1][nucid-1];
+				measurements[i][j*4+13]=nucleolaravgs[j+1][i];
+				measurements[i][j*4+14]=nucleolarstdev[j+1][i];
 			}
 		}
 		return new Object[]{measurements,nucleolarobj,nucleolaroutlines};

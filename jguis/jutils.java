@@ -1478,6 +1478,24 @@ public class jutils{
 		}
 		return new LUT(r,g,b);
 	}
+	
+	public static LUT get_lut_for_color(float maxred,float maxgreen,float maxblue){
+		if(maxblue<=0.0f&&maxred<=0.0f&&maxgreen<=0.0f){
+			maxblue=255.0f;
+			maxred=255.0f;
+			maxgreen=255.0f;
+		}
+		byte[] r=new byte[256];
+		byte[] g=new byte[256];
+		byte[] b=new byte[256];
+		for(int i=0;i<256;i++){
+			float fraction=(i)/255.0f;
+			r[i]=(byte)((int)(maxred*fraction));
+			g[i]=(byte)((int)(maxgreen*fraction));
+			b[i]=(byte)((int)(maxblue*fraction));
+		}
+		return new LUT(r,g,b);
+	}
 
 	public static Object convert_array(Object oldarr,int type){
 		// can convert from and to byte, short, or float

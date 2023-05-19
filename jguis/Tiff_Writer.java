@@ -214,6 +214,27 @@ public class Tiff_Writer{
 			if(metaDataSize>0)
 				writeMetaData(outg);
 			// write the image data frame by frame using the saveFrame method
+			Object[] stack=jutils.stack2array(imp.getImageStack());
+			for(int i=0;i<stackframes;i++) {
+				saveFrame(stack[i]);
+			}
+			if(nextIFDg>0L){
+				int ifdSize2=ifdSize;
+				if(metaDataSize>0){
+					metaDataSize=0;
+					nEntries-=2;
+					ifdSize2-=2*12;
+				}
+				for(int i=2;i<=stackframes;i++){
+					if(i==stackframes)
+						nextIFDg=0;
+					else
+						nextIFDg+=ifdSize2;
+					imageOffset+=imageSize;
+					writeIFD(outg,imageOffset,(int)nextIFDg);
+				}
+			}
+			outg.close();
 		}catch(IOException e){
 			IJ.showMessage(e.getMessage());
 			return false;
