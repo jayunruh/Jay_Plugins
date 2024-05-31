@@ -104,15 +104,15 @@ Plugins>Stowers>Jay_Unruh>Carpet Tools	carpet stics jru v1	carpet_stics_jru_v1	c
 Plugins>Stowers>Jay_Unruh>Carpet Tools	fit carpet stics jru v1	fit_carpet_stics_jru_v1	fits a STICS carpet to gaussians (center is fixed)--basically just a multiple gaussian profile fitting plugin
 Plugins>Stowers>Jay_Unruh>Carpet Tools	get line traj jru v1	get_line_traj_jru_v1	Uses a thick polyline drawn down a binned carpet to create a trajectory integrating over the same thickness on an unbinned carpet.
 Plugins>Stowers>Jay_Unruh>Detrend Tools	carpet sub avg jru v1	carpet_sub_avg_jru_v1	Subtracts the average profile from a carpet
-Plugins>Stowers>Jay_Unruh>File Tools	" ""batch LOCI converter jru v1"""	 batch_LOCI_converter_jru_v1	batch converts a multifile format like leica or perkin elmer to ImageJ tiffs--can use avoid metadata to fix LOCI crash issues
+Plugins>Stowers>Jay_Unruh>File Tools	"""batch LOCI converter jru v1"""	batch_LOCI_converter_jru_v1	batch converts a multifile format like leica or perkin elmer to ImageJ tiffs--can use avoid metadata to fix LOCI crash issues
 Plugins>Stowers>Jay_Unruh>File Tools	DV file reader jru v1	DV_file_reader_jru_v1	reads deltavision dv and otf files
-Plugins>Stowers>Jay_Unruh>File Tools	" ""LOCI file reader jru v1"""	 LOCI_file_reader_jru_v1	opens files using the LOCI library--can use avoid metadata to fix LOCI crash issues
+Plugins>Stowers>Jay_Unruh>File Tools	"""LOCI file reader jru v1"""	LOCI_file_reader_jru_v1	opens files using the LOCI library--can use avoid metadata to fix LOCI crash issues
 Plugins>Stowers>Jay_Unruh>File Tools	generate jru luts jru v1	generate_jru_luts_jru_v1	generates my lookup tables
 Plugins>Stowers>Jay_Unruh>File Tools	get imaris spot traj jru v1	get_imaris_spot_traj_jru_v1	gets as series of spots from Imaris via ImarisXT and the ImarisBridge
 Plugins>Stowers>Jay_Unruh>File Tools	HEFT shortcut window jru v1	HEFT_shortcut_window_jru_v1	"provides a drag-n-drop window for a HandleExtraFileTypesjru class.  If it is not found, uses the default HandleExtraFileTypes class.  In the future will provide an interactive interface for adding file import plugins."
 Plugins>Stowers>Jay_Unruh>File Tools	import KISS jru v1	import_KISS_jru_v1	imports a .kiss file containing spectral karyotyping data
 Plugins>Stowers>Jay_Unruh>File Tools	import toa trajectory jru v1	import_toa_trajectory_jru_v1	imports a time of arrival trajectory as little endian integers; checking photon mode imports the photon arrival interval in clock units
-Plugins>Stowers>Jay_Unruh>File Tools	register Jay_Unruh readers jru v1	register_Jay_Unruh_readers_jru_v1	called via my autorun macro to register my loci readers
+Plugins>Stowers>Jay_Unruh>File Tools	register jay readers jru v1	register_jay_readers_jru_v1	called via my autorun macro to register my loci readers
 Plugins>Stowers>Jay_Unruh>File Tools	set imaris dataset jru v1	set_imaris_dataset_jru_v1	sends a the current image to Imaris vis ImarisXT and ImarisBridge
 Plugins>Stowers>Jay_Unruh>File Tools	set imaris spot traj jru v1	set_imaris_spot_traj_jru_v1	sends a 3D trajectory to Imaris via ImarisXT and the ImarisBridge as a series of spots
 Plugins>Stowers>Jay_Unruh>ICS Tools	complex amp jru v1	complex_amp_jru_v1	computes the amplitude of an interlaced complex stack (amp=sqrt(real*real+im*im))
@@ -121,7 +121,7 @@ Plugins>Stowers>Jay_Unruh>ICS Tools	fit ICS jru v1	fit_ICS_jru_v1	fits the 2D im
 Plugins>Stowers>Jay_Unruh>ICS Tools	fft3D jru v1	fft3D_jru_v1	"calculates the forward or inverse 3D fft, image will be truncated to best size (usually power of 2)"
 Plugins>Stowers>Jay_Unruh>ICS Tools	fft2D jru v1	fft2D_jru_v1	"calculates the forward or inverse 2D fft, image will be truncated to best size (usually power of 2)"
 Plugins>Stowers>Jay_Unruh>ICS Tools	stack FFT STICS jru v1	stack_FFT_STICS_jru_v1	calculates the spatial cross correlation of images in a stack with different temporal shifts
-Plugins>Stowers>Jay_Unruh>ICS Tools	stack temporal fft jru v1	stack_temporal_fft_jru_v1	does an fft down a stack--data are truncated to best length
+Plugins>Stowers>Jay_Unruh>ICS Tools	stack temporal FFT jru v1	stack_temporal_FFT_jru_v1	does an fft down a stack--data are truncated to best length
 Plugins>Stowers>Jay_Unruh>ICS Tools	stack FFT TICS jru v1	stack_FFT_TICS_jru_v1	calculates the temporal correlation at each pixel
 Plugins>Stowers>Jay_Unruh>ICS Tools	stack FFT TICCS jru v1	stack_FFT_TICCS_jru_v1	calculates the temporal cross-correlation at each pixel of a hyperstack
 Plugins>Stowers>Jay_Unruh>ICS Tools	STICS map jru v3	STICS_map_jru_v3	computes flow maps using STICS as with v2 (Jay_Unruh_Plugins) but allows for time lapse flow maps

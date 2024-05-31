@@ -230,6 +230,22 @@ public class table_tools{
 			return false;
 		}
 	}
+	
+	public static List<List<String>> copylisttable(List<List<String>> table){
+		List<List<String>> ctable=new ArrayList<List<String>>();
+		for(int i=0;i<table.size();i++) {
+			ctable.add(copylist(table.get(i)));
+		}
+		return ctable;
+	}
+	
+	public static List<String> copylist(List<String> row){
+		List<String> tmp=new ArrayList<String>();
+		for(int j=0;j<row.size();j++) {
+			tmp.add(row.get(j));
+		}
+		return tmp;
+	}
 
 	public static List<List<String>> table2listtable(TextPanel tp){
 		int nlines=tp.getLineCount();
@@ -717,7 +733,7 @@ public class table_tools{
 		for(int i=0;i<list.size();i++){
 			List<String> row=list.get(i);
 			int pos2=pos;
-			if(pos2>row.size())
+			if(pos2>row.size() || pos2<0)
 				pos2=row.size();
 			row.add(pos2,""+column[i]);
 		}

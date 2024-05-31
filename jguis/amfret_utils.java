@@ -8,6 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.imageio.ImageIO;
+
 import ij.IJ;
 import ij.ImagePlus;
 import ij.gui.PolygonRoi;
@@ -49,14 +51,24 @@ public class amfret_utils implements gui_interface{
 		if(args[0].equals("--getgate")) {
 			//in this version we output a gate roi
 			//args is "--getgate", indir, infile, savedir, savename, minconc, maxconc
-			custom.getGate(args[1],args[2],args[3],args[4],Float.parseFloat(args[5]),Float.parseFloat(args[6]),-0.2f,1.0f,1.5f,99.0f,99.0f,6,false);
+			float minamfret=-0.2f; float maxamfret=1.0f;
+			if(args.length>7) {
+				minamfret=Float.parseFloat(args[7]);
+				maxamfret=Float.parseFloat(args[8]);
+			}
+			custom.getGate(args[1],args[2],args[3],args[4],Float.parseFloat(args[5]),Float.parseFloat(args[6]),minamfret,maxamfret,1.5f,99.0f,99.0f,6,false);
 			return;
 		}
 		if(args[0].equals("--getgateVolumeReporter")) {
 			//in this version we output a gate roi
 			//args is "--getgateVolumeReporter", indir, infile, savedir, savename, minconc, maxconc
 			custom.volumeReporter=true;
-			custom.getGate(args[1],args[2],args[3],args[4],Float.parseFloat(args[5]),Float.parseFloat(args[6]),-0.2f,1.0f,0.01f,99.0f,99.0f,6,false);
+			float minamfret=-0.2f; float maxamfret=1.0f;
+			if(args.length>7) {
+				minamfret=Float.parseFloat(args[7]);
+				maxamfret=Float.parseFloat(args[8]);
+			}
+			custom.getGate(args[1],args[2],args[3],args[4],Float.parseFloat(args[5]),Float.parseFloat(args[6]),minamfret,maxamfret,0.01f,99.0f,99.0f,6,false);
 			return;
 		}
 		//need to create a version that compensates fcs files
@@ -84,12 +96,12 @@ public class amfret_utils implements gui_interface{
 			String[] col_labels={"basename","datFile","Well","Plate","volume","c^2","Iter","baseline","amp","EC50","alpha","xshift","EC50_errs","alpha_errs","totcells","fretcells","bimodal_metric","f_gate","delta","delta_errs","accstdev","nfaccmean","nfaccstdev","faccmean","faccstdev","fretmean","fretstdev"};
 			System.out.println(table_tools.print_string_array(col_labels,1));
 			float minamfret=-0.2f; float maxamfret=1.0f; int mincells=1; float mincrop=0.01f;
-			if(args.length>5) {
+			if(args.length>7) {
 				//passing other variables
 				minamfret=Float.parseFloat(args[6]);
-				if(args.length>6) maxamfret=Float.parseFloat(args[7]);
-				if(args.length>7) mincells=(int)Float.parseFloat(args[8]);
-				if(args.length>8) mincrop=Float.parseFloat(args[9]);
+				if(args.length>7) maxamfret=Float.parseFloat(args[7]);
+				if(args.length>8) mincells=(int)Float.parseFloat(args[8]);
+				if(args.length>9) mincrop=Float.parseFloat(args[9]);
 			}
 			try{
 				if(args[1].endsWith(".fcs")) {//this analyzes a single file only
@@ -439,12 +451,17 @@ public class amfret_utils implements gui_interface{
 		}
 		ImagePlus overviewimp=new ImagePlus("Overview",overviewcp);
 		String overviewname=name.substring(0,name.length()-4)+"_overview.png";
-		IJ.save(overviewimp,outdir+overviewname);
-		//(new LOCI_file_writer()).save_imp_as_png(overviewimp,outdir+overviewname);
+		//IJ.save(overviewimp,outdir+overviewname);
 		//note that this is triggering an x windows headless error
-		//might try using BMPWriterJ or another png writer
-		//String overviewname=name.substring(0,name.length()-4)+"_overview.bmp";
-		//BMPWriterJ.writeBMP32((int[])overviewcp.getPixels(),overviewcp.getWidth(),overviewcp.getHeight(),outdir+overviewname);
+		try {
+			ImageIO.write(overviewimp.getBufferedImage(),"png",new File(outdir+overviewname));
+		} catch (IOException e) {
+			if(showplots) {
+				IJ.log("error writing overview");
+			} else {
+				System.out.println("error writing overview");
+			}
+		}
 		return output;
 	}
 
@@ -700,7 +717,16 @@ public class amfret_utils implements gui_interface{
 			}
 			ImagePlus overviewimp=new ImagePlus("Overview",overviewcp);
 			String overviewname=name.substring(0,name.length()-4)+"_overview.png";
-			IJ.save(overviewimp,outdir+overviewname);
+			//IJ.save(overviewimp,outdir+overviewname);
+			try {
+				ImageIO.write(overviewimp.getBufferedImage(),"png",new File(outdir+overviewname));
+			} catch (IOException e) {
+				if(showplots) {
+					IJ.log("error writing overview");
+				} else {
+					System.out.println("error writing overview");
+				}
+			}
 			return output;
 		}
 	
