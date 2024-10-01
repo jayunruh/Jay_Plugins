@@ -127,7 +127,7 @@ public class amfret_utils implements gui_interface{
 	    					b.write(table_tools.print_string_array(output,0)+"\n");
 	    				} else {
 	    					output=new ArrayList<String>();
-	    					for(int j=0;j<col_labels.length;j++) output.add("0");
+	    					for(int j=0;j<col_labels.length;j++) output.add("NaN");
 	    					System.out.println(table_tools.print_string_array(output,1));
 	    					b.write(table_tools.print_string_array(output,0)+"\n");
 	    				}
@@ -175,7 +175,7 @@ public class amfret_utils implements gui_interface{
     					b.write(table_tools.print_string_array(output,0)+"\n");
     				} else {
     					output=new ArrayList<String>();
-    					for(int j=0;j<col_labels.length;j++) output.add("0");
+    					for(int j=0;j<col_labels.length;j++) output.add("NaN");
     					System.out.println(table_tools.print_string_array(output,1));
     					b.write(table_tools.print_string_array(output,0)+"\n");
     				}
@@ -229,6 +229,8 @@ public class amfret_utils implements gui_interface{
 			rois=rman.getRoisAsArray();
 		}
 		//now load the fcs data
+		if(!directory.endsWith(File.separator)) directory=directory+File.separator;
+		if(!outdir.endsWith(File.separator)) outdir=outdir+File.separator;
 		Object[] data=(new import_flowcyte()).getFCSFile(directory+name);
 		String[][] meta=(String[][])data[2];
 		//try to find the WELLID and PLATEID values in the metadata
@@ -250,12 +252,12 @@ public class amfret_utils implements gui_interface{
 		float[][] rowdata=(float[][])data[1];
 		if(rowdata==null){
 			if(showplots) IJ.log("No data in the fcs file");
-			for(int i=0;i<23;i++) output.add("");
+			for(int i=0;i<23;i++) output.add("NaN");
 			return output;
 		}
 		if(rowdata.length<mincells){
 			if(showplots) IJ.log("Not enough cells in the fcs file");
-			for(int i=0;i<23;i++) output.add("");
+			for(int i=0;i<23;i++) output.add("NaN");
 			return output;
 		}
 		int ncells=rowdata.length;
@@ -500,6 +502,8 @@ public class amfret_utils implements gui_interface{
 				rois=rman.getRoisAsArray();
 			}
 			//now load the fcs data
+			if(!directory.endsWith(File.separator)) directory=directory+File.separator;
+			if(!outdir.endsWith(File.separator)) outdir=outdir+File.separator;
 			Object[] data=(new import_flowcyte()).getFCSFile(directory+name);
 			String[][] meta=(String[][])data[2];
 			//try to find the WELLID and PLATEID values in the metadata
@@ -521,12 +525,12 @@ public class amfret_utils implements gui_interface{
 			float[][] rowdata=(float[][])data[1];
 			if(rowdata==null){
 				if(showplots) IJ.log("No data in the fcs file");
-				for(int i=0;i<23;i++) output.add("");
+				for(int i=0;i<23;i++) output.add("NaN");
 				return output;
 			}
 			if(rowdata.length<mincells){
 				if(showplots) IJ.log("Not enough cells in the fcs file");
-				for(int i=0;i<23;i++) output.add("");
+				for(int i=0;i<23;i++) output.add("NaN");
 				return output;
 			}
 			int ncells=rowdata.length;
@@ -860,6 +864,8 @@ public class amfret_utils implements gui_interface{
 			return;
 		}
 		//now load the fcs data
+		if(!directory.endsWith(File.separator)) directory=directory+File.separator;
+		if(!outdir.endsWith(File.separator)) outdir=outdir+File.separator;
 		Object[] data=(new import_flowcyte()).getFCSFile(directory+name);
 		//now calculate the acceptor and amfret data sets
 		//find the desired column names
@@ -1037,6 +1043,8 @@ public class amfret_utils implements gui_interface{
 			return;
 		}
 		//now load the fcs data
+		if(!directory.endsWith(File.separator)) directory=directory+File.separator;
+		if(!outdir.endsWith(File.separator)) outdir=outdir+File.separator;
 		Object[] data=(new import_flowcyte()).getFCSFile(directory+name);
 		//now calculate the acceptor and amfret data sets
 		//find the desired column names
